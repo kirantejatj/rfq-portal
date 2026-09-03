@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AGIC RFQ Portal - Knowledge Transfer (KT) & User Training Manual</title>
+  <style>
+    :root {
+      --gov-blue: #1e3a8a;
+      --gov-dark: #0f172a;
+      --gov-light: #eff6ff;
+      --amber: #d97706;
+      --emerald: #059669;
+      --slate-50: #f8fafc;
+      --slate-100: #f1f5f9;
+      --slate-200: #e2e8f0;
+      --slate-600: #475569;
+      --slate-700: #334155;
+      --slate-800: #1e293b;
+      --slate-900: #0f172a;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: var(--slate-800);
+      background-color: var(--slate-50);
+      line-height: 1.6;
+    }
+    .header-banner {
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #0369a1 100%);
+      color: white;
+      padding: 40px 20px;
+      text-align: center;
+      border-bottom: 5px solid var(--amber);
+    }
+    .badge {
+      display: inline-block;
+      padding: 5px 14px;
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+      background: rgba(245, 158, 11, 0.2);
+      color: #fde68a;
+      border: 1px solid rgba(245, 158, 11, 0.5);
+    }
+    .header-banner h1 {
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .header-banner p {
+      font-size: 14px;
+      color: #bae6fd;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: white;
+      padding: 14px 20px;
+      border-radius: 12px;
+      border: 1px solid var(--slate-200);
+      margin-bottom: 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .btn {
+      background: var(--gov-blue);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+    }
+    .btn:hover { background: #1d4ed8; }
+    .nav-toc {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid var(--slate-200);
+      margin-bottom: 30px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .nav-toc h3 {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--slate-900);
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .nav-toc ul {
+      list-style: none;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 10px;
+    }
+    .nav-toc a {
+      color: var(--gov-blue);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      display: block;
+      padding: 8px 12px;
+      border-radius: 6px;
+      background: var(--slate-50);
+      border: 1px solid var(--slate-200);
+    }
+    .nav-toc a:hover {
+      background: var(--gov-light);
+      border-color: #bfdbfe;
+    }
+    .card {
+      background: white;
+      border-radius: 14px;
+      border: 1px solid var(--slate-200);
+      padding: 28px;
+      margin-bottom: 28px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+    }
+    h2 {
+      font-size: 20px;
+      color: var(--slate-900);
+      font-weight: 800;
+      border-bottom: 2px solid var(--slate-200);
+      padding-bottom: 8px;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    h3 {
+      font-size: 16px;
+      color: var(--gov-blue);
+      font-weight: 700;
+      margin: 20px 0 10px 0;
+    }
+    p, li {
+      font-size: 13.5px;
+      color: var(--slate-700);
+    }
+    ul, ol {
+      margin-left: 22px;
+      margin-bottom: 14px;
+    }
+    li { margin-bottom: 6px; }
+    .step-box {
+      border: 1px solid var(--slate-200);
+      background: var(--slate-50);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .step-header {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--slate-900);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .step-num {
+      background: var(--gov-blue);
+      color: white;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+    }
+    .step-num.green { background: var(--emerald); }
+    .highlight-box {
+      background: #eff6ff;
+      border-left: 4px solid var(--gov-blue);
+      padding: 14px;
+      border-radius: 0 8px 8px 0;
+      margin: 14px 0;
+      font-size: 13px;
+      color: var(--gov-blue);
+    }
+    .highlight-box.green {
+      background: #f0fdf4;
+      border-left-color: var(--emerald);
+      color: #065f46;
+    }
+    .highlight-box.amber {
+      background: #fffbeb;
+      border-left-color: var(--amber);
+      color: #92400e;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+      margin: 14px 0 20px 0;
+      background: white;
+    }
+    th, td {
+      border: 1px solid var(--slate-200);
+      padding: 9px 12px;
+      text-align: left;
+    }
+    th {
+      background-color: var(--slate-100);
+      color: var(--slate-900);
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 11px;
+    }
+    tr:nth-child(even) { background-color: var(--slate-50); }
+    .tag {
+      font-family: ui-monospace, monospace;
+      font-weight: 700;
+      color: var(--gov-blue);
+      background: var(--gov-light);
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid #dbeafe;
+      font-size: 11.5px;
+    }
+    @media print {
+      body { background: white; }
+      .toolbar, .btn { display: none; }
+      .card { box-shadow: none; border: 1px solid #ccc; page-break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header-banner">
+    <span class="badge">Training & Operational Manual</span>
+    <h1>AGIC RFQ Portal: Knowledge Transfer (KT) Guide</h1>
+    <p>Complete operational guidebook for Chief Engineers (Procuring Authority) and Contractors/Applicants (Bidders).</p>
+  </div>
+
+  <div class="container">
+    <div class="toolbar">
+      <div>
+        <strong style="font-size: 13px; color: var(--slate-900);">Amaravati Growth and Infrastructure Corporation (AGIC)</strong>
+        <span style="font-size: 11px; color: var(--slate-600); margin-left: 10px;">KT Training Material • Multi-Job RFQ System</span>
+      </div>
+      <div>
+        <button class="btn" onclick="window.print()">🖨️ Print / Save as PDF</button>
+      </div>
+    </div>
+
+    <!-- Table of Contents -->
+    <div class="nav-toc">
+      <h3>Quick Navigation</h3>
+      <ul>
+        <li><a href="#section-roles">1. Role & Permission Matrix</a></li>
+        <li><a href="#section-ce-guide">2. Chief Engineer (CE) Training Guide</a></li>
+        <li><a href="#section-applicant-guide">3. Contractor / Applicant Training Guide</a></li>
+        <li><a href="#section-multijob">4. Multi-Job Work Packages Explained</a></li>
+        <li><a href="#section-faq">5. FAQ & KT Troubleshooting</a></li>
+        <li><a href="#section-cheatsheet">6. Quick Reference Cheat Sheet</a></li>
+      </ul>
+    </div>
+
+    <!-- SECTION 1 -->
+    <div class="card" id="section-roles">
+      <h2>1. Role & Permission Matrix</h2>
+      <p>The RFQ portal enforces strict Role-Based Access Control (RBAC) to ensure commercial confidentiality and audit compliance.</p>
+      
+      <table>
+        <thead>
+          <tr>
+            <th>Module / Action</th>
+            <th>Chief Engineer (CE)</th>
+            <th>Applicant / Contractor</th>
+            <th>Public Visitor</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>View Active Tenders & Specs</strong></td>
+            <td>✅ Full Access</td>
+            <td>✅ Full Access</td>
+            <td>✅ Full Access</td>
+          </tr>
+          <tr>
+            <td><strong>Raise New RFQ Tender</strong></td>
+            <td>✅ Full Access</td>
+            <td>❌ No Access</td>
+            <td>❌ No Access</td>
+          </tr>
+          <tr>
+            <td><strong>Add / Delete Work Packages (Jobs)</strong></td>
+            <td>✅ Full Access</td>
+            <td>❌ No Access</td>
+            <td>❌ No Access</td>
+          </tr>
+          <tr>
+            <td><strong>Submit Pre-Bid Query</strong></td>
+            <td>❌ N/A (Can Reply)</td>
+            <td>✅ Allowed</td>
+            <td>❌ Requires Login</td>
+          </tr>
+          <tr>
+            <td><strong>Submit Quotation (Annexure II & III)</strong></td>
+            <td>❌ N/A (Reviewer)</td>
+            <td>✅ Allowed within Window</td>
+            <td>❌ Requires Login</td>
+          </tr>
+          <tr>
+            <td><strong>View Competitor Quotations</strong></td>
+            <td>❌ Hidden during bidding</td>
+            <td>❌ Never Visible</td>
+            <td>❌ Never Visible</td>
+          </tr>
+          <tr>
+            <td><strong>L1 Comparative Evaluation Matrix</strong></td>
+            <td>✅ Full Access</td>
+            <td>❌ No Access</td>
+            <td>❌ No Access</td>
+          </tr>
+          <tr>
+            <td><strong>Approve / Reject Dossiers</strong></td>
+            <td>✅ Full Access</td>
+            <td>❌ No Access</td>
+            <td>❌ No Access</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- SECTION 2 -->
+    <div class="card" id="section-ce-guide">
+      <h2>2. Chief Engineer (CE) Training Guide</h2>
+      <p>This section guides Chief Engineers and Procuring Officers through tender publishing, pre-bid handling, and evaluation.</p>
+
+      <div class="step-box">
+        <div class="step-header">
+          <span class="step-num">1</span>
+          <span>Login to CE Administrative Portal</span>
+        </div>
+        <p>Navigate to <span class="tag">http://localhost:5173/ce/login</span>.</p>
+        <p>Use the credentials: <strong>Mobile:</strong> <code>9876543210</code> | <strong>Password:</strong> <code>Admin@123</code>.</p>
+      </div>
+
+      <div class="step-box">
+        <div class="step-header">
+          <span class="step-num">2</span>
+          <span>Raise a New RFQ Tender</span>
+        </div>
+        <p>From the CE Dashboard, click <strong>"Raise New RFQ Tender & Jobs"</strong> (<span class="tag">/ce/tenders/new</span>).</p>
+        <ul>
+          <li><strong>Tender Identification</strong>: Enter Tender Reference Number (e.g. <code>RFQ/AGIC/2026/INFRA-02</code>) and work title.</li>
+          <li><strong>Scope of Work & Specs</strong>: Detail standards (IS 800), surface prep, total pieces, element types, and weight estimates.</li>
+          <li><strong>EMD & Quotation Window</strong>: Specify the Earnest Money Deposit amount and the <strong>START</strong> and <strong>END</strong> cutoff timestamps.</li>
+        </ul>
+      </div>
+
+      <div class="step-box">
+        <div class="step-header">
+          <span class="step-num">3</span>
+          <span>Configure Work Packages / Jobs</span>
+        </div>
+        <p>In Section 2 of the form, add multiple job packages under the tender:</p>
+        <ul>
+          <li><strong>Job Code</strong>: e.g. <code>JOB-01</code>, <code>JOB-02</code>.</li>
+          <li><strong>Job Name</strong>: e.g. <em>Structural Steel Shop Fabrication</em>, <em>Tower Erection & Bolting</em>.</li>
+          <li><strong>Category & Quantities</strong>: e.g. Steel / 250 MT.</li>
+          <li><strong>Estimated Cost (₹)</strong>: Budget allocation. The form automatically computes the cumulative budget across all jobs in real time.</li>
+        </ul>
+      </div>
+
+      <div class="step-box">
+        <div class="step-header">
+          <span class="step-num">4</span>
+          <span>Attach Documents & Publish</span>
+        </div>
+        <p>Attach the official RFQ PDF document and click <strong>"Publish Tender with Job Packages"</strong>. The tender is now live on the public portal.</p>
+      </div>
+
+      <div class="step-box">
+        <div class="step-header">
+          <span class="step-num">5</span>
+          <span>Answer Pre-Bid Queries</span>
+        </div>
+        <p>Open the tender details page to view queries submitted by bidders. Type the official departmental response and click <strong>"Publish Reply"</strong>.</p>
+      </div>
+
+      <div class="step-box">
+        <div class="step-header">
+          <span class="step-num">6</span>
+          <span>Evaluate Bids in the L1 Comparative Matrix</span>
+        </div>
+        <p>When the quotation window closes, open <strong>"View All Submissions"</strong> (<span class="tag">/ce/tenders/{id}/submissions</span>):</p>
+        <ul>
+          <li>Bids are automatically ranked from lowest (<strong>👑 L1</strong>) to highest.</li>
+          <li>Use the <strong>"Filter by Job"</strong> dropdown to inspect quotes for individual work packages.</li>
+          <li>Click <strong>"Evaluate Dossier"</strong> on any applicant to review their Annexure II past capabilities, Annexure III rates, and EMD receipt.</li>
+          <li>Set the evaluation decision (<span class="tag">ACCEPTED</span> or <span class="tag">REJECTED</span>) with justification remarks. The system logs an audit trail in the database.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- SECTION 3 -->
+    <div class="card" id="section-applicant-guide">
+      <h2>3. Contractor / Applicant Training Guide</h2>
+      <p>This section guides contractor firms on onboarding, tender discovery, job selection, and submitting compliant quotations.</p>
+
+      <div class="step-box">
+        <div class="step-header">
+          <span class="step-num green">1</span>
+          <span>Contractor Registration & OTP Login</span>
+        </div>
+        <p>Go to <span class="tag">http://localhost:5173/applicant/login</span>.</p>
+        <ul>
+          <li><strong>New Firm</strong>: Click <em>Register New Contracting Firm</em>, enter company name, GSTIN, PAN, MD/CEO name, and mobile number.</li>
+          <li><strong>Existing Firm</strong>: Enter registered mobile number (e.g. <code>9111222333</code>) and verify using the instant 6-digit OTP.</li>
+        </ul>
+      </div>
+
+      <div class="step-box">
+        <div class="step-header">
+          <span class="step-num green">2</span>
+          <span>Discover Active Tenders</span>
+        </div>
+        <p>On the homepage, review published tenders. Check the live <strong>Ticking Countdown Timer</strong> to verify the time remaining before the quotation cutoff.</p>
+      </div>
+
+      <div class="step-box">
+        <div class="step-header">
+          <span class="step-num green">3</span>
+          <span>6-Step Quotation Submission Wizard</span>
+        </div>
+        <p>Click <strong>"Submit Quotation Online"</strong> (<span class="tag">/applicant/apply/{tenderId}</span>):</p>
+        <ol>
+          <li><strong>Step 1: Signatory Details</strong> — Enter authorized signatory name and designation (e.g. Managing Director).</li>
+          <li><strong>Step 2: Job Package Selection</strong> — Check/uncheck specific jobs. You can quote for one, multiple, or all work packages.</li>
+          <li><strong>Step 3: Annexure II (Capabilities)</strong> — Enter past similar works executed, client names, and project cost in ₹ Lakhs.</li>
+          <li><strong>Step 4: Annexure III (Line Items & Rates)</strong> — Enter your rate per unit for each line item mapped to your selected jobs. The grand total is calculated automatically.</li>
+          <li><strong>Step 5: EMD Payment & Docs</strong> — Enter bank UTR / DD payment reference and upload PDF verification proofs.</li>
+          <li><strong>Step 6: Review & Final Submit</strong> — Review the computed quote breakdown across your selected jobs and click <strong>"Confirm & Submit Quotation"</strong>.</li>
+        </ol>
+      </div>
+
+      <div class="step-box">
+        <div class="step-header">
+          <span class="step-num green">4</span>
+          <span>Track Status in "My Submitted Quotations"</span>
+        </div>
+        <p>Open <span class="tag">/applicant/my-applications</span> to view your submitted bids, selected job badges, and the Chief Engineer's evaluation decision.</p>
+      </div>
+    </div>
+
+    <!-- SECTION 4 -->
+    <div class="card" id="section-multijob">
+      <h2>4. Multi-Job Work Packages Explained</h2>
+      <div class="highlight-box">
+        <strong>How Multi-Job Bidding Works:</strong>
+        <p style="margin-top: 6px;">A single master tender (e.g. <em>Administrative Towers Construction</em>) can be partitioned by the Chief Engineer into multiple specialized work packages:</p>
+        <ul style="margin-top: 8px;">
+          <li><code>JOB-01</code>: Structural Steel Fabrication (Shop work, Shot blasting, Primer) — Est. Budget: ₹2.15 Cr</li>
+          <li><code>JOB-02</code>: Site Crane Erection & High-Tensile Torque Bolting — Est. Budget: ₹85 Lakhs</li>
+          <li><code>JOB-03</code>: Standing Seam Metal Roofing & Wall Cladding — Est. Budget: ₹1.40 Cr</li>
+        </ul>
+        <p style="margin-top: 6px;"><strong>Contractor Flexibility</strong>: A specialized steel fabrication firm can bid for only <code>JOB-01</code>, while a turnkey contractor can bid for all 3 jobs in a single unified submission docket.</p>
+      </div>
+    </div>
+
+    <!-- SECTION 5 -->
+    <div class="card" id="section-faq">
+      <h2>5. FAQ & KT Troubleshooting</h2>
+      
+      <h3>Q1: What happens if an applicant tries to submit after the countdown expires?</h3>
+      <p>The backend API strictly rejects submissions attempted after <span class="tag">quotation_to_date</span> with a <code>400 Bad Request: Quotation window is closed</code>. The online submit button is automatically disabled.</p>
+
+      <h3>Q2: Can contractors see other contractors' quoted prices?</h3>
+      <p><strong>No.</strong> The portal enforces role isolation. Applicants can only view their own quotations. Competitor pricing is strictly hidden to prevent price collusion.</p>
+
+      <h3>Q3: How does the Chief Engineer determine L1?</h3>
+      <p>The Comparative Evaluation Matrix automatically ranks all submitted bids from lowest quoted amount (👑 L1) to highest. The CE can filter by specific job package to see L1 rankings for individual work components.</p>
+
+      <h3>Q4: How do I restart the servers if Antigravity is closed?</h3>
+      <p>Double-click the <strong>START_PORTAL.bat</strong> shortcut on your Desktop. It launches both servers independently and opens the portal in your web browser.</p>
+    </div>
+
+    <!-- SECTION 6 -->
+    <div class="card" id="section-cheatsheet">
+      <h2>6. Quick Reference Cheat Sheet</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Role / Resource</th>
+            <th>URL / Location</th>
+            <th>Default Credentials / Details</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Frontend Portal</strong></td>
+            <td><code>http://localhost:5173</code></td>
+            <td>Public tender explorer & contractor bidding</td>
+          </tr>
+          <tr>
+            <td><strong>Chief Engineer Login</strong></td>
+            <td><code>http://localhost:5173/ce/login</code></td>
+            <td>Mobile: <strong>9876543210</strong> | Password: <strong>Admin@123</strong></td>
+          </tr>
+          <tr>
+            <td><strong>Contractor Login</strong></td>
+            <td><code>http://localhost:5173/applicant/login</code></td>
+            <td>Mobile: <strong>9111222333</strong> (Instant 6-digit OTP)</td>
+          </tr>
+          <tr>
+            <td><strong>Backend API Swagger</strong></td>
+            <td><code>http://127.0.0.1:8000/docs</code></td>
+            <td>Interactive FastAPI documentation & testing</td>
+          </tr>
+          <tr>
+            <td><strong>1-Click Desktop Launcher</strong></td>
+            <td>Desktop ➔ <code>START_PORTAL.bat</code></td>
+            <td>Starts background services independently</td>
+          </tr>
+          <tr>
+            <td><strong>GitHub Repository</strong></td>
+            <td><code>https://github.com/kirantejatj/rfq-portal</code></td>
+            <td>Main code repository & documentation</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+</body>
+</html>
