@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AGIC RFQ Portal - System Design & Database Architecture</title>
+  <!-- Mermaid.js for visual diagrams -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
+  </script>
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      --primary-dark: #0f172a;
+      --primary-light: #eff6ff;
+      --accent: #f59e0b;
+      --success: #059669;
+      --slate-50: #f8fafc;
+      --slate-100: #f1f5f9;
+      --slate-200: #e2e8f0;
+      --slate-700: #334155;
+      --slate-800: #1e293b;
+      --slate-900: #0f172a;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: #1e293b;
+      background-color: #f8fafc;
+      line-height: 1.6;
+      padding: 0;
+      margin: 0;
+    }
+    .header-banner {
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #1d4ed8 100%);
+      color: white;
+      padding: 40px 20px;
+      text-align: center;
+      border-bottom: 4px solid #f59e0b;
+    }
+    .header-banner h1 {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+    }
+    .header-banner p {
+      font-size: 14px;
+      color: #93c5fd;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      background: rgba(245, 158, 11, 0.2);
+      color: #fcd34d;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+    }
+    .container {
+      max-width: 1100px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: white;
+      padding: 12px 20px;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .btn {
+      background: #1e3a8a;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.2s;
+    }
+    .btn:hover {
+      background: #1d4ed8;
+    }
+    .nav-toc {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 30px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .nav-toc h3 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .nav-toc ul {
+      list-style: none;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 8px;
+    }
+    .nav-toc a {
+      color: #1e3a8a;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      display: block;
+      padding: 6px 10px;
+      border-radius: 6px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+    }
+    .nav-toc a:hover {
+      background: #eff6ff;
+      border-color: #bfdbfe;
+    }
+    .card {
+      background: white;
+      border-radius: 14px;
+      border: 1px solid #e2e8f0;
+      padding: 28px;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+    }
+    h2 {
+      font-size: 20px;
+      color: #0f172a;
+      font-weight: 800;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 8px;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    h3 {
+      font-size: 15px;
+      color: #1e3a8a;
+      font-weight: 700;
+      margin: 20px 0 10px 0;
+    }
+    p, li {
+      font-size: 13px;
+      color: #334155;
+    }
+    ul, ol {
+      margin-left: 20px;
+      margin-bottom: 15px;
+    }
+    li {
+      margin-bottom: 6px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      margin: 12px 0 20px 0;
+      background: white;
+    }
+    th, td {
+      border: 1px solid #e2e8f0;
+      padding: 8px 12px;
+      text-align: left;
+    }
+    th {
+      background-color: #f1f5f9;
+      color: #0f172a;
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.5px;
+    }
+    tr:nth-child(even) {
+      background-color: #f8fafc;
+    }
+    .code-tag {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-weight: 700;
+      color: #1e3a8a;
+      background: #eff6ff;
+      padding: 2px 5px;
+      border-radius: 4px;
+      border: 1px solid #dbeafe;
+      font-size: 11px;
+    }
+    .pk {
+      background: #fef3c7;
+      color: #92400e;
+      border: 1px solid #fde68a;
+      padding: 1px 4px;
+      border-radius: 3px;
+      font-size: 10px;
+      font-weight: 700;
+    }
+    .fk {
+      background: #e0e7ff;
+      color: #3730a3;
+      border: 1px solid #c7d2fe;
+      padding: 1px 4px;
+      border-radius: 3px;
+      font-size: 10px;
+      font-weight: 700;
+    }
+    .diagram-box {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 16px;
+      margin: 16px 0;
+      overflow-x: auto;
+      text-align: center;
+    }
+    .highlight-box {
+      background: #eff6ff;
+      border-left: 4px solid #1e3a8a;
+      padding: 14px;
+      border-radius: 0 8px 8px 0;
+      margin: 15px 0;
+      font-size: 12px;
+      color: #1e3a8a;
+    }
+    @media print {
+      body { background: white; }
+      .toolbar, .btn { display: none; }
+      .card { box-shadow: none; border: 1px solid #ccc; page-break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header-banner">
+    <span class="badge">Official Technical Specification</span>
+    <h1>AGIC RFQ Portal: System Design & Database Architecture</h1>
+    <p>Complete documentation of models, relational schemas, ER diagrams, operational workflows, and REST API specifications.</p>
+  </div>
+
+  <div class="container">
+    <div class="toolbar">
+      <div>
+        <strong style="font-size: 13px; color: #0f172a;">Amaravati Growth and Infrastructure Corporation (AGIC)</strong>
+        <span style="font-size: 11px; color: #64748b; margin-left: 10px;">Version 2.0.0 • Multi-Job RFQ Architecture</span>
+      </div>
+      <div>
+        <button class="btn" onclick="window.print()">🖨️ Print / Save as PDF</button>
+      </div>
+    </div>
+
+    <!-- Table of Contents -->
+    <div class="nav-toc">
+      <h3>Table of Contents</h3>
+      <ul>
+        <li><a href="#section-overview">1. System Overview & Tech Stack</a></li>
+        <li><a href="#section-er-diagram">2. Entity Relationship (ER) Diagram</a></li>
+        <li><a href="#section-data-dictionary">3. Full Database Schema (Data Dictionary)</a></li>
+        <li><a href="#section-workflows">4. Chief Engineer & Bidder Workflows</a></li>
+        <li><a href="#section-api">5. REST API Specifications</a></li>
+        <li><a href="#section-ui">6. UI Architecture & Components</a></li>
+        <li><a href="#section-security">7. Security & Guardrails</a></li>
+      </ul>
+    </div>
+
+    <!-- SECTION 1 -->
+    <div class="card" id="section-overview">
+      <h2>1. System Overview & Tech Stack</h2>
+      <p>The AGIC RFQ Portal coordinates high-value infrastructure and engineering tenders. It provides strict quotation window cutoffs, multi-job partitioning, itemized rate submissions, automated L1 comparative rankings, and complete audit trail logging.</p>
+
+      <h3>Technology Matrix</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Layer</th>
+            <th>Technology</th>
+            <th>Version</th>
+            <th>Function & Role</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Frontend</strong></td>
+            <td>React 19 + Vite 8</td>
+            <td>19.2.8</td>
+            <td>Single Page Application (SPA) with fast HMR and client-side routing</td>
+          </tr>
+          <tr>
+            <td><strong>Styling & Icons</strong></td>
+            <td>Tailwind CSS + Lucide Icons</td>
+            <td>3.4.17</td>
+            <td>Responsive government portal design system and visual indicators</td>
+          </tr>
+          <tr>
+            <td><strong>Backend API</strong></td>
+            <td>FastAPI (Python 3.12)</td>
+            <td>0.115+</td>
+            <td>High-performance asynchronous REST API framework with Pydantic v2</td>
+          </tr>
+          <tr>
+            <td><strong>ORM & DB</strong></td>
+            <td>SQLAlchemy 2.0</td>
+            <td>2.0+</td>
+            <td>ACID-compliant relational persistence with connection pooling</td>
+          </tr>
+          <tr>
+            <td><strong>Security</strong></td>
+            <td>JWT & Passlib (PBKDF2)</td>
+            <td>3.3.0</td>
+            <td>Cryptographic authentication and Role-Based Access Control (RBAC)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- SECTION 2 -->
+    <div class="card" id="section-er-diagram">
+      <h2>2. Visual Entity Relationship (ER) Diagram</h2>
+      <p>Below is the complete database schema diagram illustrating all primary keys, foreign keys, and entity relations.</p>
+      
+      <div class="diagram-box">
+        <pre class="mermaid">
+erDiagram
+    CE_USERS ||--o{ RFQ_TENDERS : creates
+    CE_USERS ||--o{ CLARIFICATIONS : answers
+    CE_USERS ||--o{ APPLICATION_STATUS_HISTORY : audits
+
+    RFQ_TENDERS ||--|{ RFQ_JOBS : contains
+    RFQ_TENDERS ||--o{ TENDER_DOCUMENTS : attaches
+    RFQ_TENDERS ||--o{ APPLICATIONS : receives
+    RFQ_TENDERS ||--o{ CLARIFICATIONS : receives
+
+    APPLICANTS ||--o{ APPLICATIONS : submits
+    APPLICANTS ||--o{ CLARIFICATIONS : asks
+    APPLICANTS ||--o{ OTP_VERIFICATIONS : verifies
+
+    APPLICATIONS ||--|{ APPLICATION_JOBS : selects
+    APPLICATIONS ||--|{ TECHNICAL_PROPOSAL_ITEMS : items
+    APPLICATIONS ||--o{ TECHNICAL_FINANCIAL_CAPABILITY : capabilities
+    APPLICATIONS ||--o{ APPLICATION_DOCUMENTS : attachments
+    APPLICATIONS ||--|| EMD_PAYMENTS : pays
+    APPLICATIONS ||--o{ APPLICATION_STATUS_HISTORY : logs
+
+    RFQ_JOBS ||--o{ APPLICATION_JOBS : maps_to
+    RFQ_JOBS ||--o{ TECHNICAL_PROPOSAL_ITEMS : tags
+        </pre>
+      </div>
+    </div>
+
+    <!-- SECTION 3 -->
+    <div class="card" id="section-data-dictionary">
+      <h2>3. Full Database Schema (Data Dictionary)</h2>
+      
+      <!-- Table 1 -->
+      <h3>1. ce_users (Chief Engineers & Admins)</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Column</th>
+            <th>Type</th>
+            <th>Key / Constraint</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>ce_id</td><td>BigInteger</td><td><span class="pk">PK</span> Auto-inc</td><td>Unique Chief Engineer Identifier</td></tr>
+          <tr><td>name</td><td>String(150)</td><td>NOT NULL</td><td>Full legal name and designation</td></tr>
+          <tr><td>mobile_no</td><td>String(15)</td><td>NOT NULL, UNIQUE</td><td>10-digit login mobile number</td></tr>
+          <tr><td>email</td><td>String(150)</td><td>NULLABLE</td><td>Official email address</td></tr>
+          <tr><td>password_hash</td><td>Text</td><td>NOT NULL</td><td>Hashed password (PBKDF2/Bcrypt)</td></tr>
+          <tr><td>designation</td><td>String(100)</td><td>DEFAULT "Chief Engineer"</td><td>Official government post</td></tr>
+          <tr><td>role</td><td>String(20)</td><td>DEFAULT "CE"</td><td>Access role ("CE")</td></tr>
+          <tr><td>is_active</td><td>Boolean</td><td>DEFAULT True</td><td>Account active flag</td></tr>
+        </tbody>
+      </table>
+
+      <!-- Table 2 -->
+      <h3>2. applicants (Contractor / Bidder Firms)</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Column</th>
+            <th>Type</th>
+            <th>Key / Constraint</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>applicant_id</td><td>BigInteger</td><td><span class="pk">PK</span> Auto-inc</td><td>Unique Contractor Identifier</td></tr>
+          <tr><td>mobile_no</td><td>String(15)</td><td>NOT NULL, UNIQUE</td><td>10-digit mobile number for OTP</td></tr>
+          <tr><td>firm_name</td><td>String(255)</td><td>NOT NULL</td><td>Registered company / firm name</td></tr>
+          <tr><td>registration_type</td><td>String(100)</td><td>NULLABLE</td><td>Pvt Ltd, LLP, Partnership, etc.</td></tr>
+          <tr><td>prime_line_business</td><td>String(255)</td><td>NULLABLE</td><td>Trade domain (Steel Fabrication, Civil)</td></tr>
+          <tr><td>chairperson_name</td><td>String(150)</td><td>NULLABLE</td><td>Chairperson name</td></tr>
+          <tr><td>md_ceo_name</td><td>String(150)</td><td>NULLABLE</td><td>Managing Director / CEO name</td></tr>
+          <tr><td>gstin</td><td>String(20)</td><td>NULLABLE</td><td>15-character GST identification number</td></tr>
+          <tr><td>pan_no</td><td>String(20)</td><td>NULLABLE</td><td>Permanent Account Number</td></tr>
+          <tr><td>mobile_verified</td><td>Boolean</td><td>DEFAULT False</td><td>Mobile OTP verified status</td></tr>
+        </tbody>
+      </table>
+
+      <!-- Table 3 -->
+      <h3>3. rfq_tenders (Master Tenders)</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Column</th>
+            <th>Type</th>
+            <th>Key / Constraint</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>tender_id</td><td>BigInteger</td><td><span class="pk">PK</span> Auto-inc</td><td>Primary Key</td></tr>
+          <tr><td>tender_ref_no</td><td>String(50)</td><td>NOT NULL, UNIQUE</td><td>Reference No (e.g. RFQ/AGIC/2026/INFRA-01)</td></tr>
+          <tr><td>title</td><td>Text</td><td>NOT NULL</td><td>Title of tender work</td></tr>
+          <tr><td>authority_name</td><td>String(255)</td><td>DEFAULT "AGIC"</td><td>Procuring authority</td></tr>
+          <tr><td>scope_of_work</td><td>Text</td><td>NULLABLE</td><td>Overarching scope and specifications</td></tr>
+          <tr><td>emd_amount</td><td>Numeric(12,2)</td><td>NOT NULL</td><td>Mandatory EMD deposit amount in INR</td></tr>
+          <tr><td>completion_period</td><td>String(50)</td><td>NULLABLE</td><td>Timeline (e.g. "12 Months")</td></tr>
+          <tr><td>quotation_from_date</td><td>DateTime</td><td>NOT NULL</td><td>Quotation window start date/time</td></tr>
+          <tr><td>quotation_to_date</td><td>DateTime</td><td>NOT NULL</td><td>Quotation window hard cutoff date/time</td></tr>
+          <tr><td>status</td><td>String(20)</td><td>DEFAULT "DRAFT"</td><td>DRAFT, PUBLISHED, CLOSED, CANCELLED</td></tr>
+        </tbody>
+      </table>
+
+      <!-- Table 4 -->
+      <h3>4. rfq_jobs (Work Packages Under Tender)</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Column</th>
+            <th>Type</th>
+            <th>Key / Constraint</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>job_id</td><td>BigInteger</td><td><span class="pk">PK</span> Auto-inc</td><td>Primary Key</td></tr>
+          <tr><td>tender_id</td><td>BigInteger</td><td><span class="fk">FK</span> rfq_tenders</td><td>Parent Tender ID</td></tr>
+          <tr><td>job_code</td><td>String(30)</td><td>NULLABLE</td><td>Job Code (e.g. JOB-INFRA-01-FAB)</td></tr>
+          <tr><td>job_name</td><td>String(255)</td><td>NOT NULL</td><td>Work Package Title</td></tr>
+          <tr><td>category</td><td>String(100)</td><td>NULLABLE</td><td>Fabrication, Erection, Roofing, etc.</td></tr>
+          <tr><td>estimated_quantity</td><td>Numeric(12,2)</td><td>NULLABLE</td><td>Quantified scope</td></tr>
+          <tr><td>unit</td><td>String(30)</td><td>NULLABLE</td><td>MT, SQM, NOS, RMT</td></tr>
+          <tr><td>estimated_cost</td><td>Numeric(16,2)</td><td>NULLABLE</td><td>Estimated allocation budget (INR)</td></tr>
+          <tr><td>completion_period</td><td>String(50)</td><td>NULLABLE</td><td>Timeline (e.g. "6 Months")</td></tr>
+          <tr><td>status</td><td>String(20)</td><td>DEFAULT "ACTIVE"</td><td>ACTIVE / INACTIVE</td></tr>
+        </tbody>
+      </table>
+
+      <!-- Table 5 -->
+      <h3>5. applications (Submitted Quotation Dossiers)</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Column</th>
+            <th>Type</th>
+            <th>Key / Constraint</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>application_id</td><td>BigInteger</td><td><span class="pk">PK</span> Auto-inc</td><td>Primary Key</td></tr>
+          <tr><td>tender_id</td><td>BigInteger</td><td><span class="fk">FK</span> rfq_tenders</td><td>Target Tender ID</td></tr>
+          <tr><td>applicant_id</td><td>BigInteger</td><td><span class="fk">FK</span> applicants</td><td>Submitting Contractor ID</td></tr>
+          <tr><td>application_no</td><td>String(50)</td><td>NOT NULL, UNIQUE</td><td>Unique Docket (e.g. APP-1-2-1788265)</td></tr>
+          <tr><td>signatory_name</td><td>String(150)</td><td>NULLABLE</td><td>Authorized signatory name</td></tr>
+          <tr><td>signatory_designation</td><td>String(150)</td><td>NULLABLE</td><td>Signatory title (e.g. Managing Director)</td></tr>
+          <tr><td>quoted_amount</td><td>Numeric(16,2)</td><td>NULLABLE</td><td>Cumulative grand total quotation (INR)</td></tr>
+          <tr><td>status</td><td>String(30)</td><td>DEFAULT "SUBMITTED"</td><td>SUBMITTED, UNDER_REVIEW, ACCEPTED, REJECTED</td></tr>
+          <tr><td>submitted_at</td><td>DateTime</td><td>DEFAULT now()</td><td>Official submission timestamp</td></tr>
+        </tbody>
+      </table>
+
+      <!-- Table 6 -->
+      <h3>6. application_jobs (Applicant Job Package Selection)</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Column</th>
+            <th>Type</th>
+            <th>Key / Constraint</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>application_job_id</td><td>BigInteger</td><td><span class="pk">PK</span> Auto-inc</td><td>Primary Key</td></tr>
+          <tr><td>application_id</td><td>BigInteger</td><td><span class="fk">FK</span> applications</td><td>Application ID</td></tr>
+          <tr><td>job_id</td><td>BigInteger</td><td><span class="fk">FK</span> rfq_jobs</td><td>Selected Job ID</td></tr>
+          <tr><td>quoted_amount</td><td>Numeric(16,2)</td><td>NULLABLE</td><td>Sub-total quote for this job package</td></tr>
+          <tr><td>remarks</td><td>Text</td><td>NULLABLE</td><td>Applicant technical remarks for this job</td></tr>
+        </tbody>
+      </table>
+
+      <!-- Table 7 -->
+      <h3>7. technical_proposal_items (Annexure III Itemized Rates)</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Column</th>
+            <th>Type</th>
+            <th>Key / Constraint</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>proposal_item_id</td><td>BigInteger</td><td><span class="pk">PK</span> Auto-inc</td><td>Primary Key</td></tr>
+          <tr><td>application_id</td><td>BigInteger</td><td><span class="fk">FK</span> applications</td><td>Application ID</td></tr>
+          <tr><td>job_id</td><td>BigInteger</td><td><span class="fk">FK</span> rfq_jobs</td><td>Mapped Job Package ID</td></tr>
+          <tr><td>sl_no</td><td>Integer</td><td>NOT NULL</td><td>Sequential row index (1, 2, 3...)</td></tr>
+          <tr><td>item_description</td><td>Text</td><td>NOT NULL</td><td>Bill of Quantities item description</td></tr>
+          <tr><td>unit</td><td>String(30)</td><td>NULLABLE</td><td>MT, SQM, NOS</td></tr>
+          <tr><td>quantity</td><td>Numeric(14,2)</td><td>NULLABLE</td><td>Quantity</td></tr>
+          <tr><td>rate_per_unit</td><td>Numeric(14,2)</td><td>NULLABLE</td><td>Quoted unit rate in INR</td></tr>
+          <tr><td>amount</td><td>Numeric(16,2)</td><td>NULLABLE</td><td>Computed amount (Quantity * Rate)</td></tr>
+        </tbody>
+      </table>
+
+      <!-- Table 8 -->
+      <h3>8. technical_financial_capability (Annexure II Experience)</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Column</th>
+            <th>Type</th>
+            <th>Key / Constraint</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>capability_id</td><td>BigInteger</td><td><span class="pk">PK</span> Auto-inc</td><td>Primary Key</td></tr>
+          <tr><td>application_id</td><td>BigInteger</td><td><span class="fk">FK</span> applications</td><td>Application ID</td></tr>
+          <tr><td>sl_no</td><td>Integer</td><td>NOT NULL</td><td>Row index</td></tr>
+          <tr><td>work_description</td><td>Text</td><td>NOT NULL</td><td>Past project description</td></tr>
+          <tr><td>client_name</td><td>String(255)</td><td>NULLABLE</td><td>Client authority (NHAI, APCRDA, etc.)</td></tr>
+          <tr><td>cost_lakhs</td><td>Numeric(14,2)</td><td>NULLABLE</td><td>Cost of work in ₹ Lakhs</td></tr>
+          <tr><td>financial_year</td><td>String(20)</td><td>NULLABLE</td><td>e.g. 2024-25</td></tr>
+        </tbody>
+      </table>
+
+      <!-- Table 9 -->
+      <h3>9. application_status_history (Audit Trail Log)</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Column</th>
+            <th>Type</th>
+            <th>Key / Constraint</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>history_id</td><td>BigInteger</td><td><span class="pk">PK</span> Auto-inc</td><td>Primary Key</td></tr>
+          <tr><td>application_id</td><td>BigInteger</td><td><span class="fk">FK</span> applications</td><td>Application ID</td></tr>
+          <tr><td>old_status</td><td>String(30)</td><td>NULLABLE</td><td>Previous status</td></tr>
+          <tr><td>new_status</td><td>String(30)</td><td>NOT NULL</td><td>New updated status</td></tr>
+          <tr><td>changed_by_ce</td><td>BigInteger</td><td><span class="fk">FK</span> ce_users</td><td>ID of evaluating Chief Engineer</td></tr>
+          <tr><td>remarks</td><td>Text</td><td>NULLABLE</td><td>Evaluation justification notes</td></tr>
+          <tr><td>changed_at</td><td>DateTime</td><td>DEFAULT now()</td><td>Timestamp of status change</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- SECTION 4 -->
+    <div class="card" id="section-workflows">
+      <h2>4. Operational Workflows</h2>
+      
+      <div class="highlight-box">
+        <strong>Chief Engineer (CE) Lifecycle:</strong>
+        <ol style="margin-top: 6px; margin-bottom: 0;">
+          <li>Login with mobile <code>9876543210</code> / <code>Admin@123</code>.</li>
+          <li>Click <strong>Raise New RFQ Tender & Jobs</strong> to configure tender specifications, multiple job packages with budgets, and cutoff dates.</li>
+          <li>Publish the tender. Contractors can now view the tender on the home page and submit pre-bid queries.</li>
+          <li>Upon window closing, review the <strong>L1 Comparative Evaluation Matrix</strong> sorted by quoted amounts, filter by job packages, inspect Annexure II and III, and record evaluation decisions with audit remarks.</li>
+        </ol>
+      </div>
+
+      <div class="highlight-box" style="background: #f0fdf4; border-left-color: #059669; color: #065f46;">
+        <strong>Contractor / Applicant Lifecycle:</strong>
+        <ol style="margin-top: 6px; margin-bottom: 0;">
+          <li>Register contracting firm with mobile number, GSTIN, PAN, and corporate details.</li>
+          <li>Browse published tenders on the portal with live countdown timers.</li>
+          <li>Complete the 6-step online quotation submission wizard:
+            <ul>
+              <li><strong>Step 1</strong>: Signatory & covering letter details.</li>
+              <li><strong>Step 2</strong>: Work Package Selection (Select one, multiple, or all jobs).</li>
+              <li><strong>Step 3</strong>: Annexure II past technical & financial capability.</li>
+              <li><strong>Step 4</strong>: Annexure III itemized unit rates tagged to selected jobs.</li>
+              <li><strong>Step 5</strong>: EMD deposit details & document upload.</li>
+              <li><strong>Step 6</strong>: Review computed quotation totals and lock submission into the database.</li>
+            </ul>
+          </li>
+          <li>Track submitted bids and view CE evaluation decisions in <strong>My Submitted Quotations</strong>.</li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- SECTION 5 -->
+    <div class="card" id="section-api">
+      <h2>5. REST API Specifications</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Method</th>
+            <th>Endpoint</th>
+            <th>Role Access</th>
+            <th>Purpose</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="code-tag">POST</span></td><td><code>/api/auth/ce/login</code></td><td>Public</td><td>Chief Engineer administrative login</td></tr>
+          <tr><td><span class="code-tag">POST</span></td><td><code>/api/auth/applicant/send-otp</code></td><td>Public</td><td>Dispatches simulated 6-digit OTP</td></tr>
+          <tr><td><span class="code-tag">POST</span></td><td><code>/api/auth/applicant/verify-otp</code></td><td>Public</td><td>Verifies OTP and returns JWT token</td></tr>
+          <tr><td><span class="code-tag">GET</span></td><td><code>/api/tenders</code></td><td>Public</td><td>Lists all tenders with jobs schedule</td></tr>
+          <tr><td><span class="code-tag">GET</span></td><td><code>/api/tenders/{id}</code></td><td>Public</td><td>Fetches tender details, documents & job packages</td></tr>
+          <tr><td><span class="code-tag">POST</span></td><td><code>/api/tenders</code></td><td>CE Only</td><td>Creates tender with multiple work packages</td></tr>
+          <tr><td><span class="code-tag">POST</span></td><td><code>/api/tenders/{id}/jobs</code></td><td>CE Only</td><td>Adds new job package to an existing tender</td></tr>
+          <tr><td><span class="code-tag">POST</span></td><td><code>/api/applications</code></td><td>Applicant</td><td>Submits multi-job quotation with Annexures II & III</td></tr>
+          <tr><td><span class="code-tag">GET</span></td><td><code>/api/applications/my</code></td><td>Applicant</td><td>Lists contractor's own submitted dossiers</td></tr>
+          <tr><td><span class="code-tag">GET</span></td><td><code>/api/applications/tender/{id}</code></td><td>CE Only</td><td>Returns comparative evaluation matrix for tender</td></tr>
+          <tr><td><span class="code-tag">PATCH</span></td><td><code>/api/applications/{id}/status</code></td><td>CE Only</td><td>Updates evaluation status & records audit history</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- SECTION 6 & 7 -->
+    <div class="card" id="section-security">
+      <h2>6. Security & Guardrails</h2>
+      <ul>
+        <li><strong>Role-Based Access Control</strong>: Applicants can only view their own submissions. Competitor quotations remain hidden.</li>
+        <li><strong>Quotation Window Enforcement</strong>: Submissions attempted before opening or after cutoff timestamps are rejected with <code>400 Bad Request</code>.</li>
+        <li><strong>Multi-Job Validation</strong>: If a tender defines job packages, applicants must select at least one active job.</li>
+        <li><strong>Immutable Audit Trail</strong>: Every status change made by the Chief Engineer is permanently logged in <code>application_status_history</code>.</li>
+      </ul>
+    </div>
+  </div>
+
+</body>
+</html>
