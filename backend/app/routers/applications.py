@@ -1,7 +1,11 @@
 from datetime import datetime
 import shutil
+import io
+import os
+import zipfile
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, status
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.config import settings
@@ -9,7 +13,7 @@ from app.core.dependencies import get_current_user, require_applicant, require_c
 from app.models.schema import (
     Application, RFQTender, Applicant, ApplicationDocument,
     TechnicalFinancialCapability, TechnicalProposalItem,
-    EMDPayment, ApplicationStatusHistory, ApplicationJob, RFQJob
+    EMDPayment, ApplicationStatusHistory, ApplicationJob, RFQJob, ApplicantDocument
 )
 from app.schemas.application import (
     ApplicationSubmitRequest, ApplicationStatusUpdate, ApplicationOut,
@@ -84,6 +88,10 @@ def build_application_out(app_obj: Application, db: Session) -> ApplicationOut:
         email=applicant.email if applicant else None,
         gstin=applicant.gstin if applicant else None,
         pan_no=applicant.pan_no if applicant else None,
+        turnover=applicant.turnover or applicant.md_ceo_name if applicant else None,
+        work_experience=applicant.work_experience or applicant.chairperson_name if applicant else None,
+        registration_type=applicant.registration_type if applicant else None,
+        prime_line_business=applicant.prime_line_business if applicant else None,
         tender_title=tender.title if tender else None,
         tender_ref_no=tender.tender_ref_no if tender else None,
         selected_jobs=selected_jobs_out,
@@ -172,7 +180,7 @@ def submit_application(
 
     calc_job_total = sum((float(sj.quoted_amount) for sj in payload.selected_jobs if sj.quoted_amount), 0.0)
 
-    if payload.quoted_amount is not None and payload.quoted_amount > 0:
+    if payload.quoted_amount is not None:
         quoted_amount = payload.quoted_amount
     elif calc_proposal_total > 0:
         quoted_amount = calc_proposal_total
@@ -246,11 +254,11 @@ def submit_application(
         )
         db.add(prop)
 
-    # Save EMD Payment
-    if payload.emd:
+    # Save EMD Payment (optional)
+    if payload.emd and (payload.emd.amount or payload.emd.transaction_ref):
         emd_record = EMDPayment(
             application_id=app_obj.application_id,
-            amount=payload.emd.amount or float(tender.emd_amount),
+            amount=payload.emd.amount or 0.0,
             payment_mode=payload.emd.payment_mode or "ONLINE_PORTAL",
             transaction_ref=payload.emd.transaction_ref or f"TXN-{int(datetime.now().timestamp())}",
             payment_date=payload.emd.payment_date or datetime.now(),
@@ -288,7 +296,7 @@ def upload_application_document(
     if current_user["role"] == "APPLICANT" and app_obj.applicant_id != current_user["id"]:
         raise HTTPException(status_code=403, detail="Forbidden")
 
-    safe_filename = f"app_{application_id}_{datetime.now().strftime('%Y%m%d%H%M%S')}_{file.filename}"
+    safe_filename = f"app_{application_id}_{datetime.now().strftime('%Y%m%d%H%M%S')}_{file.filename.replace(' ', '_')}"
     file_dest = settings.UPLOAD_DIR / safe_filename
 
     with open(file_dest, "wb") as buffer:
@@ -307,6 +315,65 @@ def upload_application_document(
     db.commit()
     db.refresh(doc)
     return doc
+
+@router.get("/{application_id}/download-all")
+def download_all_application_documents(
+    application_id: int,
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    app_obj = db.query(Application).filter(Application.application_id == application_id).first()
+    if not app_obj:
+        raise HTTPException(status_code=404, detail="Application not found")
+
+    # Security: Applicant only downloads their own, CE downloads any
+    if current_user["role"] == "APPLICANT" and app_obj.applicant_id != current_user["id"]:
+        raise HTTPException(status_code=403, detail="Forbidden")
+
+    docs = db.query(ApplicationDocument).filter(ApplicationDocument.application_id == application_id).all()
+    applicant_docs = db.query(ApplicantDocument).filter(ApplicantDocument.applicant_id == app_obj.applicant_id).all()
+
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
+        added_names = set()
+        # Add application documents (Annexure III, EMD, Signed RFQ, etc.)
+        for doc in docs:
+            filename_clean = os.path.basename(doc.file_path)
+            real_path = os.path.join(settings.UPLOAD_DIR, filename_clean)
+            if os.path.exists(real_path):
+                arcname = f"Application_{doc.document_type}_{doc.file_name}"
+                count = 1
+                while arcname in added_names:
+                    arcname = f"Application_{doc.document_type}_{count}_{doc.file_name}"
+                    count += 1
+                added_names.add(arcname)
+                zip_file.write(real_path, arcname=arcname)
+
+        # Add applicant profile documents (Turnover, Registration, Experience)
+        for adoc in applicant_docs:
+            filename_clean = os.path.basename(adoc.file_path)
+            real_path = os.path.join(settings.UPLOAD_DIR, filename_clean)
+            if os.path.exists(real_path):
+                arcname = f"Applicant_{adoc.document_type}_{adoc.file_name}"
+                count = 1
+                while arcname in added_names:
+                    arcname = f"Applicant_{adoc.document_type}_{count}_{adoc.file_name}"
+                    count += 1
+                added_names.add(arcname)
+                zip_file.write(real_path, arcname=arcname)
+
+        if not added_names:
+            # Add a readme text file if no files exist yet
+            zip_file.writestr("README.txt", f"No documents were attached for Application {app_obj.application_no or application_id}.")
+
+    zip_buffer.seek(0)
+    safe_app_no = (app_obj.application_no or f"App_{application_id}").replace(" ", "_").replace("/", "_")
+    filename = f"Quotation_Documents_{safe_app_no}.zip"
+    return StreamingResponse(
+        zip_buffer,
+        media_type="application/zip",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
 
 @router.get("/my", response_model=List[ApplicationOut])
 def get_my_applications(

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import shutil
 from pathlib import Path
 from typing import List, Optional
@@ -17,7 +17,9 @@ router = APIRouter(prefix="/api/tenders", tags=["Tenders"])
 
 def build_tender_out(tender: RFQTender, db: Session) -> TenderOut:
     now = datetime.now()
-    is_open = (tender.status == "PUBLISHED") and (tender.quotation_from_date <= now <= tender.quotation_to_date)
+    from_date = tender.quotation_from_date or now
+    to_date = tender.quotation_to_date or (now + timedelta(days=365))
+    is_open = (tender.status == "PUBLISHED") and (from_date <= now <= to_date)
     sub_count = db.query(Application).filter(Application.tender_id == tender.tender_id).count()
     docs = db.query(TenderDocument).filter(TenderDocument.tender_id == tender.tender_id).all()
     jobs = db.query(RFQJob).filter(RFQJob.tender_id == tender.tender_id).order_by(RFQJob.job_id.asc()).all()
@@ -34,7 +36,7 @@ def build_tender_out(tender: RFQTender, db: Session) -> TenderOut:
         max_weight_mt=float(tender.max_weight_mt) if tender.max_weight_mt is not None else None,
         min_weight_mt=float(tender.min_weight_mt) if tender.min_weight_mt is not None else None,
         avg_weight_mt=float(tender.avg_weight_mt) if tender.avg_weight_mt is not None else None,
-        emd_amount=float(tender.emd_amount),
+        emd_amount=float(tender.emd_amount) if tender.emd_amount is not None else 0.0,
         completion_period=tender.completion_period,
         quotation_from_date=tender.quotation_from_date,
         quotation_to_date=tender.quotation_to_date,
@@ -77,8 +79,11 @@ def create_tender(
     current_user: dict = Depends(require_ce),
     db: Session = Depends(get_db)
 ):
-    if payload.quotation_to_date <= payload.quotation_from_date:
-        raise HTTPException(status_code=400, detail="quotation_to_date must be after quotation_from_date")
+    now = datetime.now()
+    q_from = payload.quotation_from_date or now
+    q_to = payload.quotation_to_date or (payload.opening_date or (now + timedelta(days=30)))
+    if q_to <= q_from:
+        q_to = q_from + timedelta(days=30)
 
     tender = RFQTender(
         tender_ref_no=payload.tender_ref_no.strip(),
@@ -91,11 +96,11 @@ def create_tender(
         max_weight_mt=payload.max_weight_mt,
         min_weight_mt=payload.min_weight_mt,
         avg_weight_mt=payload.avg_weight_mt,
-        emd_amount=payload.emd_amount,
+        emd_amount=payload.emd_amount if payload.emd_amount is not None else 0.0,
         completion_period=payload.completion_period,
-        quotation_from_date=payload.quotation_from_date,
-        quotation_to_date=payload.quotation_to_date,
-        opening_date=payload.opening_date,
+        quotation_from_date=q_from,
+        quotation_to_date=q_to,
+        opening_date=payload.opening_date or q_to,
         contact_person=payload.contact_person,
         contact_email=payload.contact_email,
         contact_phone=payload.contact_phone,

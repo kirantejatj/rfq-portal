@@ -28,6 +28,8 @@ class Applicant(Base):
     firm_name = Column(String(255), nullable=False)
     registration_type = Column(String(100), nullable=True)
     prime_line_business = Column(String(255), nullable=True)
+    turnover = Column(String(100), nullable=True)
+    work_experience = Column(Text, nullable=True)
     chairperson_name = Column(String(150), nullable=True)
     md_ceo_name = Column(String(150), nullable=True)
     postal_address = Column(Text, nullable=True)
@@ -39,6 +41,19 @@ class Applicant(Base):
     is_active = Column(Boolean, nullable=False, default=True)
     created_at = Column(DateTime, server_default=text("now()"), nullable=False)
     updated_at = Column(DateTime, server_default=text("now()"), nullable=False)
+
+
+class ApplicantDocument(Base):
+    __tablename__ = "applicant_documents"
+
+    document_id = Column(BigInteger, primary_key=True, index=True)
+    applicant_id = Column(BigInteger, nullable=False, index=True)
+    document_type = Column(String(50), nullable=False, default="REGISTRATION_DOC")
+    file_name = Column(String(255), nullable=False)
+    file_path = Column(Text, nullable=False)
+    file_size_kb = Column(Integer, nullable=True)
+    uploaded_at = Column(DateTime, server_default=text("now()"), nullable=False)
+
 
 
 class OTPVerification(Base):

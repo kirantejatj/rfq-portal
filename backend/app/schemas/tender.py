@@ -67,8 +67,8 @@ class TenderCreate(BaseModel):
     avg_weight_mt: Optional[float] = None
     emd_amount: float = 0.0
     completion_period: Optional[str] = None
-    quotation_from_date: datetime
-    quotation_to_date: datetime
+    quotation_from_date: Optional[datetime] = None
+    quotation_to_date: Optional[datetime] = None
     opening_date: Optional[datetime] = None
     contact_person: Optional[str] = None
     contact_email: Optional[str] = None

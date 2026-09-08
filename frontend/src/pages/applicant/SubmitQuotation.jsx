@@ -6,8 +6,15 @@ import StatusBadge from '../../components/StatusBadge';
 import CountdownTimer from '../../components/CountdownTimer';
 import { 
   Building2, User, Calendar, Plus, Trash2, IndianRupee, Upload, 
-  CheckCircle2, AlertCircle, ArrowRight, ArrowLeft, Briefcase, CheckSquare, Square
+  CheckCircle2, AlertCircle, ArrowRight, ArrowLeft, Briefcase, CheckSquare, Square, FileCheck, Info
 } from 'lucide-react';
+
+const UNIT_OPTIONS = [
+  'MT', 'KG', 'Tonne', 'Quintal',
+  'NOS', 'PCS', 'SET', 'Units',
+  'RMT', 'MTR', 'SQM', 'SQFT', 'CUM', 'CFT',
+  'LS', 'JOB', 'LOT', 'MONTHS', 'DAYS', 'TRIP'
+];
 
 export default function SubmitQuotation() {
   const { tenderId } = useParams();
@@ -32,16 +39,21 @@ export default function SubmitQuotation() {
 
   // Step 3: Annexure II - Past Technical & Financial Capabilities
   const [capabilities, setCapabilities] = useState([
-    { sl_no: 1, work_description: 'Fabrication & supply of heavy structural steel girders', client_name: 'National Highways Authority', cost_lakhs: 450.00, financial_year: '2024-25' }
+    { sl_no: 1, work_description: '', client_name: '', cost_lakhs: '', financial_year: '2024-25' }
   ]);
 
-  // Step 4: Annexure III - Technical Proposal / Line Items
+  // Step 4: Annexure III - Technical Proposal / Line Items & BOQ Document
   const [proposalItems, setProposalItems] = useState([]);
+  const [annexureDocFile, setAnnexureDocFile] = useState(null);
 
   // Step 5: EMD Details & Files
+  const [isEmdExempt, setIsEmdExempt] = useState(false);
   const [emdMode, setEmdMode] = useState('ONLINE_PORTAL');
-  const [emdTxnRef, setEmdTxnRef] = useState(`TXN-AGIC-${Math.floor(100000 + Math.random() * 900000)}`);
+  const [emdTxnRef, setEmdTxnRef] = useState('');
   const [uploadedFiles, setUploadedFiles] = useState([]);
+
+  // Step 6: Signed RFQ Document
+  const [signedRfqFile, setSignedRfqFile] = useState(null);
 
   useEffect(() => {
     fetchTender();
@@ -56,6 +68,10 @@ export default function SubmitQuotation() {
         setError('Quotation window for this tender is currently closed.');
       }
 
+      if (res.data.emd_amount === 0) {
+        setIsEmdExempt(true);
+      }
+
       // Initialize selected jobs (select all active jobs by default)
       if (res.data.jobs && res.data.jobs.length > 0) {
         const activeJobIds = res.data.jobs.filter(j => j.status === 'ACTIVE').map(j => j.job_id);
@@ -67,7 +83,7 @@ export default function SubmitQuotation() {
 
         res.data.jobs.forEach(j => {
           initJobMap[j.job_id] = {
-            quoted_amount: j.estimated_cost || 0,
+            quoted_amount: 0,
             remarks: ''
           };
           initProposalItems.push({
@@ -76,7 +92,7 @@ export default function SubmitQuotation() {
             item_description: j.job_name,
             unit: j.unit || 'MT',
             quantity: j.estimated_quantity || 1,
-            rate_per_unit: j.estimated_quantity ? Math.round((j.estimated_cost || 0) / j.estimated_quantity) : (j.estimated_cost || 0),
+            rate_per_unit: '', // No fixed amount - applicant enters own rate
             remarks: j.category || ''
           });
         });
@@ -84,10 +100,8 @@ export default function SubmitQuotation() {
         setJobDataMap(initJobMap);
         setProposalItems(initProposalItems);
       } else {
-        // Fallback default proposal items if no jobs defined
         setProposalItems([
-          { sl_no: 1, job_id: null, item_description: 'Supply & fabrication of structural steel components as per IS 800', unit: 'MT', quantity: 250, rate_per_unit: 85000, remarks: 'Includes primer coat' },
-          { sl_no: 2, job_id: null, item_description: 'Crane erection, precision alignment, and high-tensile torque bolting', unit: 'MT', quantity: 250, rate_per_unit: 18000, remarks: 'Site erection' }
+          { sl_no: 1, job_id: null, item_description: 'Supply & fabrication of structural steel components as per IS 800', unit: 'MT', quantity: 100, rate_per_unit: '', remarks: '' }
         ]);
       }
     } catch (err) {
@@ -130,7 +144,7 @@ export default function SubmitQuotation() {
   const addCapabilityRow = () => {
     setCapabilities([
       ...capabilities,
-      { sl_no: capabilities.length + 1, work_description: '', client_name: '', cost_lakhs: 0, financial_year: '2024-25' }
+      { sl_no: capabilities.length + 1, work_description: '', client_name: '', cost_lakhs: '', financial_year: '2024-25' }
     ]);
   };
 
@@ -155,7 +169,7 @@ export default function SubmitQuotation() {
         item_description: '',
         unit: 'MT',
         quantity: 1,
-        rate_per_unit: 0,
+        rate_per_unit: '',
         remarks: ''
       }
     ]);
@@ -184,11 +198,11 @@ export default function SubmitQuotation() {
     return sum + (q * r);
   }, 0);
 
-  // File Upload Handler
-  const handleFileUpload = async (e, docType) => {
+  // File Upload Handlers
+  const handleFileUpload = (e, docType) => {
     const file = e.target.files[0];
     if (!file) return;
-    setUploadedFiles(prev => [...prev, { file, document_type: docType, name: file.name }]);
+    setUploadedFiles(prev => [...prev.filter(f => f.document_type !== docType), { file, document_type: docType, name: file.name }]);
   };
 
   const handleFinalSubmit = async () => {
@@ -210,7 +224,7 @@ export default function SubmitQuotation() {
 
         return {
           job_id: jobId,
-          quoted_amount: jobTotal > 0 ? jobTotal : (jobDataMap[jobId]?.quoted_amount || 0),
+          quoted_amount: jobTotal,
           remarks: jobDataMap[jobId]?.remarks || ''
         };
       });
@@ -223,7 +237,7 @@ export default function SubmitQuotation() {
         quoted_amount: grandTotalQuoted,
         remarks: remarks,
         selected_jobs: selectedJobsPayload,
-        capabilities: capabilities.map(c => ({
+        capabilities: capabilities.filter(c => c.work_description.trim()).map(c => ({
           sl_no: c.sl_no,
           work_description: c.work_description,
           client_name: c.client_name,
@@ -240,10 +254,10 @@ export default function SubmitQuotation() {
           amount: (parseFloat(p.quantity) || 0) * (parseFloat(p.rate_per_unit) || 0),
           remarks: p.remarks
         })),
-        emd: {
+        emd: isEmdExempt ? null : {
           amount: parseFloat(tender.emd_amount) || 0,
           payment_mode: emdMode,
-          transaction_ref: emdTxnRef,
+          transaction_ref: emdTxnRef || `TXN-AGIC-${Math.floor(100000 + Math.random() * 900000)}`,
           payment_date: new Date().toISOString()
         }
       };
@@ -251,19 +265,29 @@ export default function SubmitQuotation() {
       const res = await api.post('/applications', payload);
       const newAppId = res.data.application_id;
 
-      // Upload attached files if any
-      for (const item of uploadedFiles) {
+      // Upload attached files (EMD, Annexure III doc, Signed RFQ, etc.)
+      const allFilesToUpload = [...uploadedFiles];
+      if (annexureDocFile) {
+        allFilesToUpload.push({ file: annexureDocFile, document_type: 'ANNEXURE_III_DOC', name: annexureDocFile.name });
+      }
+      if (signedRfqFile) {
+        allFilesToUpload.push({ file: signedRfqFile, document_type: 'SIGNED_RFQ_DOC', name: signedRfqFile.name });
+      }
+
+      for (const item of allFilesToUpload) {
         const fData = new FormData();
         fData.append('document_type', item.document_type);
         fData.append('file', item.file);
         try {
-          await api.post(`/applications/${newAppId}/documents`, fData);
+          await api.post(`/applications/${newAppId}/documents`, fData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+          });
         } catch (fErr) {
           console.error('File upload err', fErr);
         }
       }
 
-      alert(`Quotation submitted successfully with ${selectedJobIds.length} selected job package(s)! Application No: ${res.data.application_no}`);
+      alert(`Quotation submitted successfully! Your exact submitted amount is ₹${grandTotalQuoted.toLocaleString('en-IN')}. Application No: ${res.data.application_no}`);
       navigate('/applicant/my-applications');
     } catch (err) {
       setError(err.response?.data?.detail || err.message || 'Failed to submit quotation. Check quotation window & validity.');
@@ -280,7 +304,7 @@ export default function SubmitQuotation() {
     { num: 1, label: 'Signatory & Covering' },
     { num: 2, label: 'Job Package Selection' },
     { num: 3, label: 'Annexure II (Capabilities)' },
-    { num: 4, label: 'Annexure III (Line Items)' },
+    { num: 4, label: 'Annexure III (Line Items & Rates)' },
     { num: 5, label: 'EMD & Documents' },
     { num: 6, label: 'Review & Submit' }
   ];
@@ -301,201 +325,187 @@ export default function SubmitQuotation() {
               </span>
             )}
           </div>
-          <CountdownTimer fromDate={tender.quotation_from_date} toDate={tender.quotation_to_date} />
+          <div className="flex flex-col items-end gap-2">
+            <StatusBadge status={tender.status} />
+            <CountdownTimer targetDate={tender.quotation_to_date} />
+          </div>
         </div>
 
-        {/* Step Indicator */}
-        <div className="pt-4 border-t border-slate-100 flex flex-wrap justify-between items-center text-xs gap-2">
-          {stepsList.map(s => (
-            <div key={s.num} className="flex items-center space-x-1.5">
-              <div className={`w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs ${
-                step === s.num
-                  ? 'bg-gov-600 text-white shadow'
-                  : step > s.num
-                  ? 'bg-emerald-600 text-white'
-                  : 'bg-slate-200 text-slate-600'
-              }`}>
-                {step > s.num ? '✓' : s.num}
-              </div>
-              <span className={`hidden lg:inline text-[11px] font-semibold ${step === s.num ? 'text-gov-800' : 'text-slate-500'}`}>
-                {s.label}
-              </span>
-            </div>
-          ))}
-        </div>
+        {error && (
+          <div className="p-3 bg-red-50 text-red-700 rounded-lg text-xs flex items-center border border-red-200">
+            <AlertCircle className="w-4 h-4 mr-2 shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
       </div>
 
-      {error && (
-        <div className="p-4 bg-red-50 text-red-700 rounded-xl text-xs flex items-center border border-red-200">
-          <AlertCircle className="w-5 h-5 mr-2 shrink-0" />
-          <span>{error}</span>
-        </div>
-      )}
+      {/* Wizard Step Navigation Tabs */}
+      <div className="grid grid-cols-2 sm:grid-cols-6 gap-2 text-xs">
+        {stepsList.map(s => (
+          <button
+            key={s.num}
+            type="button"
+            onClick={() => setStep(s.num)}
+            className={`p-3 rounded-xl border text-center transition font-bold flex flex-col items-center justify-center ${
+              step === s.num
+                ? 'bg-gov-800 text-white border-gov-800 shadow-md ring-2 ring-gov-600/30'
+                : step > s.num
+                ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
+            }`}
+          >
+            <span className="text-[10px] opacity-80 uppercase tracking-wider">Step {s.num}</span>
+            <span className="truncate w-full mt-0.5">{s.label}</span>
+          </button>
+        ))}
+      </div>
 
-      {/* STEP 1: COVERING LETTER */}
+      {/* STEP 1: COVERING LETTER & SIGNATORY */}
       {step === 1 && (
         <div className="bg-white rounded-xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
-          <h2 className="text-base font-bold text-slate-900">Step 1: Authorized Signatory & Covering Letter Details</h2>
+          <div>
+            <h2 className="text-base font-bold text-slate-900">Step 1: Quotation Covering Letter & Signatory Details</h2>
+            <p className="text-xs text-slate-500">Provide official authorization details and date for the quotation dossier.</p>
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
             <div>
-              <label className="font-bold text-slate-700 block mb-1">Covering Letter Date</label>
+              <label className="font-bold text-slate-700 block mb-1">Covering Letter Date *</label>
               <input
                 type="date"
                 value={coveringDate}
                 onChange={(e) => setCoveringDate(e.target.value)}
+                required
                 className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-gov-500 focus:outline-none"
               />
             </div>
+
             <div>
-              <label className="font-bold text-slate-700 block mb-1">Authorized Signatory Name *</label>
+              <label className="font-bold text-slate-700 block mb-1">Authorized Signatory Legal Name *</label>
               <input
                 type="text"
                 value={signatoryName}
                 onChange={(e) => setSignatoryName(e.target.value)}
-                placeholder="Full name of signatory"
+                placeholder="Full Name"
                 required
                 className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-gov-500 focus:outline-none"
               />
             </div>
-            <div>
-              <label className="font-bold text-slate-700 block mb-1">Signatory Designation *</label>
+
+            <div className="sm:col-span-2">
+              <label className="font-bold text-slate-700 block mb-1">Signatory Title / Designation *</label>
               <input
                 type="text"
                 value={signatoryDesignation}
                 onChange={(e) => setSignatoryDesignation(e.target.value)}
-                placeholder="e.g. Managing Director / Partner"
+                placeholder="e.g. Managing Director / Lead Partner"
                 required
                 className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-gov-500 focus:outline-none"
               />
             </div>
-            <div>
-              <label className="font-bold text-slate-700 block mb-1">Submitting Firm</label>
-              <input
-                type="text"
-                disabled
-                value={user?.firm_name || 'My Firm'}
-                className="w-full px-3 py-2 border rounded-lg bg-slate-100 text-slate-600 font-semibold"
-              />
-            </div>
+
             <div className="sm:col-span-2">
-              <label className="font-bold text-slate-700 block mb-1">General Notes / Remarks</label>
+              <label className="font-bold text-slate-700 block mb-1">Covering Letter Technical Notes / Remarks (Optional)</label>
               <textarea
-                rows={2}
+                rows={3}
                 value={remarks}
                 onChange={(e) => setRemarks(e.target.value)}
-                placeholder="Any special remarks regarding this submission..."
+                placeholder="We hereby submit our commercial quotation for the requested scope of works..."
                 className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-gov-500 focus:outline-none"
               />
             </div>
           </div>
-          <div className="flex justify-end">
+
+          <div className="flex justify-end pt-4 border-t border-slate-100">
             <button
               type="button"
               onClick={() => setStep(2)}
               className="px-5 py-2.5 bg-gov-600 text-white font-bold rounded-lg text-xs hover:bg-gov-700 flex items-center"
             >
-              Next: Select Work Packages / Jobs
+              Next: Select Work Packages
               <ArrowRight className="w-4 h-4 ml-1.5" />
             </button>
           </div>
         </div>
       )}
 
-      {/* STEP 2: JOB SELECTION */}
+      {/* STEP 2: JOB PACKAGE SELECTION */}
       {step === 2 && (
         <div className="bg-white rounded-xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
           <div className="flex flex-wrap justify-between items-center gap-2">
             <div>
-              <h2 className="text-base font-bold text-slate-900 flex items-center">
-                <Briefcase className="w-5 h-5 mr-2 text-gov-600" />
-                Step 2: Select Job Packages to Bid ({selectedJobIds.length} of {tender.jobs?.length || 0} selected)
-              </h2>
-              <p className="text-xs text-slate-500">
-                You can select a subset or all jobs under this RFQ tender. Only selected jobs will be included in your quotation.
-              </p>
+              <h2 className="text-base font-bold text-slate-900">Step 2: Work Packages / Jobs Selection</h2>
+              <p className="text-xs text-slate-500">Select which work package(s) your firm is quoting for. You can choose one, multiple, or all packages.</p>
             </div>
-            {tender.jobs && tender.jobs.length > 0 && (
+            {tender?.jobs && tender.jobs.length > 0 && (
               <button
                 type="button"
                 onClick={selectAllJobs}
-                className="px-3 py-1.5 bg-gov-50 text-gov-700 hover:bg-gov-100 rounded-lg text-xs font-bold border border-gov-200"
+                className="px-3 py-1 bg-gov-50 text-gov-700 font-bold rounded text-xs border border-gov-200 hover:bg-gov-100"
               >
                 Select All Jobs
               </button>
             )}
           </div>
 
-          {tender.jobs && tender.jobs.length > 0 ? (
-            <div className="space-y-4">
-              {tender.jobs.map((job) => {
+          {tender?.jobs && tender.jobs.length > 0 ? (
+            <div className="space-y-3">
+              {tender.jobs.map(job => {
                 const isSelected = selectedJobIds.includes(job.job_id);
                 return (
                   <div
                     key={job.job_id}
                     onClick={() => toggleJobSelection(job.job_id)}
-                    className={`p-5 rounded-xl border-2 cursor-pointer transition text-xs space-y-3 ${
+                    className={`p-4 rounded-xl border-2 transition cursor-pointer ${
                       isSelected
-                        ? 'border-gov-600 bg-gov-50/40 shadow-sm'
-                        : 'border-slate-200 bg-slate-50/60 hover:border-slate-300 opacity-75'
+                        ? 'border-gov-600 bg-gov-50/50 shadow-sm'
+                        : 'border-slate-200 bg-slate-50/50 opacity-75 hover:opacity-100'
                     }`}
                   >
-                    <div className="flex items-start justify-between">
+                    <div className="flex items-start justify-between gap-3">
                       <div className="flex items-start space-x-3">
-                        <div className="mt-0.5 text-gov-700">
+                        <div className="mt-0.5 text-gov-600">
                           {isSelected ? (
-                            <CheckSquare className="w-5 h-5 text-gov-600 fill-gov-50" />
+                            <CheckSquare className="w-5 h-5 text-gov-600 fill-gov-100" />
                           ) : (
                             <Square className="w-5 h-5 text-slate-400" />
                           )}
                         </div>
-                        <div className="space-y-1">
+                        <div>
                           <div className="flex items-center space-x-2">
-                            <span className="font-mono font-bold text-gov-700 bg-white px-2 py-0.5 rounded border border-gov-200">
-                              {job.job_code}
+                            <span className="font-mono font-bold text-xs bg-white px-2 py-0.5 rounded border border-slate-300 text-gov-800">
+                              {job.job_code || `JOB #${job.job_id}`}
                             </span>
-                            <h3 className="font-bold text-slate-900 text-sm">{job.job_name}</h3>
+                            <span className="font-bold text-sm text-slate-900">{job.job_name}</span>
+                            {job.category && (
+                              <span className="text-[10px] bg-blue-100 text-blue-800 font-semibold px-2 py-0.5 rounded">
+                                {job.category}
+                              </span>
+                            )}
                           </div>
-                          {job.category && (
-                            <span className="inline-block text-[10px] uppercase font-bold text-slate-500 bg-slate-200/80 px-2 py-0.5 rounded">
-                              {job.category}
-                            </span>
+                          {job.job_description && (
+                            <p className="text-xs text-slate-600 mt-1">{job.job_description}</p>
                           )}
+                          <div className="flex flex-wrap gap-4 text-xs text-slate-500 mt-2">
+                            {job.estimated_quantity && (
+                              <span><strong>Scope Qty:</strong> {job.estimated_quantity} {job.unit}</span>
+                            )}
+                            {job.completion_period && (
+                              <span><strong>Period:</strong> {job.completion_period}</span>
+                            )}
+                          </div>
                         </div>
                       </div>
-
-                      <div className="text-right">
-                        {job.estimated_cost ? (
-                          <span className="font-extrabold text-gov-900 text-sm flex items-center justify-end">
-                            <IndianRupee className="w-3.5 h-3.5 mr-0.5 text-amber-600" />
-                            ₹{job.estimated_cost.toLocaleString('en-IN')}
-                          </span>
-                        ) : null}
-                        <span className="text-[10px] text-slate-400 block">Est. Budget</span>
-                      </div>
                     </div>
 
-                    {job.job_description && (
-                      <p className="text-slate-600 text-xs pl-8 leading-relaxed">{job.job_description}</p>
-                    )}
-
-                    <div className="pl-8 pt-2 border-t border-slate-200/60 flex flex-wrap gap-4 text-[11px] text-slate-600">
-                      {job.estimated_quantity && (
-                        <span>Est. Quantity: <strong>{job.estimated_quantity} {job.unit || 'units'}</strong></span>
-                      )}
-                      {job.completion_period && (
-                        <span>Period: <strong>{job.completion_period}</strong></span>
-                      )}
-                    </div>
-
-                    {/* Remarks per selected job */}
                     {isSelected && (
-                      <div className="pl-8 pt-2" onClick={(e) => e.stopPropagation()}>
-                        <label className="text-[10px] font-bold text-slate-600 block mb-1">
-                          Applicant Remarks / Notes for this Job:
+                      <div className="mt-3 pt-3 border-t border-gov-200/60" onClick={(e) => e.stopPropagation()}>
+                        <label className="text-[11px] font-bold text-gov-800 block mb-1">
+                          Applicant Remarks / Notes for this Work Package:
                         </label>
                         <input
                           type="text"
-                          placeholder="e.g. Scope conforms to technical specs, ready for immediate deployment"
+                          placeholder="e.g. Quoting with dedicated automatic submerged arc welding lines"
                           value={jobDataMap[job.job_id]?.remarks || ''}
                           onChange={(e) => handleJobRemarksChange(job.job_id, e.target.value)}
                           className="w-full px-3 py-1.5 text-xs bg-white border rounded-lg focus:ring-2 focus:ring-gov-500 focus:outline-none"
@@ -577,17 +587,19 @@ export default function SubmitQuotation() {
                     type="text"
                     value={row.client_name}
                     onChange={(e) => handleCapabilityChange(idx, 'client_name', e.target.value)}
-                    placeholder="e.g. NHAI / APCRDA"
+                    placeholder="e.g. NHAI / APCRDA / L&T"
                     className="w-full px-2.5 py-1.5 border rounded bg-white"
                   />
                 </div>
                 <div className="sm:col-span-1">
-                  <label className="text-[10px] text-slate-500 block">Cost (Lakhs)</label>
+                  <label className="text-[10px] text-slate-500 block">Cost (₹ Lakhs)</label>
                   <input
                     type="number"
+                    step="0.01"
                     value={row.cost_lakhs}
                     onChange={(e) => handleCapabilityChange(idx, 'cost_lakhs', e.target.value)}
-                    className="w-full px-2.5 py-1.5 border rounded bg-white"
+                    placeholder="e.g. 450"
+                    className="w-full px-2.5 py-1.5 border rounded bg-white font-mono"
                   />
                 </div>
                 <div className="sm:col-span-1">
@@ -596,6 +608,7 @@ export default function SubmitQuotation() {
                     type="text"
                     value={row.financial_year}
                     onChange={(e) => handleCapabilityChange(idx, 'financial_year', e.target.value)}
+                    placeholder="2024-25"
                     className="w-full px-2.5 py-1.5 border rounded bg-white"
                   />
                 </div>
@@ -634,13 +647,13 @@ export default function SubmitQuotation() {
         </div>
       )}
 
-      {/* STEP 4: ANNEXURE III */}
+      {/* STEP 4: ANNEXURE III - FLEXIBLE PRICING, UNIT MASTER & DOCUMENT PROVISION */}
       {step === 4 && (
         <div className="bg-white rounded-xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
           <div className="flex justify-between items-center">
             <div>
               <h2 className="text-base font-bold text-slate-900">Step 4: Annexure III — Job-Wise Technical Proposal & Line Item Pricing</h2>
-              <p className="text-xs text-slate-500">Provide itemized rates per unit for each selected job package. Totals are computed automatically.</p>
+              <p className="text-xs text-slate-500">Enter your firm's quoted unit rate for each item. Amounts calculate automatically.</p>
             </div>
             <button
               type="button"
@@ -652,12 +665,24 @@ export default function SubmitQuotation() {
             </button>
           </div>
 
+          {/* Mandatory Guidance Note */}
+          <div className="p-4 bg-amber-50 border-l-4 border-amber-500 rounded-r-xl flex items-start space-x-3">
+            <Info className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+            <div className="text-xs text-amber-900 space-y-1">
+              <strong>Mandatory Quotation Consistency Note:</strong>
+              <p>Uploaded document quoted amount and the entered amount in the system must match exactly.</p>
+            </div>
+          </div>
+
           <div className="space-y-3">
             {proposalItems.map((row, idx) => {
               // Hide item if it belongs to an unselected job
               if (row.job_id && !selectedJobIds.includes(row.job_id)) return null;
 
-              const rowAmt = (parseFloat(row.quantity) || 0) * (parseFloat(row.rate_per_unit) || 0);
+              const rowQty = parseFloat(row.quantity) || 0;
+              const rowRate = parseFloat(row.rate_per_unit) || 0;
+              const rowAmt = rowQty * rowRate;
+
               return (
                 <div key={idx} className="p-4 bg-slate-50 rounded-lg border border-slate-200 grid grid-cols-1 sm:grid-cols-12 gap-3 text-xs items-center">
                   <div className="sm:col-span-1 font-bold text-slate-500 text-center">#{row.sl_no}</div>
@@ -686,42 +711,72 @@ export default function SubmitQuotation() {
                       type="text"
                       value={row.item_description}
                       onChange={(e) => handleProposalChange(idx, 'item_description', e.target.value)}
-                      placeholder="Item description"
+                      placeholder="e.g. Supply & Fabrication of Columns"
+                      required
                       className="w-full px-2.5 py-1.5 border rounded bg-white font-semibold"
                     />
                   </div>
-                  <div className="sm:col-span-1">
-                    <label className="text-[10px] text-slate-500 block">Unit</label>
-                    <input
-                      type="text"
-                      value={row.unit}
-                      onChange={(e) => handleProposalChange(idx, 'unit', e.target.value)}
-                      placeholder="MT/Nos"
-                      className="w-full px-2.5 py-1.5 border rounded bg-white text-center"
-                    />
+
+                  {/* Unit Master Selector */}
+                  <div className="sm:col-span-2">
+                    <label className="text-[10px] text-slate-500 block">Unit (Master)</label>
+                    <select
+                      value={UNIT_OPTIONS.includes(row.unit) ? row.unit : 'Custom'}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val !== 'Custom') {
+                          handleProposalChange(idx, 'unit', val);
+                        }
+                      }}
+                      className="w-full px-2 py-1.5 border rounded bg-white text-xs font-semibold"
+                    >
+                      {UNIT_OPTIONS.map(u => (
+                        <option key={u} value={u}>{u}</option>
+                      ))}
+                      <option value="Custom">Custom Unit...</option>
+                    </select>
+                    {!UNIT_OPTIONS.includes(row.unit) && (
+                      <input
+                        type="text"
+                        placeholder="Enter unit"
+                        value={row.unit}
+                        onChange={(e) => handleProposalChange(idx, 'unit', e.target.value)}
+                        className="w-full mt-1 px-2 py-1 border rounded bg-white text-xs"
+                      />
+                    )}
                   </div>
+
                   <div className="sm:col-span-1">
                     <label className="text-[10px] text-slate-500 block">Qty</label>
                     <input
                       type="number"
+                      step="0.01"
                       value={row.quantity}
                       onChange={(e) => handleProposalChange(idx, 'quantity', e.target.value)}
+                      placeholder="Qty"
                       className="w-full px-2 py-1.5 border rounded bg-white font-mono"
                     />
                   </div>
+
                   <div className="sm:col-span-2">
-                    <label className="text-[10px] text-slate-500 block">Rate / Unit (₹)</label>
+                    <label className="text-[10px] text-slate-500 block">Your Quoted Rate (₹)</label>
                     <input
                       type="number"
+                      step="0.01"
                       value={row.rate_per_unit}
                       onChange={(e) => handleProposalChange(idx, 'rate_per_unit', e.target.value)}
-                      className="w-full px-2 py-1.5 border rounded bg-white font-mono"
+                      placeholder="Enter Unit Rate"
+                      className="w-full px-2.5 py-1.5 border rounded bg-white font-mono font-bold text-gov-800"
                     />
                   </div>
-                  <div className="sm:col-span-1 text-right">
-                    <label className="text-[10px] text-slate-500 block">Total (₹)</label>
-                    <span className="font-bold text-slate-900 block pt-1">₹{rowAmt.toLocaleString('en-IN')}</span>
+
+                  <div className="sm:col-span-2 text-right">
+                    <label className="text-[10px] text-slate-500 block">Amount (₹)</label>
+                    <span className="font-bold text-slate-900 block pt-1 font-mono">
+                      ₹{rowAmt > 0 ? rowAmt.toLocaleString('en-IN') : '0.00'}
+                    </span>
                   </div>
+
                   <div className="sm:col-span-1 text-center">
                     <button
                       type="button"
@@ -738,12 +793,34 @@ export default function SubmitQuotation() {
           </div>
 
           {/* Grand Total Bar */}
-          <div className="p-4 bg-gov-50 rounded-xl border border-gov-200 flex justify-between items-center text-sm">
-            <span className="font-bold text-gov-900">Calculated Total Quoted Amount for {selectedJobIds.length} Selected Job(s):</span>
-            <span className="text-xl font-extrabold text-gov-800 flex items-center">
+          <div className="p-4 bg-gov-50 rounded-xl border border-gov-200 flex flex-wrap justify-between items-center text-sm gap-2">
+            <span className="font-bold text-gov-900">Your Submitted Total Quoted Amount for {selectedJobIds.length} Job(s):</span>
+            <span className="text-xl font-extrabold text-gov-900 flex items-center">
               <IndianRupee className="w-5 h-5 mr-0.5 text-amber-600" />
               ₹{grandTotalQuoted.toLocaleString('en-IN')}
             </span>
+          </div>
+
+          {/* Annexure III Document Upload Provision */}
+          <div className="p-4 border-2 border-dashed border-gov-200 bg-gov-50/40 rounded-xl space-y-2">
+            <label className="font-bold text-slate-800 block text-xs flex items-center">
+              <Upload className="w-4 h-4 mr-1.5 text-gov-700" />
+              Upload Detailed Annexure III Proposal Sheet / Itemized BOQ Document (PDF / Excel / Scan)
+            </label>
+            <input
+              type="file"
+              onChange={(e) => setAnnexureDocFile(e.target.files[0])}
+              accept=".pdf,.xlsx,.xls,.doc,.docx,.jpg,.jpeg,.png"
+              className="text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-gov-600 file:text-white hover:file:bg-gov-700 border border-slate-300 rounded-lg p-1.5 w-full bg-white"
+            />
+            {annexureDocFile && (
+              <p className="text-[11px] text-emerald-700 font-semibold flex items-center">
+                <CheckCircle2 className="w-3.5 h-3.5 mr-1" /> Attached: {annexureDocFile.name} ({(annexureDocFile.size / 1024).toFixed(1)} KB)
+              </p>
+            )}
+            <p className="text-[11px] text-slate-500">
+              * Note: Please ensure the total amount in your attached document matches the <strong>₹{grandTotalQuoted.toLocaleString('en-IN')}</strong> entered above.
+            </p>
           </div>
 
           <div className="flex justify-between pt-4 border-t border-slate-100">
@@ -767,50 +844,70 @@ export default function SubmitQuotation() {
         </div>
       )}
 
-      {/* STEP 5: EMD & DOCUMENTS */}
+      {/* STEP 5: EMD & DOCUMENTS (OPTIONAL EMD) */}
       {step === 5 && (
         <div className="bg-white rounded-xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
-          <h2 className="text-base font-bold text-slate-900">Step 5: EMD Deposit & Verification Uploads</h2>
-
-          {/* EMD Box */}
-          <div className="p-5 bg-amber-50 rounded-xl border border-amber-200 space-y-4 text-xs">
-            <div className="flex justify-between items-center">
-              <span className="font-bold text-amber-900 text-sm">Earnest Money Deposit (EMD) Mandatory Payment</span>
-              <span className="text-base font-extrabold text-amber-900">₹{tender.emd_amount.toLocaleString('en-IN')}</span>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="font-bold text-amber-900 block mb-1">Payment Mode</label>
-                <select
-                  value={emdMode}
-                  onChange={(e) => setEmdMode(e.target.value)}
-                  className="w-full px-3 py-2 border border-amber-300 rounded-lg bg-white"
-                >
-                  <option value="ONLINE_PORTAL">Online Portal Gateway (Simulated Instant)</option>
-                  <option value="NEFT">NEFT / RTGS Transfer</option>
-                  <option value="DD">Demand Draft (DD)</option>
-                </select>
-              </div>
-              <div>
-                <label className="font-bold text-amber-900 block mb-1">Transaction Ref / UTR / DD No.</label>
-                <input
-                  type="text"
-                  value={emdTxnRef}
-                  onChange={(e) => setEmdTxnRef(e.target.value)}
-                  className="w-full px-3 py-2 border border-amber-300 rounded-lg bg-white font-mono"
-                />
-              </div>
-            </div>
+          <div>
+            <h2 className="text-base font-bold text-slate-900">Step 5: EMD Deposit & Verification Uploads</h2>
+            <p className="text-xs text-slate-500">Earnest Money Deposit (EMD) payment and receipt proof are optional if your firm is exempted or tender has nil EMD.</p>
           </div>
+
+          {/* EMD Exemption Toggle */}
+          <div className="flex items-center space-x-2 p-3 bg-slate-50 border rounded-lg text-xs">
+            <input
+              type="checkbox"
+              id="emdExemptCheck"
+              checked={isEmdExempt}
+              onChange={(e) => setIsEmdExempt(e.target.checked)}
+              className="w-4 h-4 text-gov-600 rounded"
+            />
+            <label htmlFor="emdExemptCheck" className="font-semibold text-slate-700 cursor-pointer">
+              Exempted from EMD / MSME Registration / Nil EMD (Payment not required)
+            </label>
+          </div>
+
+          {/* EMD Box (Shown only if not exempt) */}
+          {!isEmdExempt && (
+            <div className="p-5 bg-amber-50 rounded-xl border border-amber-200 space-y-4 text-xs">
+              <div className="flex justify-between items-center">
+                <span className="font-bold text-amber-900 text-sm">Earnest Money Deposit (EMD) Amount</span>
+                <span className="text-base font-extrabold text-amber-900">₹{(tender.emd_amount || 0).toLocaleString('en-IN')}</span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="font-bold text-amber-900 block mb-1">Payment Mode</label>
+                  <select
+                    value={emdMode}
+                    onChange={(e) => setEmdMode(e.target.value)}
+                    className="w-full px-3 py-2 border border-amber-300 rounded-lg bg-white"
+                  >
+                    <option value="ONLINE_PORTAL">Online Portal Gateway (Simulated Instant)</option>
+                    <option value="NEFT">NEFT / RTGS Transfer</option>
+                    <option value="DD">Demand Draft (DD)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="font-bold text-amber-900 block mb-1">Transaction Ref / UTR / DD No. (Optional)</label>
+                  <input
+                    type="text"
+                    value={emdTxnRef}
+                    onChange={(e) => setEmdTxnRef(e.target.value)}
+                    placeholder="e.g. UTR-HDFC-998822"
+                    className="w-full px-3 py-2 border border-amber-300 rounded-lg bg-white font-mono"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* File Uploads */}
           <div className="space-y-4 text-xs">
-            <h3 className="font-bold text-slate-800">Attach Required Bid Documents</h3>
+            <h3 className="font-bold text-slate-800">Attach Supporting Bid Documents (Optional)</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="p-4 border-2 border-dashed border-slate-300 rounded-xl text-center space-y-2 hover:border-gov-500 transition">
                 <Upload className="w-6 h-6 text-slate-400 mx-auto" />
-                <span className="font-bold block text-slate-700">Covering Letter & Annexures (PDF)</span>
+                <span className="font-bold block text-slate-700">Covering Letter / Technical Bid (PDF)</span>
                 <input
                   type="file"
                   onChange={(e) => handleFileUpload(e, 'COVERING_LETTER')}
@@ -818,20 +915,22 @@ export default function SubmitQuotation() {
                 />
               </div>
 
-              <div className="p-4 border-2 border-dashed border-slate-300 rounded-xl text-center space-y-2 hover:border-gov-500 transition">
-                <Upload className="w-6 h-6 text-slate-400 mx-auto" />
-                <span className="font-bold block text-slate-700">EMD Payment Proof / Receipt</span>
-                <input
-                  type="file"
-                  onChange={(e) => handleFileUpload(e, 'EMD_PROOF')}
-                  className="text-[11px] text-slate-500 mx-auto block"
-                />
-              </div>
+              {!isEmdExempt && (
+                <div className="p-4 border-2 border-dashed border-slate-300 rounded-xl text-center space-y-2 hover:border-gov-500 transition">
+                  <Upload className="w-6 h-6 text-slate-400 mx-auto" />
+                  <span className="font-bold block text-slate-700">EMD Payment Receipt / Bank Chalan (Optional)</span>
+                  <input
+                    type="file"
+                    onChange={(e) => handleFileUpload(e, 'EMD_PROOF')}
+                    className="text-[11px] text-slate-500 mx-auto block"
+                  />
+                </div>
+              )}
             </div>
 
             {uploadedFiles.length > 0 && (
               <div className="pt-2">
-                <span className="font-bold text-slate-700 block mb-1">Files Ready For Submission:</span>
+                <span className="font-bold text-slate-700 block mb-1">Uploaded Supporting Files:</span>
                 <ul className="space-y-1 text-[11px] text-emerald-700">
                   {uploadedFiles.map((f, i) => (
                     <li key={i} className="flex items-center">
@@ -865,10 +964,13 @@ export default function SubmitQuotation() {
         </div>
       )}
 
-      {/* STEP 6: REVIEW & FINAL SUBMIT */}
+      {/* STEP 6: REVIEW & FINAL SUBMISSION WITH OPTIONAL SIGNED RFQ ATTACHMENT */}
       {step === 6 && (
         <div className="bg-white rounded-xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
-          <h2 className="text-base font-bold text-slate-900">Step 6: Final Review & Submission Confirmation</h2>
+          <div>
+            <h2 className="text-base font-bold text-slate-900">Step 6: Final Review & Submission Confirmation</h2>
+            <p className="text-xs text-slate-500">Verify your quotation details before recording your bid into the database.</p>
+          </div>
 
           <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3 text-xs">
             <div className="grid grid-cols-2 gap-4">
@@ -885,8 +987,8 @@ export default function SubmitQuotation() {
                 <span className="font-bold text-slate-800">{signatoryName} ({signatoryDesignation})</span>
               </div>
               <div>
-                <span className="text-slate-400 block text-[10px] uppercase font-semibold">Total Quoted Amount</span>
-                <span className="text-lg font-extrabold text-gov-800 flex items-center">
+                <span className="text-slate-400 block text-[10px] uppercase font-semibold">Total Submitted Quoted Amount</span>
+                <span className="text-lg font-extrabold text-gov-800 flex items-center font-mono">
                   <IndianRupee className="w-4 h-4 mr-0.5 text-amber-600" />
                   ₹{grandTotalQuoted.toLocaleString('en-IN')}
                 </span>
@@ -907,8 +1009,7 @@ export default function SubmitQuotation() {
                       <th className="p-2.5">Job Code</th>
                       <th className="p-2.5">Job Name</th>
                       <th className="p-2.5">Category</th>
-                      <th className="p-2.5">Est. Budget</th>
-                      <th className="p-2.5 text-right">Job Quoted Total</th>
+                      <th className="p-2.5 text-right">Applicant Quoted Total</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -920,9 +1021,8 @@ export default function SubmitQuotation() {
                           <td className="p-2.5 font-mono font-bold text-gov-700">{j.job_code}</td>
                           <td className="p-2.5 font-semibold text-slate-800">{j.job_name}</td>
                           <td className="p-2.5 text-slate-500">{j.category}</td>
-                          <td className="p-2.5 text-slate-600">₹{j.estimated_cost?.toLocaleString('en-IN') || '-'}</td>
-                          <td className="p-2.5 text-right font-bold text-emerald-800">
-                            ₹{jobTotal > 0 ? jobTotal.toLocaleString('en-IN') : (j.estimated_cost?.toLocaleString('en-IN') || '0')}
+                          <td className="p-2.5 text-right font-bold text-emerald-800 font-mono">
+                            ₹{jobTotal.toLocaleString('en-IN')}
                           </td>
                         </tr>
                       );
@@ -933,10 +1033,30 @@ export default function SubmitQuotation() {
             </div>
           )}
 
+          {/* Provision to attach signed RFQ Document as optional */}
+          <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2 text-xs">
+            <label className="font-bold text-slate-800 block flex items-center">
+              <FileCheck className="w-4 h-4 mr-1.5 text-gov-600" />
+              Attach Signed RFQ Document / Tender Acceptance Undertaking (Optional PDF)
+            </label>
+            <input
+              type="file"
+              onChange={(e) => setSignedRfqFile(e.target.files[0])}
+              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+              className="text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-slate-200 file:text-slate-800 hover:file:bg-slate-300 border border-slate-300 rounded-lg p-1.5 w-full bg-white"
+            />
+            {signedRfqFile && (
+              <p className="text-[11px] text-emerald-700 font-semibold flex items-center">
+                <CheckCircle2 className="w-3.5 h-3.5 mr-1" /> Attached: {signedRfqFile.name} ({(signedRfqFile.size / 1024).toFixed(1)} KB)
+              </p>
+            )}
+            <p className="text-[11px] text-slate-400">You may upload the scanned copy of the signed RFQ specification or bid declaration.</p>
+          </div>
+
           <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-200 text-xs text-emerald-900 space-y-1">
-            <strong>Declaration of Authenticity & Multi-Job Compliance:</strong>
+            <strong>Declaration of Authenticity:</strong>
             <p>
-              I/We hereby certify that our quotation accurately reflects our commitment for the {selectedJobIds.length} selected job package(s). By clicking Confirm & Submit Quotation, our bids will be locked into the PostgreSQL RFQ_DB database.
+              I/We hereby certify that our quotation of <strong>₹{grandTotalQuoted.toLocaleString('en-IN')}</strong> accurately reflects our commercial commitment. By submitting, this quotation will be locked into the system as submitted without modification.
             </p>
           </div>
 
@@ -955,7 +1075,7 @@ export default function SubmitQuotation() {
               onClick={handleFinalSubmit}
               className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-sm shadow-md transition flex items-center"
             >
-              {submitting ? 'Submitting to RFQ_DB...' : 'Confirm & Submit Quotation'}
+              {submitting ? 'Submitting to Database...' : 'Confirm & Submit Quotation'}
               <CheckCircle2 className="w-4 h-4 ml-2" />
             </button>
           </div>
@@ -964,4 +1084,3 @@ export default function SubmitQuotation() {
     </div>
   );
 }
-

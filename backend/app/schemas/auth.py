@@ -15,6 +15,8 @@ class ApplicantRegisterRequest(BaseModel):
     firm_name: str
     registration_type: Optional[str] = None
     prime_line_business: Optional[str] = None
+    turnover: Optional[str] = None
+    work_experience: Optional[str] = None
     chairperson_name: Optional[str] = None
     md_ceo_name: Optional[str] = None
     postal_address: Optional[str] = None

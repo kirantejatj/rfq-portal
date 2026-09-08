@@ -108,6 +108,10 @@ class ApplicationOut(BaseModel):
     email: Optional[str] = None
     gstin: Optional[str] = None
     pan_no: Optional[str] = None
+    turnover: Optional[str] = None
+    work_experience: Optional[str] = None
+    registration_type: Optional[str] = None
+    prime_line_business: Optional[str] = None
     tender_title: Optional[str] = None
     tender_ref_no: Optional[str] = None
     selected_jobs: List[ApplicationJobOut] = []

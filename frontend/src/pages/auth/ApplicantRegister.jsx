@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Building2, Phone, Mail, User, FileText, Lock, AlertCircle, ArrowRight } from 'lucide-react';
+import api from '../../api/client';
+import { Building2, Phone, Mail, User, FileText, Lock, AlertCircle, ArrowRight, Upload, Briefcase, DollarSign } from 'lucide-react';
 
 export default function ApplicantRegister() {
   const location = useLocation();
@@ -12,8 +13,8 @@ export default function ApplicantRegister() {
     firm_name: '',
     registration_type: 'Private Limited',
     prime_line_business: 'Civil & Structural Engineering',
-    chairperson_name: '',
-    md_ceo_name: '',
+    turnover: '',
+    work_experience: '',
     postal_address: '',
     email: '',
     gstin: '',
@@ -21,6 +22,7 @@ export default function ApplicantRegister() {
     password: ''
   });
 
+  const [documentFile, setDocumentFile] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { registerApplicant } = useAuth();
@@ -28,6 +30,12 @@ export default function ApplicantRegister() {
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleFileChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setDocumentFile(e.target.files[0]);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -39,7 +47,26 @@ export default function ApplicantRegister() {
     }
     setLoading(true);
     try {
-      await registerApplicant(formData);
+      const authRes = await registerApplicant({
+        ...formData,
+        md_ceo_name: formData.turnover,
+        chairperson_name: formData.work_experience
+      });
+
+      // If document was attached, upload it
+      if (documentFile && authRes?.user_id) {
+        try {
+          const docData = new FormData();
+          docData.append('file', documentFile);
+          docData.append('document_type', 'REGISTRATION_DOC');
+          await api.post(`/auth/applicant/${authRes.user_id}/documents`, docData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+          });
+        } catch (uploadErr) {
+          console.warn("Document upload error:", uploadErr);
+        }
+      }
+
       navigate('/applicant/dashboard');
     } catch (err) {
       setError(err.response?.data?.detail || 'Registration failed');
@@ -108,17 +135,47 @@ export default function ApplicantRegister() {
                   name="prime_line_business"
                   value={formData.prime_line_business}
                   onChange={handleChange}
-                  placeholder="e.g. Steel Structures, Precast RCC"
+                  placeholder="e.g. Steel Structures, Precast RCC, Civil Works"
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-gov-500 focus:outline-none"
                 />
               </div>
             </div>
           </div>
 
-          {/* Section 2: Statutory Tax Codes */}
+          {/* Section 2: Statutory Identifiers, Turnover & Experience */}
           <div className="space-y-4">
-            <h3 className="text-sm font-bold text-slate-800 border-b border-slate-100 pb-2">2. Statutory Identifiers & Key Personnel</h3>
+            <h3 className="text-sm font-bold text-slate-800 border-b border-slate-100 pb-2">2. Financial Turnover, Experience & Statutory Codes</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="font-bold text-slate-700 block mb-1 flex items-center">
+                  <DollarSign className="w-3.5 h-3.5 mr-1 text-emerald-600" />
+                  Annual Turnover (₹ in Lakhs / Cr)
+                </label>
+                <input
+                  type="text"
+                  name="turnover"
+                  value={formData.turnover}
+                  onChange={handleChange}
+                  placeholder="e.g. ₹ 25.50 Crores / FY 2024-25"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-gov-500 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="font-bold text-slate-700 block mb-1 flex items-center">
+                  <Briefcase className="w-3.5 h-3.5 mr-1 text-blue-600" />
+                  Work Experience (Years / Details)
+                </label>
+                <input
+                  type="text"
+                  name="work_experience"
+                  value={formData.work_experience}
+                  onChange={handleChange}
+                  placeholder="e.g. 12+ Years in Highway Bridges & PEB Sheds"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-gov-500 focus:outline-none"
+                />
+              </div>
+
               <div>
                 <label className="font-bold text-slate-700 block mb-1">GSTIN Number</label>
                 <input
@@ -143,28 +200,18 @@ export default function ApplicantRegister() {
                 />
               </div>
 
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">MD / CEO Name</label>
+              <div className="sm:col-span-2">
+                <label className="font-bold text-slate-700 block mb-1 flex items-center">
+                  <Upload className="w-3.5 h-3.5 mr-1 text-gov-600" />
+                  Upload Firm / Turnover / Experience Certificate (Optional PDF / Image)
+                </label>
                 <input
-                  type="text"
-                  name="md_ceo_name"
-                  value={formData.md_ceo_name}
-                  onChange={handleChange}
-                  placeholder="Managing Director Name"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-gov-500 focus:outline-none"
+                  type="file"
+                  onChange={handleFileChange}
+                  accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                  className="w-full text-xs text-slate-600 file:mr-3 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-gov-50 file:text-gov-700 hover:file:bg-gov-100 border border-slate-300 rounded-lg p-1.5"
                 />
-              </div>
-
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">Chairperson Name</label>
-                <input
-                  type="text"
-                  name="chairperson_name"
-                  value={formData.chairperson_name}
-                  onChange={handleChange}
-                  placeholder="Chairperson Name"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-gov-500 focus:outline-none"
-                />
+                <p className="text-[11px] text-slate-400 mt-1">Upload Audited Balance Sheet, MSME Certificate, or Company Incorporation proof (Max 10MB).</p>
               </div>
             </div>
           </div>

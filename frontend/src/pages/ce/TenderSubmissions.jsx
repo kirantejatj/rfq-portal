@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import api from '../../api/client';
 import StatusBadge from '../../components/StatusBadge';
 import { 
-  Building2, Layers, IndianRupee, Calendar, User, Eye, ArrowLeft, Download, Award, Briefcase, Filter 
+  Building2, Layers, IndianRupee, Calendar, User, Eye, ArrowLeft, Download, Award, Briefcase, Filter, FileText, Archive 
 } from 'lucide-react';
 
 export default function TenderSubmissions() {
@@ -35,6 +35,11 @@ export default function TenderSubmissions() {
     }
   };
 
+  const handleDownloadAllZip = (applicationId) => {
+    const token = localStorage.getItem('rfq_token');
+    window.open(`http://127.0.0.1:8000/api/applications/${applicationId}/download-all?token=${token}`, '_blank');
+  };
+
   if (loading) {
     return <div className="text-center py-20 text-slate-500">Loading applicant quotation submissions...</div>;
   }
@@ -61,7 +66,7 @@ export default function TenderSubmissions() {
           </div>
           <div className="flex items-center space-x-4 text-xs text-slate-500">
             <span>Total Quotations: <strong>{apps.length}</strong></span>
-            <span>EMD: <strong>₹{tender.emd_amount.toLocaleString('en-IN')}</strong></span>
+            <span>EMD: <strong>₹{(tender.emd_amount || 0).toLocaleString('en-IN')}</strong></span>
           </div>
         </div>
 
@@ -86,7 +91,7 @@ export default function TenderSubmissions() {
         <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
           <h2 className="text-base font-bold text-slate-900 flex items-center">
             <Award className="w-5 h-5 mr-2 text-amber-500" />
-            Comparative Evaluation Matrix (Ranked by Quoted Price)
+            Comparative Evaluation Matrix (Ranked by Submitted Quoted Price)
           </h2>
 
           {tender.jobs && tender.jobs.length > 0 && (
@@ -120,11 +125,11 @@ export default function TenderSubmissions() {
                 <tr className="bg-slate-50 text-slate-600 font-bold border-b border-slate-200 uppercase tracking-wider">
                   <th className="py-3 px-3">Rank</th>
                   <th className="py-3 px-3">App Ref No</th>
-                  <th className="py-3 px-3">Applicant Firm Name</th>
+                  <th className="py-3 px-3">Applicant Details & Credentials</th>
                   <th className="py-3 px-3">Selected Job Packages</th>
-                  <th className="py-3 px-3">Signatory</th>
-                  <th className="py-3 px-3">Quoted Amount</th>
+                  <th className="py-3 px-3">Submitted Quoted Amount</th>
                   <th className="py-3 px-3">Status</th>
+                  <th className="py-3 px-3 text-center">Docs</th>
                   <th className="py-3 px-3 text-center">Action</th>
                 </tr>
               </thead>
@@ -133,7 +138,7 @@ export default function TenderSubmissions() {
                   <tr key={app.application_id} className={`hover:bg-slate-50/80 transition ${idx === 0 ? 'bg-amber-50/30' : ''}`}>
                     <td className="py-3 px-3">
                       {idx === 0 ? (
-                        <span className="px-2 py-0.5 rounded bg-amber-100 text-amber-900 font-bold border border-amber-300">
+                        <span className="px-2 py-0.5 rounded bg-amber-100 text-amber-900 font-bold border border-amber-300 whitespace-nowrap">
                           👑 L1 (Lowest)
                         </span>
                       ) : (
@@ -143,7 +148,11 @@ export default function TenderSubmissions() {
                     <td className="py-3 px-3 font-mono font-bold text-gov-700">{app.application_no}</td>
                     <td className="py-3 px-3">
                       <strong className="block text-slate-900">{app.firm_name}</strong>
-                      <span className="text-[10px] text-slate-400 font-mono">GST: {app.gstin || 'Verified'}</span>
+                      <div className="flex flex-wrap gap-2 text-[10px] text-slate-500 mt-0.5">
+                        {app.turnover && <span><strong>Turnover:</strong> {app.turnover}</span>}
+                        {app.work_experience && <span><strong>Exp:</strong> {app.work_experience}</span>}
+                        <span><strong>Signatory:</strong> {app.signatory_name}</span>
+                      </div>
                     </td>
                     <td className="py-3 px-3 max-w-xs">
                       {app.selected_jobs && app.selected_jobs.length > 0 ? (
@@ -158,22 +167,30 @@ export default function TenderSubmissions() {
                         <span className="text-slate-400 italic text-[11px]">All Scope</span>
                       )}
                     </td>
-                    <td className="py-3 px-3 text-slate-700">
-                      {app.signatory_name}
-                    </td>
                     <td className="py-3 px-3 font-bold text-slate-900 text-sm">
-                      <span className="flex items-center text-emerald-800">
+                      <span className="flex items-center text-emerald-800 font-mono font-black">
                         <IndianRupee className="w-3.5 h-3.5 mr-0.5 text-amber-600" />
-                        ₹{app.quoted_amount ? app.quoted_amount.toLocaleString('en-IN') : '0'}
+                        ₹{app.quoted_amount ? app.quoted_amount.toLocaleString('en-IN') : '0.00'}
                       </span>
                     </td>
                     <td className="py-3 px-3">
                       <StatusBadge status={app.status} size="sm" />
                     </td>
                     <td className="py-3 px-3 text-center">
+                      <button
+                        type="button"
+                        onClick={() => handleDownloadAllZip(app.application_id)}
+                        className="px-2 py-1 bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 text-slate-700 rounded border text-[11px] font-bold inline-flex items-center"
+                        title="Download all submitted applicant documents (ZIP)"
+                      >
+                        <Download className="w-3 h-3 mr-1" />
+                        ZIP
+                      </button>
+                    </td>
+                    <td className="py-3 px-3 text-center">
                       <Link
                         to={`/ce/applications/${app.application_id}/review`}
-                        className="px-3 py-1.5 bg-gov-800 hover:bg-gov-900 text-white rounded font-bold text-xs inline-flex items-center shadow-sm"
+                        className="px-3 py-1.5 bg-gov-800 hover:bg-gov-900 text-white rounded font-bold text-xs inline-flex items-center shadow-sm whitespace-nowrap"
                       >
                         <Eye className="w-3.5 h-3.5 mr-1" />
                         Evaluate Dossier
@@ -189,4 +206,3 @@ export default function TenderSubmissions() {
     </div>
   );
 }
-

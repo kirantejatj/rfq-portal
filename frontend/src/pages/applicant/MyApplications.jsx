@@ -309,7 +309,7 @@ export default function MyApplications() {
                         <span className="text-[10px] text-slate-500">{doc.document_type}</span>
                       </div>
                       <a
-                        href={doc.file_path}
+                        href={doc.file_path.startsWith('http') ? doc.file_path : `http://127.0.0.1:8000${doc.file_path}`}
                         target="_blank"
                         rel="noreferrer"
                         className="px-2.5 py-1 bg-gov-50 text-gov-700 rounded font-semibold text-xs flex items-center"

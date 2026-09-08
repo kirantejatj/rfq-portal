@@ -1,11 +1,14 @@
 from datetime import datetime, timedelta, timezone
 import random
-from fastapi import APIRouter, Depends, HTTPException, status
+import os
+import shutil
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
 from sqlalchemy.orm import Session
+from app.core.config import settings
 from app.core.database import get_db
 from app.core.security import verify_password, get_password_hash, create_access_token
 from app.core.dependencies import get_current_user
-from app.models.schema import CEUser, Applicant, OTPVerification
+from app.models.schema import CEUser, Applicant, OTPVerification, ApplicantDocument
 from app.schemas.auth import (
     SendOTPRequest, VerifyOTPRequest, ApplicantRegisterRequest,
     ApplicantLoginRequest, CELoginRequest, TokenResponse
@@ -87,13 +90,18 @@ def register_applicant(req: ApplicantRegisterRequest, db: Session = Depends(get_
 
     pwd_hash = get_password_hash(req.password) if req.password else None
 
+    turnover_val = req.turnover or req.md_ceo_name
+    exp_val = req.work_experience or req.chairperson_name
+
     applicant = Applicant(
         mobile_no=mobile,
         firm_name=req.firm_name.strip(),
         registration_type=req.registration_type,
         prime_line_business=req.prime_line_business,
-        chairperson_name=req.chairperson_name,
-        md_ceo_name=req.md_ceo_name,
+        turnover=turnover_val,
+        work_experience=exp_val,
+        chairperson_name=exp_val,
+        md_ceo_name=turnover_val,
         postal_address=req.postal_address,
         email=req.email,
         gstin=req.gstin,
@@ -129,6 +137,48 @@ def login_applicant(req: ApplicantLoginRequest, db: Session = Depends(get_db)):
         name=applicant.firm_name,
         mobile=applicant.mobile_no
     )
+
+@router.post("/applicant/{applicant_id}/documents")
+def upload_applicant_document(
+    applicant_id: int,
+    file: UploadFile = File(...),
+    document_type: str = Form("REGISTRATION_DOC"),
+    db: Session = Depends(get_db)
+):
+    applicant = db.query(Applicant).filter(Applicant.applicant_id == applicant_id).first()
+    if not applicant:
+        raise HTTPException(status_code=404, detail="Applicant not found")
+
+    upload_dir = settings.UPLOAD_DIR
+    os.makedirs(upload_dir, exist_ok=True)
+
+    timestamp = int(datetime.now().timestamp())
+    safe_name = f"applicant_{applicant_id}_{timestamp}_{file.filename.replace(' ', '_')}"
+    file_path = os.path.join(upload_dir, safe_name)
+
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    size_kb = int(os.path.getsize(file_path) / 1024)
+
+    doc = ApplicantDocument(
+        applicant_id=applicant_id,
+        document_type=document_type,
+        file_name=file.filename,
+        file_path=f"/uploads/{safe_name}",
+        file_size_kb=size_kb
+    )
+    db.add(doc)
+    db.commit()
+    db.refresh(doc)
+
+    return {
+        "document_id": doc.document_id,
+        "document_type": doc.document_type,
+        "file_name": doc.file_name,
+        "file_path": doc.file_path,
+        "file_size_kb": doc.file_size_kb
+    }
 
 @router.post("/ce/login", response_model=TokenResponse)
 def login_ce(req: CELoginRequest, db: Session = Depends(get_db)):
@@ -168,8 +218,11 @@ def get_profile(current_user: dict = Depends(get_current_user)):
             "mobile": user.mobile_no,
             "email": user.email,
             "registration_type": user.registration_type,
+            "turnover": user.turnover or user.md_ceo_name,
+            "work_experience": user.work_experience or user.chairperson_name,
             "gstin": user.gstin,
             "pan_no": user.pan_no,
             "md_ceo_name": user.md_ceo_name,
+            "chairperson_name": user.chairperson_name,
             "postal_address": user.postal_address
         }
