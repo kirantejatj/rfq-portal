@@ -22,6 +22,9 @@ import CreateTender from './pages/ce/CreateTender';
 import TenderSubmissions from './pages/ce/TenderSubmissions';
 import ApplicationReview from './pages/ce/ApplicationReview';
 
+// Developer / API Workbench
+import ApiWorkbench from './pages/admin/ApiWorkbench';
+
 const ProtectedRoute = ({ children, roleRequired }) => {
   const { user, loading } = useAuth();
   if (loading) return <div className="text-center py-20">Authenticating...</div>;
@@ -85,6 +88,10 @@ export default function App() {
               <ApplicationReview />
             </ProtectedRoute>
           } />
+
+          {/* Developer / API Workbench Route */}
+          <Route path="/developer" element={<ApiWorkbench />} />
+          <Route path="/api-explorer" element={<ApiWorkbench />} />
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

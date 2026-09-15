@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Building2, FileText, User, LogOut, PlusCircle, LayoutDashboard, Shield, Send } from 'lucide-react';
+import { Building2, FileText, User, LogOut, PlusCircle, LayoutDashboard, Shield, Send, Terminal } from 'lucide-react';
 
 export default function Navbar() {
   const { user, isCE, isApplicant, logout } = useAuth();
@@ -48,6 +48,15 @@ export default function Navbar() {
             className="text-sm font-medium text-slate-700 hover:text-gov-600 px-3 py-2 rounded-md hover:bg-slate-100 transition"
           >
             Tenders
+          </Link>
+
+          <Link
+            to="/developer"
+            className="flex items-center text-xs font-semibold text-purple-700 hover:text-purple-800 bg-purple-50 hover:bg-purple-100 border border-purple-200 px-2.5 py-1.5 rounded-md transition shadow-xs"
+            title="API Developer Workbench & Swagger Docs"
+          >
+            <Terminal className="w-3.5 h-3.5 mr-1.5 text-purple-600" />
+            <span>API Workbench</span>
           </Link>
 
           {/* CE Specific Navigation */}
