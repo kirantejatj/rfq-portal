@@ -57,11 +57,11 @@ export default function CEDashboard() {
         <div className="space-y-1">
           <div className="flex items-center space-x-2 text-amber-400 text-xs font-bold uppercase tracking-wider">
             <ShieldCheck className="w-4 h-4" />
-            <span>Chief Engineer Executive Panel</span>
+            <span>Officer Executive Panel</span>
           </div>
-          <h1 className="text-2xl font-bold">RFQ Tender & Applicant Evaluation Center</h1>
+          <h1 className="text-2xl font-bold">RFQ & Vendor Quotation Evaluation Center</h1>
           <p className="text-xs text-slate-400">
-            PostgreSQL RFQ_DB Centralized Authority • Total Submissions: <strong>{stats?.total_applications || 0}</strong>
+            Authorized Procurement Management • Total Quotations Received: <strong>{stats?.total_applications || 0}</strong>
           </p>
         </div>
         <Link
@@ -69,14 +69,14 @@ export default function CEDashboard() {
           className="px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-gov-900 font-bold rounded-lg shadow text-xs transition flex items-center"
         >
           <PlusCircle className="w-4 h-4 mr-1.5" />
-          Raise New RFQ Tender
+          Raise New RFQ
         </Link>
       </div>
 
       {/* KPI Metric Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 text-xs">
         <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-          <span className="text-slate-500 block font-semibold">Total Tenders</span>
+          <span className="text-slate-500 block font-semibold">Total RFQs</span>
           <span className="text-2xl font-extrabold text-slate-900 mt-1 block">{stats?.total_tenders || 0}</span>
         </div>
         <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
@@ -96,31 +96,31 @@ export default function CEDashboard() {
           <span className="text-2xl font-extrabold text-emerald-700 mt-1 block">{stats?.accepted_applications || 0}</span>
         </div>
         <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-          <span className="text-purple-600 block font-semibold">Registered Firms</span>
+          <span className="text-purple-600 block font-semibold">Registered Vendors</span>
           <span className="text-2xl font-extrabold text-purple-700 mt-1 block">{stats?.total_registered_applicants || 0}</span>
         </div>
       </div>
 
-      {/* Tenders Master Management Table */}
+      {/* RFQs Master Management Table */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden space-y-4 p-6">
         <div className="flex justify-between items-center">
           <h2 className="text-base font-bold text-slate-900 flex items-center">
             <Layers className="w-5 h-5 mr-2 text-gov-600" />
-            All RFQ Tenders Raised
+            All RFQs Raised
           </h2>
-          <span className="text-xs text-slate-500 font-medium">Manage status, inspect applicant bids</span>
+          <span className="text-xs text-slate-500 font-medium">Manage status, evaluate vendor quotation submissions</span>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
               <tr className="bg-slate-50 text-slate-600 font-bold border-b border-slate-200 uppercase tracking-wider">
-                <th className="py-3 px-3">Tender Ref No</th>
+                <th className="py-3 px-3">RFQ Ref No</th>
                 <th className="py-3 px-3">Title</th>
                 <th className="py-3 px-3">EMD (₹)</th>
-                <th className="py-3 px-3">Quotation Window</th>
+                <th className="py-3 px-3">Quotation Window & Validity</th>
                 <th className="py-3 px-3">Status</th>
-                <th className="py-3 px-3 text-center">Submissions</th>
+                <th className="py-3 px-3 text-center">Quotations</th>
                 <th className="py-3 px-3 text-center">Quick Action</th>
               </tr>
             </thead>
@@ -138,8 +138,8 @@ export default function CEDashboard() {
                     ₹{t.emd_amount.toLocaleString('en-IN')}
                   </td>
                   <td className="py-3 px-3 text-slate-500 text-[11px]">
-                    <div>From: {new Date(t.quotation_from_date).toLocaleDateString()}</div>
                     <div>To: {new Date(t.quotation_to_date).toLocaleDateString()}</div>
+                    {t.validity_period && <div className="text-indigo-600 font-semibold">{t.validity_period}</div>}
                   </td>
                   <td className="py-3 px-3">
                     <StatusBadge status={t.status} size="sm" />
@@ -149,7 +149,7 @@ export default function CEDashboard() {
                       to={`/ce/tenders/${t.tender_id}/submissions`}
                       className="px-3 py-1 bg-gov-50 text-gov-800 hover:bg-gov-100 font-bold rounded text-xs inline-flex items-center"
                     >
-                      {t.submission_count || 0} Submissions
+                      {t.submission_count || 0} Quotations
                       <ArrowRight className="w-3 h-3 ml-1" />
                     </Link>
                   </td>

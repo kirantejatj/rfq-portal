@@ -106,10 +106,15 @@ export default function TenderDetails() {
           </div>
         </div>
 
-        {/* Action Button Strip */}
+        {/* Action Button Strip & Validity Note */}
         <div className="pt-4 border-t border-slate-100 flex flex-wrap justify-between items-center gap-4">
-          <div className="flex items-center space-x-4 text-xs text-slate-600">
-            <span>Quotation Window: <strong>{new Date(tender.quotation_from_date).toLocaleString()}</strong> — <strong>{new Date(tender.quotation_to_date).toLocaleString()}</strong></span>
+          <div className="flex flex-wrap items-center gap-4 text-xs text-slate-600">
+            <span>Quotation Window: <strong>{new Date(tender.quotation_from_date).toLocaleDateString()}</strong> — <strong>{new Date(tender.quotation_to_date).toLocaleDateString()}</strong></span>
+            {tender.validity_period && (
+              <span className="font-semibold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200">
+                Validity: {tender.validity_period}
+              </span>
+            )}
           </div>
 
           <div className="flex items-center space-x-3">
@@ -118,7 +123,7 @@ export default function TenderDetails() {
                 to={`/ce/tenders/${tender.tender_id}/submissions`}
                 className="px-4 py-2 bg-gov-800 hover:bg-gov-900 text-white font-semibold rounded-lg shadow-sm text-xs transition"
               >
-                View All Submissions ({tender.submission_count || 0})
+                View Received Quotations ({tender.submission_count || 0})
               </Link>
             )}
 
@@ -139,15 +144,15 @@ export default function TenderDetails() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left 2 Cols: Scope & Specifications */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Work Packages & Jobs Schedule */}
+          {/* RFQ Items Schedule */}
           {tender.jobs && tender.jobs.length > 0 && (
             <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm space-y-4">
               <div className="flex justify-between items-center">
                 <h2 className="text-base font-bold text-slate-900 flex items-center">
                   <Layers className="w-5 h-5 mr-2 text-gov-600" />
-                  Work Packages & Job Schedule ({tender.jobs.length} Jobs Available)
+                  RFQ Items Schedule ({tender.jobs.length} Items Available)
                 </h2>
-                <span className="text-[11px] text-slate-500 font-medium">Applicants can select specific jobs to quote</span>
+                <span className="text-[11px] text-slate-500 font-medium">Vendors can select specific items or entire scope to quote</span>
               </div>
 
               <div className="space-y-3">
@@ -157,24 +162,26 @@ export default function TenderDetails() {
                       <div className="space-y-1">
                         <div className="flex items-center space-x-2">
                           <span className="font-mono font-bold text-gov-700 bg-gov-100/70 px-2 py-0.5 rounded text-[11px]">
-                            {job.job_code || `JOB #${idx + 1}`}
+                            {job.job_code || `ITEM #${idx + 1}`}
                           </span>
                           <span className="font-bold text-slate-900 text-sm">{job.job_name}</span>
                         </div>
                         {job.category && (
-                          <span className="inline-block text-[10px] uppercase font-bold text-slate-500 bg-slate-200/80 px-2 py-0.5 rounded">
+                          <span className={`inline-block text-[10px] uppercase font-bold px-2 py-0.5 rounded ${
+                            job.category === 'Supply Item' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'
+                          }`}>
                             {job.category}
                           </span>
                         )}
                       </div>
                       <div className="text-right">
-                        {job.estimated_cost ? (
+                        {job.amount || job.estimated_cost ? (
                           <span className="font-extrabold text-gov-800 text-sm flex items-center">
                             <IndianRupee className="w-3.5 h-3.5 mr-0.5 text-amber-600" />
-                            ₹{job.estimated_cost.toLocaleString('en-IN')}
+                            ₹{(job.amount || job.estimated_cost).toLocaleString('en-IN')}
                           </span>
                         ) : null}
-                        <span className="text-[10px] text-slate-400 block">Est. Budget</span>
+                        <span className="text-[10px] text-slate-400 block">Est. Amount</span>
                       </div>
                     </div>
 
@@ -185,6 +192,9 @@ export default function TenderDetails() {
                     <div className="pt-2 border-t border-slate-200/60 flex flex-wrap gap-4 text-[11px] text-slate-600">
                       {job.estimated_quantity && (
                         <span>Quantity: <strong>{job.estimated_quantity} {job.unit || 'units'}</strong></span>
+                      )}
+                      {job.unit_rate && (
+                        <span>Unit Rate: <strong>₹{job.unit_rate.toLocaleString('en-IN')}</strong></span>
                       )}
                       {job.completion_period && (
                         <span>Period: <strong>{job.completion_period}</strong></span>
@@ -247,11 +257,11 @@ export default function TenderDetails() {
             </div>
           </div>
 
-          {/* Official Tender Documents */}
+          {/* Official Attached Documents */}
           <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm space-y-4">
             <h2 className="text-base font-bold text-slate-900 flex items-center">
               <Download className="w-5 h-5 mr-2 text-gov-600" />
-              Attached RFQ Documents & Corrigenda
+              Attached RFQ Documents & Technical Dossier
             </h2>
             {tender.documents && tender.documents.length > 0 ? (
               <div className="space-y-2">
@@ -281,7 +291,7 @@ export default function TenderDetails() {
               </div>
             ) : (
               <div className="text-xs text-slate-500 italic p-3 bg-slate-50 rounded">
-                No external document attachments uploaded for this tender yet.
+                No external document attachments uploaded for this RFQ yet.
               </div>
             )}
           </div>
@@ -308,17 +318,17 @@ export default function TenderDetails() {
                     </div>
                     {c.answer ? (
                       <div className="p-3 bg-emerald-50 text-emerald-900 rounded border border-emerald-200">
-                        <strong className="block font-bold">Chief Engineer Response:</strong>
+                        <strong className="block font-bold">Officer Response:</strong>
                         <p className="mt-1">{c.answer}</p>
                       </div>
                     ) : (
                       <div className="text-amber-700 italic text-[11px]">
-                        Pending CE Clarification
+                        Pending Officer Clarification
                         {isCE && (
                           <div className="mt-2 flex gap-2">
                             <input
                               type="text"
-                              placeholder="Type CE reply here..."
+                              placeholder="Type Officer reply here..."
                               value={answerInput[c.clarification_id] || ''}
                               onChange={(e) => setAnswerInput({ ...answerInput, [c.clarification_id]: e.target.value })}
                               className="flex-1 px-3 py-1 text-xs border rounded focus:outline-none"
@@ -338,7 +348,7 @@ export default function TenderDetails() {
               )}
             </div>
 
-            {/* Ask Query Form for Applicants */}
+            {/* Ask Query Form for Vendors */}
             {isApplicant && (
               <form onSubmit={handleAskQuestion} className="pt-4 border-t border-slate-100 space-y-2">
                 <label className="text-xs font-bold text-slate-700 block">Ask a Pre-Bid Technical Query</label>
@@ -385,12 +395,21 @@ export default function TenderDetails() {
                   {tender.opening_date ? new Date(tender.opening_date).toLocaleString() : 'To be notified'}
                 </span>
               </div>
+
+              {tender.validity_period && (
+                <div>
+                  <span className="text-slate-400 block text-[11px]">Quotation Validity Period</span>
+                  <span className="font-bold text-indigo-800">
+                    {tender.validity_period}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
 
           {/* Contact Person */}
           <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm space-y-3">
-            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">Tender Inviting Authority</h3>
+            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">RFQ Inviting Authority</h3>
             <div className="space-y-2.5 text-xs text-slate-600">
               <div className="font-bold text-slate-900">{tender.contact_person || 'Office of Chief Engineer'}</div>
               {tender.contact_phone && (

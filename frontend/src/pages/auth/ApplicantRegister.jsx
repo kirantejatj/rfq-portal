@@ -11,7 +11,8 @@ export default function ApplicantRegister() {
   const [formData, setFormData] = useState({
     mobile_no: initialMobile,
     firm_name: '',
-    registration_type: 'Private Limited',
+    registration_type: 'Manufacturer',
+    vendor_type: 'Manufacturer',
     prime_line_business: 'Civil & Structural Engineering',
     turnover: '',
     work_experience: '',
@@ -29,7 +30,12 @@ export default function ApplicantRegister() {
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    if (name === 'registration_type' || name === 'vendor_type') {
+      setFormData({ ...formData, registration_type: value, vendor_type: value });
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
   };
 
   const handleFileChange = (e) => {
@@ -49,6 +55,8 @@ export default function ApplicantRegister() {
     try {
       const authRes = await registerApplicant({
         ...formData,
+        vendor_type: formData.vendor_type || formData.registration_type,
+        registration_type: formData.vendor_type || formData.registration_type,
         md_ceo_name: formData.turnover,
         chairperson_name: formData.work_experience
       });
@@ -80,10 +88,20 @@ export default function ApplicantRegister() {
       <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-xl space-y-6">
         <div className="space-y-1">
           <div className="inline-flex items-center space-x-2 text-xs font-bold text-gov-600 bg-gov-50 px-2.5 py-1 rounded">
-            <span>Official Applicant Onboarding</span>
+            <span>Official Vendor Onboarding</span>
           </div>
-          <h1 className="text-2xl font-bold text-slate-900">Register Firm / Enterprise Profile</h1>
-          <p className="text-xs text-slate-500">Create an applicant account to participate in RFQ tenders across Amaravati Infrastructure</p>
+          <h1 className="text-2xl font-bold text-slate-900">Vendor / Bidder Registration</h1>
+          <p className="text-xs text-slate-500">Register your enterprise profile to participate in RFQ quotations across Amaravati Infrastructure</p>
+        </div>
+
+        {/* Eligibility Verification Notice */}
+        <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-800 space-y-1">
+          <div className="font-bold flex items-center">
+            <span>✓ Vendor Eligibility Requirement</span>
+          </div>
+          <p className="text-[11px] text-emerald-700">
+            Only registered <strong>Manufacturers</strong>, <strong>Authorised Dealers</strong>, <strong>Authorised Distributors</strong>, and <strong>Contractors</strong> are eligible to participate and submit quotations.
+          </p>
         </div>
 
         {error && (
@@ -96,10 +114,10 @@ export default function ApplicantRegister() {
         <form onSubmit={handleSubmit} className="space-y-6 text-xs">
           {/* Section 1: Firm Identification */}
           <div className="space-y-4">
-            <h3 className="text-sm font-bold text-slate-800 border-b border-slate-100 pb-2">1. Firm & Entity Details</h3>
+            <h3 className="text-sm font-bold text-slate-800 border-b border-slate-100 pb-2">1. Vendor & Entity Details</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="sm:col-span-2">
-                <label className="font-bold text-slate-700 block mb-1">Firm / Company Name *</label>
+                <label className="font-bold text-slate-700 block mb-1">Firm / Company / Vendor Name *</label>
                 <input
                   type="text"
                   name="firm_name"
@@ -112,20 +130,20 @@ export default function ApplicantRegister() {
               </div>
 
               <div>
-                <label className="font-bold text-slate-700 block mb-1">Registration Type</label>
+                <label className="font-bold text-slate-700 block mb-1">Vendor Category / Type *</label>
                 <select
-                  name="registration_type"
-                  value={formData.registration_type}
+                  name="vendor_type"
+                  value={formData.vendor_type}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-gov-500 focus:outline-none"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-gov-500 focus:outline-none font-semibold text-gov-800 bg-slate-50"
+                  required
                 >
-                  <option value="Private Limited">Private Limited</option>
-                  <option value="Public Limited">Public Limited</option>
-                  <option value="Partnership">Partnership Firm</option>
-                  <option value="Sole Proprietorship">Sole Proprietorship</option>
-                  <option value="LLP">Limited Liability Partnership (LLP)</option>
-                  <option value="Joint Venture">Joint Venture (JV)</option>
+                  <option value="Manufacturer">Manufacturer</option>
+                  <option value="Authorised Dealer">Authorised Dealer</option>
+                  <option value="Authorised Distributor">Authorised Distributor</option>
+                  <option value="Contractor">Contractor</option>
                 </select>
+                <span className="text-[10px] text-slate-400 mt-0.5 block">Eligible categories for quotation submissions</span>
               </div>
 
               <div>

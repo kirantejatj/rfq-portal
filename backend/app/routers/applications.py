@@ -135,30 +135,48 @@ def submit_application(
     applicant_id = current_user["id"]
     tender_id = payload.tender_id
 
-    # Check tender window
+    # 1. Vendor Eligibility Validation
+    applicant = db.query(Applicant).filter(Applicant.applicant_id == applicant_id).first()
+    if not applicant:
+        raise HTTPException(status_code=404, detail="Vendor profile not found")
+
+    v_type = (applicant.vendor_type or applicant.registration_type or "").strip()
+    eligible_set = {
+        "MANUFACTURER", "AUTHORISED_DEALER", "AUTHORISED_DISTRIBUTOR", "CONTRACTOR",
+        "AUTHORIZED DEALER", "AUTHORIZED DISTRIBUTOR",
+        "Manufacturer", "Authorised Dealer", "Authorised Distributor", "Contractor"
+    }
+    is_eligible = (v_type in eligible_set) or (v_type.upper().replace(" ", "_") in eligible_set)
+    if not is_eligible:
+        raise HTTPException(
+            status_code=400,
+            detail="Eligibility criteria not met: Only registered Manufacturers, Authorised Dealers, Authorised Distributors, or Contractors are permitted to submit quotations."
+        )
+
+    # 2. Check tender window
     tender = db.query(RFQTender).filter(RFQTender.tender_id == tender_id).first()
     if not tender:
-        raise HTTPException(status_code=404, detail="Tender not found")
+        raise HTTPException(status_code=404, detail="Quotation/RFQ not found")
 
     now = datetime.now()
     if tender.status != "PUBLISHED":
-        raise HTTPException(status_code=400, detail=f"Tender is not published (current status: {tender.status})")
+        raise HTTPException(status_code=400, detail=f"RFQ is not published (current status: {tender.status})")
     
     if now < tender.quotation_from_date or now > tender.quotation_to_date:
         raise HTTPException(
             status_code=400,
-            detail=f"Quotation window is closed. Allowed between {tender.quotation_from_date} and {tender.quotation_to_date}"
+            detail=f"Quotation window is closed. Submissions allowed between {tender.quotation_from_date} and {tender.quotation_to_date}"
         )
 
-    # Check if already submitted
+    # 3. Check if already submitted
     existing = db.query(Application).filter(
         Application.tender_id == tender_id,
         Application.applicant_id == applicant_id
     ).first()
     if existing:
-        raise HTTPException(status_code=400, detail="You have already submitted a quotation for this tender.")
+        raise HTTPException(status_code=400, detail="You have already submitted a quotation for this RFQ.")
 
-    # Check tender jobs: if tender has jobs, at least one job must be selected
+    # 4. Check RFQ items
     tender_jobs = db.query(RFQJob).filter(RFQJob.tender_id == tender_id, RFQJob.status == "ACTIVE").all()
     valid_job_ids = {j.job_id for j in tender_jobs}
 
@@ -390,6 +408,17 @@ def get_tender_applications(
     current_user: dict = Depends(require_ce),
     db: Session = Depends(get_db)
 ):
+    tender = db.query(RFQTender).filter(RFQTender.tender_id == tender_id).first()
+    if not tender:
+        raise HTTPException(status_code=404, detail="Quotation/RFQ not found")
+
+    # Strict Officer Authorization: Only the Officer who raised the RFQ can view quotations
+    if current_user["role"] != "SUPER_ADMIN" and tender.created_by != current_user["id"]:
+        raise HTTPException(
+            status_code=403,
+            detail=f"Access forbidden: You do not have authorization to view quotations for RFQ {tender.tender_ref_no or tender_id}. Only the Officer who raised this RFQ has authority to view and approve submitted quotations."
+        )
+
     apps = db.query(Application).filter(Application.tender_id == tender_id).order_by(Application.submitted_at.desc()).all()
     return [build_application_out(a, db) for a in apps]
 
@@ -401,11 +430,20 @@ def get_application_details(
 ):
     app_obj = db.query(Application).filter(Application.application_id == application_id).first()
     if not app_obj:
-        raise HTTPException(status_code=404, detail="Application not found")
+        raise HTTPException(status_code=404, detail="Quotation not found")
 
     # Access control: APPLICANT sees ONLY their own quotation
     if current_user["role"] == "APPLICANT" and app_obj.applicant_id != current_user["id"]:
-        raise HTTPException(status_code=403, detail="Forbidden: You can only view your own application")
+        raise HTTPException(status_code=403, detail="Forbidden: You can only view your own quotation")
+
+    # Access control: CE/Officer sees ONLY quotations for RFQs raised by them (unless SUPER_ADMIN)
+    if current_user["role"] in ["CE", "ADMIN"] and current_user["role"] != "SUPER_ADMIN":
+        tender = db.query(RFQTender).filter(RFQTender.tender_id == app_obj.tender_id).first()
+        if tender and tender.created_by != current_user["id"]:
+            raise HTTPException(
+                status_code=403,
+                detail=f"Access forbidden: Only the Officer who created RFQ {tender.tender_ref_no or tender.tender_id} has authority to review this quotation."
+            )
 
     return build_application_out(app_obj, db)
 
@@ -416,16 +454,25 @@ def update_application_status(
     current_user: dict = Depends(require_ce),
     db: Session = Depends(get_db)
 ):
-    valid_statuses = ['DRAFT', 'SUBMITTED', 'UNDER_REVIEW', 'ACCEPTED', 'REJECTED', 'WITHDRAWN']
+    status_val = "ACCEPTED" if payload.status == "APPROVED" else payload.status
+    valid_statuses = ['DRAFT', 'SUBMITTED', 'UNDER_REVIEW', 'ACCEPTED', 'APPROVED', 'REJECTED', 'WITHDRAWN']
     if payload.status not in valid_statuses:
         raise HTTPException(status_code=400, detail=f"Invalid status. Must be one of: {valid_statuses}")
 
     app_obj = db.query(Application).filter(Application.application_id == application_id).first()
     if not app_obj:
-        raise HTTPException(status_code=404, detail="Application not found")
+        raise HTTPException(status_code=404, detail="Quotation not found")
+
+    # Officer Authorization: Only the Officer who raised this RFQ can approve or reject quotations
+    tender = db.query(RFQTender).filter(RFQTender.tender_id == app_obj.tender_id).first()
+    if current_user["role"] != "SUPER_ADMIN" and tender and tender.created_by != current_user["id"]:
+        raise HTTPException(
+            status_code=403,
+            detail=f"Access forbidden: Only the Officer who raised RFQ {tender.tender_ref_no or tender.tender_id} can approve or reject quotations."
+        )
 
     old_status = app_obj.status
-    app_obj.status = payload.status
+    app_obj.status = status_val
     if payload.remarks:
         app_obj.remarks = payload.remarks
     app_obj.updated_at = datetime.now()
@@ -434,11 +481,11 @@ def update_application_status(
     history = ApplicationStatusHistory(
         application_id=application_id,
         old_status=old_status,
-        new_status=payload.status,
+        new_status=status_val,
         changed_by_ce=current_user["id"],
         remarks=payload.remarks
     )
     db.add(history)
     db.commit()
 
-    return {"message": "Application status updated", "application_id": application_id, "status": payload.status}
+    return {"message": "Quotation status updated successfully", "application_id": application_id, "status": status_val}

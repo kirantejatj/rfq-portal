@@ -6,9 +6,11 @@ class RFQJobCreate(BaseModel):
     job_code: Optional[str] = None
     job_name: str
     job_description: Optional[str] = None
-    category: Optional[str] = None
+    category: Optional[str] = "Supply Item" # "Supply Item" or "Only Rate"
     estimated_quantity: Optional[float] = None
     unit: Optional[str] = None
+    unit_rate: Optional[float] = None
+    amount: Optional[float] = None
     estimated_cost: Optional[float] = None
     completion_period: Optional[str] = None
     status: str = "ACTIVE"
@@ -20,6 +22,8 @@ class RFQJobUpdate(BaseModel):
     category: Optional[str] = None
     estimated_quantity: Optional[float] = None
     unit: Optional[str] = None
+    unit_rate: Optional[float] = None
+    amount: Optional[float] = None
     estimated_cost: Optional[float] = None
     completion_period: Optional[str] = None
     status: Optional[str] = None
@@ -33,6 +37,8 @@ class RFQJobOut(BaseModel):
     category: Optional[str] = None
     estimated_quantity: Optional[float] = None
     unit: Optional[str] = None
+    unit_rate: Optional[float] = None
+    amount: Optional[float] = None
     estimated_cost: Optional[float] = None
     completion_period: Optional[str] = None
     status: str
@@ -69,6 +75,8 @@ class TenderCreate(BaseModel):
     completion_period: Optional[str] = None
     quotation_from_date: Optional[datetime] = None
     quotation_to_date: Optional[datetime] = None
+    quotation_valid_upto: Optional[datetime] = None
+    validity_period: Optional[str] = None
     opening_date: Optional[datetime] = None
     contact_person: Optional[str] = None
     contact_email: Optional[str] = None
@@ -90,6 +98,8 @@ class TenderUpdate(BaseModel):
     completion_period: Optional[str] = None
     quotation_from_date: Optional[datetime] = None
     quotation_to_date: Optional[datetime] = None
+    quotation_valid_upto: Optional[datetime] = None
+    validity_period: Optional[str] = None
     opening_date: Optional[datetime] = None
     contact_person: Optional[str] = None
     contact_email: Optional[str] = None
@@ -113,6 +123,8 @@ class TenderOut(BaseModel):
     completion_period: Optional[str] = None
     quotation_from_date: datetime
     quotation_to_date: datetime
+    quotation_valid_upto: Optional[datetime] = None
+    validity_period: Optional[str] = None
     opening_date: Optional[datetime] = None
     contact_person: Optional[str] = None
     contact_email: Optional[str] = None

@@ -14,22 +14,34 @@ def get_ce_stats(
     db: Session = Depends(get_db)
 ):
     now = datetime.now()
-    total_tenders = db.query(RFQTender).count()
-    active_tenders = db.query(RFQTender).filter(
+    officer_id = current_user["id"]
+    is_super = current_user.get("role") == "SUPER_ADMIN"
+
+    tenders_query = db.query(RFQTender)
+    if not is_super:
+        tenders_query = tenders_query.filter(RFQTender.created_by == officer_id)
+
+    total_tenders = tenders_query.count()
+    active_tenders = tenders_query.filter(
         RFQTender.status == "PUBLISHED",
         RFQTender.quotation_from_date <= now,
         RFQTender.quotation_to_date >= now
     ).count()
+
+    officer_tender_ids = [t.tender_id for t in tenders_query.all()]
     
-    total_applications = db.query(Application).count()
-    under_review = db.query(Application).filter(Application.status == "UNDER_REVIEW").count()
-    accepted = db.query(Application).filter(Application.status == "ACCEPTED").count()
-    rejected = db.query(Application).filter(Application.status == "REJECTED").count()
+    app_query = db.query(Application)
+    if not is_super:
+        app_query = app_query.filter(Application.tender_id.in_(officer_tender_ids) if officer_tender_ids else False)
+
+    total_applications = app_query.count() if (is_super or officer_tender_ids) else 0
+    under_review = app_query.filter(Application.status == "UNDER_REVIEW").count() if (is_super or officer_tender_ids) else 0
+    accepted = app_query.filter(Application.status == "ACCEPTED").count() if (is_super or officer_tender_ids) else 0
+    rejected = app_query.filter(Application.status == "REJECTED").count() if (is_super or officer_tender_ids) else 0
     total_applicants = db.query(Applicant).count()
     
-    total_quoted = db.query(func.sum(Application.quoted_amount)).scalar() or 0.0
-    total_emd = db.query(func.sum(EMDPayment.amount)).scalar() or 0.0
-
+    total_quoted = app_query.with_entities(func.sum(Application.quoted_amount)).scalar() if (is_super or officer_tender_ids) else 0.0
+    
     return {
         "total_tenders": total_tenders,
         "active_tenders": active_tenders,
@@ -38,8 +50,8 @@ def get_ce_stats(
         "accepted_applications": accepted,
         "rejected_applications": rejected,
         "total_registered_applicants": total_applicants,
-        "total_quoted_amount": float(total_quoted),
-        "total_emd_collected": float(total_emd)
+        "total_quoted_amount": float(total_quoted or 0.0),
+        "total_emd_collected": 0.0
     }
 
 @router.get("/applicant")

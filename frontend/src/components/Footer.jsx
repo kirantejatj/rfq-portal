@@ -13,11 +13,11 @@ export default function Footer() {
               <span>Amaravati Growth and Infrastructure Corporation Limited</span>
             </div>
             <p className="text-xs text-slate-400 leading-relaxed pr-6">
-              Official e-Procurement and RFQ Applicant Submission Portal for capital city infrastructure development projects. Ensuring transparency, competitive quotations, and rigorous technical compliance.
+              Official e-Procurement and RFQ Portal for capital city infrastructure development projects. Ensuring transparency, competitive quotations, and rigorous technical compliance.
             </p>
             <div className="flex items-center space-x-2 text-emerald-400 text-xs font-semibold pt-2">
               <ShieldCheck className="w-4 h-4" />
-              <span>PostgreSQL Schema (v2) Role-Restricted & Window-Enforced</span>
+              <span>RFQ Portal Secure Authorization & Window-Enforced</span>
             </div>
           </div>
 
@@ -31,7 +31,7 @@ export default function Footer() {
               </div>
               <div className="flex items-center space-x-2">
                 <Mail className="w-4 h-4 text-amber-400 shrink-0" />
-                <span>tenders.infra@agic.gov.in</span>
+                <span>rfq.infra@agic.gov.in</span>
               </div>
               <div className="flex items-start space-x-2 pt-1">
                 <MapPin className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
@@ -44,8 +44,8 @@ export default function Footer() {
           <div className="space-y-2">
             <h4 className="text-white text-sm font-semibold uppercase tracking-wider">Access Roles</h4>
             <ul className="text-xs space-y-1.5 text-slate-400">
-              <li>• <strong className="text-white">Applicant</strong>: Mobile verification, tender discovery, structured submission, single quotation visibility.</li>
-              <li>• <strong className="text-white">Chief Engineer</strong>: Full administrative evaluation, tender publishing, and audit remarks.</li>
+              <li>• <strong className="text-white">Vendor</strong>: Mobile verification, RFQ discovery, structured quote submission.</li>
+              <li>• <strong className="text-white">Officer</strong>: RFQ creation, item breakdown, and quotation review & approval.</li>
             </ul>
           </div>
         </div>

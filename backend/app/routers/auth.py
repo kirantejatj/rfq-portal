@@ -92,11 +92,13 @@ def register_applicant(req: ApplicantRegisterRequest, db: Session = Depends(get_
 
     turnover_val = req.turnover or req.md_ceo_name
     exp_val = req.work_experience or req.chairperson_name
+    vendor_type_val = req.vendor_type or req.registration_type or "Contractor"
 
     applicant = Applicant(
         mobile_no=mobile,
         firm_name=req.firm_name.strip(),
-        registration_type=req.registration_type,
+        registration_type=vendor_type_val,
+        vendor_type=vendor_type_val,
         prime_line_business=req.prime_line_business,
         turnover=turnover_val,
         work_experience=exp_val,
@@ -221,13 +223,23 @@ def get_profile(current_user: dict = Depends(get_current_user)):
             "designation": user.designation
         }
     else:
+        v_type = user.vendor_type or user.registration_type or "Contractor"
+        eligible_set = {
+            "MANUFACTURER", "AUTHORISED_DEALER", "AUTHORISED_DISTRIBUTOR", "CONTRACTOR",
+            "MANUFACTURER / SUPPLIER", "AUTHORIZED DEALER", "AUTHORIZED DISTRIBUTOR",
+            "Manufacturer", "Authorised Dealer", "Authorised Distributor", "Contractor"
+        }
+        is_eligible = v_type in eligible_set or v_type.upper().replace(" ", "_") in eligible_set
+
         return {
             "id": user.applicant_id,
             "role": "APPLICANT",
             "firm_name": user.firm_name,
             "mobile": user.mobile_no,
             "email": user.email,
-            "registration_type": user.registration_type,
+            "registration_type": v_type,
+            "vendor_type": v_type,
+            "is_eligible": is_eligible,
             "turnover": user.turnover or user.md_ceo_name,
             "work_experience": user.work_experience or user.chairperson_name,
             "gstin": user.gstin,

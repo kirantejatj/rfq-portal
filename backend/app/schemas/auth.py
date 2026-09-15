@@ -14,6 +14,7 @@ class ApplicantRegisterRequest(BaseModel):
     mobile_no: str
     firm_name: str
     registration_type: Optional[str] = None
+    vendor_type: Optional[str] = None
     prime_line_business: Optional[str] = None
     turnover: Optional[str] = None
     work_experience: Optional[str] = None

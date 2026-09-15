@@ -78,8 +78,8 @@ export default function ApplicantLogin() {
           <div className="w-12 h-12 rounded-xl bg-gov-600 text-white flex items-center justify-center mx-auto shadow-md">
             <Building2 className="w-7 h-7" />
           </div>
-          <h1 className="text-xl font-bold text-slate-900">Applicant Portal Login</h1>
-          <p className="text-xs text-slate-500">Sign in to submit quotations and track application status</p>
+          <h1 className="text-xl font-bold text-slate-900">Vendor Portal Login</h1>
+          <p className="text-xs text-slate-500">Sign in to participate in RFQs, submit quotations, and track quotation status</p>
         </div>
 
         {/* Method Toggle */}
@@ -226,9 +226,9 @@ export default function ApplicantLogin() {
 
         <div className="pt-4 border-t border-slate-100 text-center space-y-2 text-xs">
           <div className="text-slate-600">
-            First time applicant?{' '}
+            First time vendor / bidder?{' '}
             <Link to="/applicant/register" className="text-gov-600 font-bold hover:underline">
-              Register Firm Profile
+              Register Vendor Profile
             </Link>
           </div>
         </div>

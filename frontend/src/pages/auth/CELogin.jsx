@@ -37,8 +37,8 @@ export default function CELogin() {
           <div className="w-12 h-12 rounded-xl bg-gov-900 text-amber-400 flex items-center justify-center mx-auto shadow-md">
             <Shield className="w-7 h-7" />
           </div>
-          <h1 className="text-xl font-bold text-slate-900">Chief Engineer / Admin Login</h1>
-          <p className="text-xs text-slate-500">Authorized departmental access to RFQ creation and evaluation</p>
+          <h1 className="text-xl font-bold text-slate-900">Officer / Departmental Login</h1>
+          <p className="text-xs text-slate-500">Authorized access for Officers to create RFQs, evaluate quotes, and approve submissions</p>
         </div>
 
         {error && (
@@ -84,7 +84,7 @@ export default function CELogin() {
             disabled={loading}
             className="w-full py-2.5 bg-gov-800 hover:bg-gov-900 text-white font-bold rounded-lg shadow-sm transition text-sm flex items-center justify-center"
           >
-            {loading ? 'Authenticating...' : 'Sign In as Chief Engineer'}
+            {loading ? 'Authenticating...' : 'Sign In as Officer'}
             <ArrowRight className="w-4 h-4 ml-1.5" />
           </button>
         </form>
@@ -96,11 +96,11 @@ export default function CELogin() {
             onClick={fillDemoCreds}
             className="text-xs text-gov-700 bg-gov-50 hover:bg-gov-100 px-3 py-1.5 rounded-md font-semibold border border-gov-200 transition"
           >
-            ⚡ Auto-Fill CE Demo Credentials (9876543210 / Admin@123)
+            ⚡ Auto-Fill Officer Demo Credentials (9876543210 / Admin@123)
           </button>
 
           <div className="text-[11px] text-slate-500">
-            Are you a bidder/applicant? <Link to="/applicant/login" className="text-gov-600 font-bold hover:underline">Applicant Login here</Link>
+            Are you a vendor / bidder? <Link to="/applicant/login" className="text-gov-600 font-bold hover:underline">Vendor Login here</Link>
           </div>
         </div>
       </div>

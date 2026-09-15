@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import api from '../../api/client';
 import StatusBadge from '../../components/StatusBadge';
 import { 
-  Building2, Layers, IndianRupee, Calendar, User, Eye, ArrowLeft, Download, Award, Briefcase, Filter, FileText, Archive 
+  Building2, Layers, IndianRupee, Calendar, User, Eye, ArrowLeft, Download, Award, Briefcase, Filter, FileText, Archive, ShieldAlert, ShieldCheck, Clock
 } from 'lucide-react';
 
 export default function TenderSubmissions() {
@@ -12,6 +12,7 @@ export default function TenderSubmissions() {
   const [apps, setApps] = useState([]);
   const [selectedJobFilter, setSelectedJobFilter] = useState('ALL');
   const [loading, setLoading] = useState(true);
+  const [authError, setAuthError] = useState('');
 
   useEffect(() => {
     fetchSubmissions();
@@ -19,6 +20,7 @@ export default function TenderSubmissions() {
 
   const fetchSubmissions = async () => {
     setLoading(true);
+    setAuthError('');
     try {
       const [tRes, aRes] = await Promise.all([
         api.get(`/tenders/${tenderId}`),
@@ -29,7 +31,12 @@ export default function TenderSubmissions() {
       const sorted = [...aRes.data].sort((a, b) => (a.quoted_amount || 0) - (b.quoted_amount || 0));
       setApps(sorted);
     } catch (err) {
-      console.error('Failed to load tender submissions', err);
+      console.error('Failed to load RFQ submissions', err);
+      if (err.response?.status === 403) {
+        setAuthError(err.response?.data?.detail || 'Access Restricted: Only the Officer who raised this RFQ has authority to view and approve quotations.');
+      } else {
+        setAuthError('Failed to load quotation submissions. Please verify access.');
+      }
     } finally {
       setLoading(false);
     }
@@ -41,7 +48,30 @@ export default function TenderSubmissions() {
   };
 
   if (loading) {
-    return <div className="text-center py-20 text-slate-500">Loading applicant quotation submissions...</div>;
+    return <div className="text-center py-20 text-slate-500">Loading vendor quotation submissions...</div>;
+  }
+
+  if (authError) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-16 space-y-6">
+        <Link to="/ce/dashboard" className="inline-flex items-center text-xs font-bold text-gov-700 hover:underline">
+          <ArrowLeft className="w-4 h-4 mr-1" />
+          Back to Officer Dashboard
+        </Link>
+        <div className="bg-white rounded-2xl p-8 border border-rose-200 shadow-md text-center space-y-4">
+          <div className="w-14 h-14 bg-rose-100 rounded-full flex items-center justify-center mx-auto text-rose-600">
+            <ShieldAlert className="w-8 h-8" />
+          </div>
+          <h2 className="text-xl font-bold text-slate-900">Officer Authorization Restriction</h2>
+          <p className="text-sm text-slate-600 max-w-lg mx-auto">
+            {authError}
+          </p>
+          <div className="p-4 bg-slate-50 rounded-xl border text-xs text-slate-500 max-w-md mx-auto">
+            <strong>Security Policy:</strong> Each RFQ is strictly managed by its originating Officer. Only the Officer who created the RFQ has authority to view vendor bids and make acceptance decisions.
+          </div>
+        </div>
+      </div>
+    );
   }
 
   const filteredApps = selectedJobFilter === 'ALL'
@@ -52,10 +82,10 @@ export default function TenderSubmissions() {
     <div className="max-w-7xl mx-auto px-4 sm:px-8 py-8 space-y-6">
       <Link to="/ce/dashboard" className="inline-flex items-center text-xs font-bold text-gov-700 hover:underline">
         <ArrowLeft className="w-4 h-4 mr-1" />
-        Back to CE Dashboard
+        Back to Officer Dashboard
       </Link>
 
-      {/* Tender Header */}
+      {/* RFQ Header */}
       <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-3">
         <div className="flex flex-wrap justify-between items-start gap-2">
           <div>
@@ -63,6 +93,12 @@ export default function TenderSubmissions() {
               {tender.tender_ref_no}
             </span>
             <h1 className="text-2xl font-bold text-slate-900 mt-1">{tender.title}</h1>
+            {tender.validity_period && (
+              <div className="flex items-center text-xs text-indigo-700 font-semibold mt-1">
+                <Clock className="w-3.5 h-3.5 mr-1" />
+                Quotation Validity: {tender.validity_period}
+              </div>
+            )}
           </div>
           <div className="flex items-center space-x-4 text-xs text-slate-500">
             <span>Total Quotations: <strong>{apps.length}</strong></span>
@@ -70,23 +106,23 @@ export default function TenderSubmissions() {
           </div>
         </div>
 
-        {/* Jobs list in header */}
+        {/* RFQ Items in header */}
         {tender.jobs && tender.jobs.length > 0 && (
           <div className="pt-3 border-t border-slate-100 flex flex-wrap gap-2 items-center text-xs">
             <span className="font-bold text-slate-700 flex items-center">
               <Briefcase className="w-3.5 h-3.5 mr-1 text-gov-600" />
-              Tender Work Packages:
+              RFQ Items:
             </span>
             {tender.jobs.map(j => (
               <span key={j.job_id} className="px-2 py-0.5 bg-slate-100 text-slate-700 rounded border border-slate-200 text-[11px]">
-                <strong>{j.job_code}</strong>: {j.job_name.slice(0, 30)}...
+                <strong>{j.job_code}</strong> ({j.category || 'Supply'}): {j.job_name.slice(0, 30)}...
               </span>
             ))}
           </div>
         )}
       </div>
 
-      {/* Submissions Table with L1 Ranking & Job Filter */}
+      {/* Submissions Table with L1 Ranking & Item Filter */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden space-y-4 p-6">
         <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
           <h2 className="text-base font-bold text-slate-900 flex items-center">
@@ -97,13 +133,13 @@ export default function TenderSubmissions() {
           {tender.jobs && tender.jobs.length > 0 && (
             <div className="flex items-center space-x-2 text-xs">
               <Filter className="w-3.5 h-3.5 text-slate-500" />
-              <span className="font-semibold text-slate-600">Filter by Job:</span>
+              <span className="font-semibold text-slate-600">Filter by Item:</span>
               <select
                 value={selectedJobFilter}
                 onChange={(e) => setSelectedJobFilter(e.target.value)}
                 className="px-2.5 py-1 border rounded-lg text-xs bg-white font-medium focus:ring-2 focus:ring-gov-500"
               >
-                <option value="ALL">All Jobs ({apps.length} bids)</option>
+                <option value="ALL">All Items ({apps.length} bids)</option>
                 {tender.jobs.map(j => (
                   <option key={j.job_id} value={j.job_id}>
                     {j.job_code} - {j.job_name.slice(0, 25)}...
@@ -116,7 +152,7 @@ export default function TenderSubmissions() {
 
         {filteredApps.length === 0 ? (
           <div className="text-center py-12 text-slate-500 text-xs italic">
-            No applicants have submitted quotations matching this filter.
+            No vendors have submitted quotations matching this filter.
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -125,8 +161,8 @@ export default function TenderSubmissions() {
                 <tr className="bg-slate-50 text-slate-600 font-bold border-b border-slate-200 uppercase tracking-wider">
                   <th className="py-3 px-3">Rank</th>
                   <th className="py-3 px-3">App Ref No</th>
-                  <th className="py-3 px-3">Applicant Details & Credentials</th>
-                  <th className="py-3 px-3">Selected Job Packages</th>
+                  <th className="py-3 px-3">Vendor Details & Category</th>
+                  <th className="py-3 px-3">Selected RFQ Items</th>
                   <th className="py-3 px-3">Submitted Quoted Amount</th>
                   <th className="py-3 px-3">Status</th>
                   <th className="py-3 px-3 text-center">Docs</th>
@@ -159,7 +195,7 @@ export default function TenderSubmissions() {
                         <div className="flex flex-wrap gap-1">
                           {app.selected_jobs.map(sj => (
                             <span key={sj.job_id} className="px-1.5 py-0.5 bg-gov-50 text-gov-800 font-mono font-semibold rounded text-[10px] border border-gov-200">
-                              {sj.job_code || `Job #${sj.job_id}`}
+                              {sj.job_code || `Item #${sj.job_id}`}
                             </span>
                           ))}
                         </div>
@@ -181,7 +217,7 @@ export default function TenderSubmissions() {
                         type="button"
                         onClick={() => handleDownloadAllZip(app.application_id)}
                         className="px-2 py-1 bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 text-slate-700 rounded border text-[11px] font-bold inline-flex items-center"
-                        title="Download all submitted applicant documents (ZIP)"
+                        title="Download all submitted vendor documents (ZIP)"
                       >
                         <Download className="w-3 h-3 mr-1" />
                         ZIP

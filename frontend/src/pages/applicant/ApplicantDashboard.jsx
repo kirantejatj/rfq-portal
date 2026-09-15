@@ -48,8 +48,15 @@ export default function ApplicantDashboard() {
       {/* Welcome Banner */}
       <div className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="space-y-1">
-          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Applicant Workspace</span>
-          <h1 className="text-2xl font-bold text-slate-900">{user?.firm_name || user?.name || 'Registered Applicant'}</h1>
+          <div className="flex items-center space-x-2">
+            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Vendor Workspace</span>
+            {user?.vendor_type && (
+              <span className="text-[11px] font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200">
+                {user.vendor_type}
+              </span>
+            )}
+          </div>
+          <h1 className="text-2xl font-bold text-slate-900">{user?.firm_name || user?.name || 'Registered Vendor'}</h1>
           <p className="text-xs text-slate-500">
             GSTIN: <strong>{user?.gstin || 'Registered'}</strong> • Mobile: <strong>+91 {user?.mobile}</strong>
           </p>
@@ -59,7 +66,7 @@ export default function ApplicantDashboard() {
           className="px-4 py-2.5 bg-gov-600 hover:bg-gov-700 text-white font-bold rounded-lg shadow-sm text-xs transition flex items-center"
         >
           <PlusCircle className="w-4 h-4 mr-1.5" />
-          Browse Active Tenders
+          Browse Active RFQs
         </Link>
       </div>
 
@@ -74,7 +81,7 @@ export default function ApplicantDashboard() {
           <span className="text-2xl font-extrabold text-blue-700 mt-1 block">{stats?.submitted || 0}</span>
         </div>
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <span className="text-xs font-semibold text-amber-600 block">Under CE Review</span>
+          <span className="text-xs font-semibold text-amber-600 block">Under Officer Review</span>
           <span className="text-2xl font-extrabold text-amber-700 mt-1 block">{stats?.under_review || 0}</span>
         </div>
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
@@ -123,12 +130,12 @@ export default function ApplicantDashboard() {
           )}
         </div>
 
-        {/* Right: Active Tenders Open For Quotation */}
+        {/* Right: Active RFQs Open For Quotation */}
         <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm space-y-4">
           <div className="flex justify-between items-center border-b border-slate-100 pb-3">
             <h2 className="text-base font-bold text-slate-900 flex items-center">
               <Clock className="w-5 h-5 mr-2 text-gov-600" />
-              Tenders Open for Submission
+              RFQs Open for Quotation
             </h2>
             <Link to="/" className="text-xs text-gov-600 font-bold hover:underline">
               Browse All

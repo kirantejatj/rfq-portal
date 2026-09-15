@@ -4,7 +4,7 @@ import api from '../../api/client';
 import StatusBadge from '../../components/StatusBadge';
 import { 
   Building2, Layers, IndianRupee, Calendar, User, FileText, Download, 
-  ArrowLeft, CheckCircle2, AlertCircle, Shield, Briefcase, DollarSign, Archive, ExternalLink
+  ArrowLeft, CheckCircle2, AlertCircle, Shield, Briefcase, DollarSign, Archive, ExternalLink, ShieldAlert, ShieldCheck
 } from 'lucide-react';
 
 export default function ApplicationReview() {
@@ -14,6 +14,7 @@ export default function ApplicationReview() {
   const [remarks, setRemarks] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [authError, setAuthError] = useState('');
 
   useEffect(() => {
     fetchApplication();
@@ -21,6 +22,7 @@ export default function ApplicationReview() {
 
   const fetchApplication = async () => {
     setLoading(true);
+    setAuthError('');
     try {
       const res = await api.get(`/applications/${applicationId}`);
       setAppData(res.data);
@@ -28,6 +30,11 @@ export default function ApplicationReview() {
       setRemarks(res.data.remarks || '');
     } catch (err) {
       console.error('Failed to load application', err);
+      if (err.response?.status === 403) {
+        setAuthError(err.response?.data?.detail || 'Access Restricted: Only the Officer who created this RFQ has authority to view and evaluate this quotation.');
+      } else {
+        setAuthError('Failed to load quotation dossier.');
+      }
     } finally {
       setLoading(false);
     }
@@ -41,7 +48,7 @@ export default function ApplicationReview() {
         status: status,
         remarks: remarks
       });
-      alert('Application evaluation status updated in RFQ_DB!');
+      alert('Quotation evaluation status updated in RFQ_DB!');
       fetchApplication();
     } catch (err) {
       alert(err.response?.data?.detail || 'Failed to update status');
@@ -56,14 +63,34 @@ export default function ApplicationReview() {
   };
 
   if (loading) {
-    return <div className="text-center py-20 text-slate-500">Loading applicant dossier...</div>;
+    return <div className="text-center py-20 text-slate-500">Loading vendor quotation dossier...</div>;
+  }
+
+  if (authError) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-16 space-y-6">
+        <Link to="/ce/dashboard" className="inline-flex items-center text-xs font-bold text-gov-700 hover:underline">
+          <ArrowLeft className="w-4 h-4 mr-1" />
+          Back to Officer Dashboard
+        </Link>
+        <div className="bg-white rounded-2xl p-8 border border-rose-200 shadow-md text-center space-y-4">
+          <div className="w-14 h-14 bg-rose-100 rounded-full flex items-center justify-center mx-auto text-rose-600">
+            <ShieldAlert className="w-8 h-8" />
+          </div>
+          <h2 className="text-xl font-bold text-slate-900">Officer Authorization Restriction</h2>
+          <p className="text-sm text-slate-600 max-w-lg mx-auto">
+            {authError}
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-8 py-8 space-y-6">
       <Link to={`/ce/tenders/${appData.tender_id}/submissions`} className="inline-flex items-center text-xs font-bold text-gov-700 hover:underline">
         <ArrowLeft className="w-4 h-4 mr-1" />
-        Back to Tender Submissions Matrix
+        Back to Quotation Submissions Matrix
       </Link>
 
       {/* Header Dossier */}
@@ -74,7 +101,7 @@ export default function ApplicationReview() {
               {appData.application_no}
             </span>
             <h1 className="text-2xl font-bold text-slate-900 mt-1">{appData.firm_name}</h1>
-            <p className="text-xs text-slate-500 font-medium">Tender: <strong>{appData.tender_title}</strong> ({appData.tender_ref_no})</p>
+            <p className="text-xs text-slate-500 font-medium">RFQ: <strong>{appData.tender_title}</strong> ({appData.tender_ref_no})</p>
           </div>
           <div className="flex flex-col items-end space-y-1">
             <StatusBadge status={appData.status} />
@@ -88,8 +115,12 @@ export default function ApplicationReview() {
           </div>
         </div>
 
-        {/* Firm Profile Summary including Turnover & Experience */}
+        {/* Firm Profile Summary including Category, Turnover & Experience */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs">
+          <div>
+            <span className="text-slate-400 block text-[10px] uppercase font-semibold">Vendor Category</span>
+            <span className="font-bold text-indigo-800">{appData.vendor_type || appData.registration_type || 'Contractor'}</span>
+          </div>
           <div>
             <span className="text-slate-400 block text-[10px] uppercase font-semibold">Annual Turnover</span>
             <span className="font-bold text-emerald-800">{appData.turnover || 'N/A'}</span>
@@ -107,7 +138,7 @@ export default function ApplicationReview() {
             <span className="font-semibold text-slate-700">{new Date(appData.submitted_at).toLocaleString()}</span>
           </div>
           <div>
-            <span className="text-slate-400 block text-[10px] uppercase font-semibold">Signatory</span>
+            <span className="text-slate-400 block text-[10px] uppercase font-semibold">Authorized Signatory</span>
             <span className="font-bold text-slate-800">{appData.signatory_name} ({appData.signatory_designation || 'Signatory'})</span>
           </div>
           <div>
@@ -115,12 +146,8 @@ export default function ApplicationReview() {
             <span className="font-mono font-bold text-slate-800">+91 {appData.mobile_no}</span>
           </div>
           <div>
-            <span className="text-slate-400 block text-[10px] uppercase font-semibold">Email</span>
+            <span className="text-slate-400 block text-[10px] uppercase font-semibold">Contact Email</span>
             <span className="font-semibold text-slate-700">{appData.email || 'N/A'}</span>
-          </div>
-          <div>
-            <span className="text-slate-400 block text-[10px] uppercase font-semibold">Entity Type</span>
-            <span className="font-semibold text-slate-700">{appData.registration_type || 'Contracting Firm'}</span>
           </div>
         </div>
       </div>
@@ -131,9 +158,9 @@ export default function ApplicationReview() {
           <div>
             <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center">
               <FileText className="w-4 h-4 mr-2 text-gov-600" />
-              Uploaded Applicant Documents & Attachments ({appData.documents?.length || 0})
+              Uploaded Vendor Documents & Dossier Attachments ({appData.documents?.length || 0})
             </h3>
-            <p className="text-[11px] text-slate-500">Download and review all technical, commercial and statutory documents submitted by the applicant.</p>
+            <p className="text-[11px] text-slate-500">Download and review technical, commercial, and statutory documents submitted by the vendor.</p>
           </div>
           <button
             type="button"
@@ -172,21 +199,21 @@ export default function ApplicationReview() {
           </div>
         ) : (
           <div className="p-4 bg-slate-50 rounded-lg text-xs text-slate-500 italic text-center">
-            No external document files attached with this application.
+            No external document files attached with this quotation.
           </div>
         )}
       </div>
 
-      {/* CE Evaluation Decision Box */}
+      {/* Officer Evaluation Decision Box */}
       <div className="bg-gov-50 rounded-2xl p-6 border border-gov-200 space-y-4">
         <h3 className="text-sm font-bold text-gov-900 uppercase tracking-wider flex items-center">
           <Shield className="w-4 h-4 mr-2 text-gov-700" />
-          Chief Engineer Evaluation & Approval Decision
+          Officer Evaluation & Approval Decision
         </h3>
         <form onSubmit={handleUpdateStatus} className="space-y-4 text-xs">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label className="font-bold text-gov-900 block mb-1">Set Application Status</label>
+              <label className="font-bold text-gov-900 block mb-1">Set Quotation Status</label>
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
@@ -200,12 +227,12 @@ export default function ApplicationReview() {
               </select>
             </div>
             <div className="sm:col-span-2">
-              <label className="font-bold text-gov-900 block mb-1">Review Remarks / Justification</label>
+              <label className="font-bold text-gov-900 block mb-1">Review Remarks / Selection Justification</label>
               <input
                 type="text"
                 value={remarks}
                 onChange={(e) => setRemarks(e.target.value)}
-                placeholder="Enter technical audit remarks or selection notes..."
+                placeholder="Enter technical audit remarks or award notes..."
                 className="w-full px-3 py-2 border rounded-lg bg-white"
               />
             </div>
@@ -220,37 +247,37 @@ export default function ApplicationReview() {
         </form>
       </div>
 
-      {/* Selected Work Packages & Job Quotations */}
+      {/* Selected RFQ Items & Vendor Quotations */}
       {appData.selected_jobs && appData.selected_jobs.length > 0 && (
         <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm space-y-3">
           <div className="flex justify-between items-center">
             <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center">
               <Briefcase className="w-4 h-4 mr-2 text-gov-600" />
-              Selected Work Packages & Job Quotations ({appData.selected_jobs.length})
+              Selected RFQ Items & Vendor Quotations ({appData.selected_jobs.length})
             </h3>
-            <span className="text-[11px] text-slate-500 font-medium">Applicant-selected scope</span>
+            <span className="text-[11px] text-slate-500 font-medium">Vendor-selected scope</span>
           </div>
           <div className="border border-slate-200 rounded-lg overflow-hidden text-xs">
             <table className="w-full text-left">
               <thead className="bg-slate-50 border-b border-slate-200 font-bold text-slate-600">
                 <tr>
-                  <th className="p-3">Job Code</th>
-                  <th className="p-3">Job Name & Description</th>
+                  <th className="p-3">Item Code</th>
+                  <th className="p-3">Item Name & Description</th>
                   <th className="p-3">Category</th>
                   <th className="p-3">Est. Qty / Scope</th>
                   <th className="p-3">Est. Indicative Budget</th>
-                  <th className="p-3 text-right">Applicant Submitted Quote</th>
+                  <th className="p-3 text-right">Vendor Submitted Quote</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {appData.selected_jobs.map(sj => (
                   <tr key={sj.job_id}>
-                    <td className="p-3 font-mono font-bold text-gov-700">{sj.job_code || `Job #${sj.job_id}`}</td>
+                    <td className="p-3 font-mono font-bold text-gov-700">{sj.job_code || `Item #${sj.job_id}`}</td>
                     <td className="p-3">
                       <strong className="block text-slate-900">{sj.job_name}</strong>
                       {sj.remarks && (
                         <span className="text-[11px] text-slate-500 block mt-0.5">
-                          Applicant Remark: {sj.remarks}
+                          Vendor Remark: {sj.remarks}
                         </span>
                       )}
                     </td>
@@ -278,7 +305,7 @@ export default function ApplicationReview() {
             <thead className="bg-slate-50 border-b border-slate-200 font-bold text-slate-600">
               <tr>
                 <th className="p-3">#</th>
-                <th className="p-3">Job / Package</th>
+                <th className="p-3">RFQ Item</th>
                 <th className="p-3">Item Description</th>
                 <th className="p-3">Unit</th>
                 <th className="p-3">Qty</th>
@@ -293,7 +320,7 @@ export default function ApplicationReview() {
                   <tr key={idx}>
                     <td className="p-3">{item.sl_no}</td>
                     <td className="p-3 font-mono text-gov-700 font-bold text-[11px]">
-                      {matchedJob ? (matchedJob.job_code || `Job #${matchedJob.job_id}`) : (item.job_id ? `Job #${item.job_id}` : 'General')}
+                      {matchedJob ? (matchedJob.job_code || `Item #${matchedJob.job_id}`) : (item.job_id ? `Item #${item.job_id}` : 'General')}
                     </td>
                     <td className="p-3 font-semibold text-slate-900">{item.item_description}</td>
                     <td className="p-3">{item.unit}</td>

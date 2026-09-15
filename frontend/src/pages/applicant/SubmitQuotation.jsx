@@ -1,19 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import api from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
 import StatusBadge from '../../components/StatusBadge';
 import CountdownTimer from '../../components/CountdownTimer';
 import { 
   Building2, User, Calendar, Plus, Trash2, IndianRupee, Upload, 
-  CheckCircle2, AlertCircle, ArrowRight, ArrowLeft, Briefcase, CheckSquare, Square, FileCheck, Info
+  CheckCircle2, AlertCircle, ArrowRight, ArrowLeft, Briefcase, CheckSquare, Square, FileCheck, Info, ShieldCheck, Clock, AlertTriangle
 } from 'lucide-react';
 
 const UNIT_OPTIONS = [
   'MT', 'KG', 'Tonne', 'Quintal',
   'NOS', 'PCS', 'SET', 'Units',
-  'RMT', 'MTR', 'SQM', 'SQFT', 'CUM', 'CFT',
+  'SQM', 'SQFT', 'RMT', 'MTR', 'CUM', 'CFT',
   'LS', 'JOB', 'LOT', 'MONTHS', 'DAYS', 'TRIP'
+];
+
+const ELIGIBLE_CATEGORIES = [
+  'Manufacturer',
+  'Authorised Dealer',
+  'Authorised Distributor',
+  'Contractor'
 ];
 
 export default function SubmitQuotation() {
@@ -27,13 +34,16 @@ export default function SubmitQuotation() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
+  // Vendor eligibility check
+  const isVendorEligible = !user?.vendor_type || ELIGIBLE_CATEGORIES.includes(user?.vendor_type);
+
   // Step 1: Signatory & Covering Letter
   const [coveringDate, setCoveringDate] = useState(new Date().toISOString().split('T')[0]);
   const [signatoryName, setSignatoryName] = useState(user?.md_ceo_name || user?.name || '');
   const [signatoryDesignation, setSignatoryDesignation] = useState('Managing Director / Authorized Signatory');
   const [remarks, setRemarks] = useState('');
 
-  // Step 2: Job Selection (Selected Job IDs & Job-specific Remarks/Quotes)
+  // Step 2: RFQ Items Selection (Selected Item IDs & Item-specific Remarks/Quotes)
   const [selectedJobIds, setSelectedJobIds] = useState([]);
   const [jobDataMap, setJobDataMap] = useState({});
 
@@ -65,14 +75,14 @@ export default function SubmitQuotation() {
       const res = await api.get(`/tenders/${tenderId}`);
       setTender(res.data);
       if (!res.data.is_window_open) {
-        setError('Quotation window for this tender is currently closed.');
+        setError('Quotation window for this RFQ is currently closed.');
       }
 
       if (res.data.emd_amount === 0) {
         setIsEmdExempt(true);
       }
 
-      // Initialize selected jobs (select all active jobs by default)
+      // Initialize selected RFQ items (select all active items by default)
       if (res.data.jobs && res.data.jobs.length > 0) {
         const activeJobIds = res.data.jobs.filter(j => j.status === 'ACTIVE').map(j => j.job_id);
         setSelectedJobIds(activeJobIds);
@@ -92,7 +102,8 @@ export default function SubmitQuotation() {
             item_description: j.job_name,
             unit: j.unit || 'MT',
             quantity: j.estimated_quantity || 1,
-            rate_per_unit: '', // No fixed amount - applicant enters own rate
+            rate_per_unit: j.unit_rate || '', // Vendor can adjust rate
+            category: j.category || 'Supply Item',
             remarks: j.category || ''
           });
         });
@@ -101,11 +112,11 @@ export default function SubmitQuotation() {
         setProposalItems(initProposalItems);
       } else {
         setProposalItems([
-          { sl_no: 1, job_id: null, item_description: 'Supply & fabrication of structural steel components as per IS 800', unit: 'MT', quantity: 100, rate_per_unit: '', remarks: '' }
+          { sl_no: 1, job_id: null, item_description: 'Supply & fabrication of structural steel components as per IS 800', unit: 'MT', quantity: 100, rate_per_unit: '', category: 'Supply Item', remarks: '' }
         ]);
       }
     } catch (err) {
-      setError('Failed to load tender details');
+      setError('Failed to load RFQ details');
     } finally {
       setLoading(false);
     }
@@ -297,15 +308,15 @@ export default function SubmitQuotation() {
   };
 
   if (loading) {
-    return <div className="text-center py-20 text-slate-500">Loading tender submission wizard...</div>;
+    return <div className="text-center py-20 text-slate-500">Loading RFQ quotation submission wizard...</div>;
   }
 
   const stepsList = [
     { num: 1, label: 'Signatory & Covering' },
-    { num: 2, label: 'Job Package Selection' },
+    { num: 2, label: 'RFQ Items Selection' },
     { num: 3, label: 'Annexure II (Capabilities)' },
-    { num: 4, label: 'Annexure III (Line Items & Rates)' },
-    { num: 5, label: 'EMD & Documents' },
+    { num: 4, label: 'Annexure III (Line Items & Pricing)' },
+    { num: 5, label: 'EMD & Uploads' },
     { num: 6, label: 'Review & Submit' }
   ];
 
@@ -319,16 +330,47 @@ export default function SubmitQuotation() {
               {tender.tender_ref_no}
             </span>
             <h1 className="text-xl font-bold text-slate-900 mt-1">{tender.title}</h1>
-            {tender.jobs && tender.jobs.length > 0 && (
-              <span className="inline-block mt-1 text-[11px] font-semibold text-gov-700 bg-gov-50 px-2 py-0.5 rounded border border-gov-200">
-                📁 {tender.jobs.length} Work Packages Defined • {selectedJobIds.length} Selected
-              </span>
-            )}
+            <div className="flex flex-wrap gap-2 mt-2">
+              {tender.jobs && tender.jobs.length > 0 && (
+                <span className="text-[11px] font-semibold text-gov-700 bg-gov-50 px-2 py-0.5 rounded border border-gov-200">
+                  📁 {tender.jobs.length} RFQ Items • {selectedJobIds.length} Selected
+                </span>
+              )}
+              {tender.validity_period && (
+                <span className="text-[11px] font-semibold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200 flex items-center">
+                  <Clock className="w-3 h-3 mr-1" />
+                  Validity: {tender.validity_period}
+                </span>
+              )}
+            </div>
           </div>
           <div className="flex flex-col items-end gap-2">
             <StatusBadge status={tender.status} />
             <CountdownTimer targetDate={tender.quotation_to_date} />
           </div>
+        </div>
+
+        {/* Vendor Eligibility Status Notice */}
+        <div className={`p-3 rounded-xl border text-xs flex items-center justify-between ${
+          isVendorEligible 
+            ? 'bg-emerald-50 text-emerald-800 border-emerald-200' 
+            : 'bg-rose-50 text-rose-800 border-rose-200'
+        }`}>
+          <div className="flex items-center space-x-2">
+            {isVendorEligible ? (
+              <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+            ) : (
+              <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+            )}
+            <span>
+              <strong>Vendor Eligibility Status:</strong> {isVendorEligible ? `Eligible (${user?.vendor_type || 'Registered Vendor'})` : `Ineligible (${user?.vendor_type || 'Unspecified Type'})`}
+            </span>
+          </div>
+          {!isVendorEligible && (
+            <span className="text-[10px] font-bold text-rose-700">
+              Only Manufacturers, Authorised Dealers, Authorised Distributors, or Contractors may submit.
+            </span>
+          )}
         </div>
 
         {error && (
@@ -405,7 +447,7 @@ export default function SubmitQuotation() {
             </div>
 
             <div className="sm:col-span-2">
-              <label className="font-bold text-slate-700 block mb-1">Covering Letter Technical Notes / Remarks (Optional)</label>
+              <label className="font-bold text-slate-700 block mb-1">Covering Letter Notes / Commercial Remarks (Optional)</label>
               <textarea
                 rows={3}
                 value={remarks}
@@ -422,20 +464,20 @@ export default function SubmitQuotation() {
               onClick={() => setStep(2)}
               className="px-5 py-2.5 bg-gov-600 text-white font-bold rounded-lg text-xs hover:bg-gov-700 flex items-center"
             >
-              Next: Select Work Packages
+              Next: Select RFQ Items
               <ArrowRight className="w-4 h-4 ml-1.5" />
             </button>
           </div>
         </div>
       )}
 
-      {/* STEP 2: JOB PACKAGE SELECTION */}
+      {/* STEP 2: RFQ ITEMS SELECTION */}
       {step === 2 && (
         <div className="bg-white rounded-xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
           <div className="flex flex-wrap justify-between items-center gap-2">
             <div>
-              <h2 className="text-base font-bold text-slate-900">Step 2: Work Packages / Jobs Selection</h2>
-              <p className="text-xs text-slate-500">Select which work package(s) your firm is quoting for. You can choose one, multiple, or all packages.</p>
+              <h2 className="text-base font-bold text-slate-900">Step 2: RFQ Items Selection</h2>
+              <p className="text-xs text-slate-500">Select which RFQ items your firm is quoting for. You can choose one, multiple, or all items.</p>
             </div>
             {tender?.jobs && tender.jobs.length > 0 && (
               <button
@@ -443,7 +485,7 @@ export default function SubmitQuotation() {
                 onClick={selectAllJobs}
                 className="px-3 py-1 bg-gov-50 text-gov-700 font-bold rounded text-xs border border-gov-200 hover:bg-gov-100"
               >
-                Select All Jobs
+                Select All Items
               </button>
             )}
           </div>
@@ -474,11 +516,13 @@ export default function SubmitQuotation() {
                         <div>
                           <div className="flex items-center space-x-2">
                             <span className="font-mono font-bold text-xs bg-white px-2 py-0.5 rounded border border-slate-300 text-gov-800">
-                              {job.job_code || `JOB #${job.job_id}`}
+                              {job.job_code || `ITEM #${job.job_id}`}
                             </span>
                             <span className="font-bold text-sm text-slate-900">{job.job_name}</span>
                             {job.category && (
-                              <span className="text-[10px] bg-blue-100 text-blue-800 font-semibold px-2 py-0.5 rounded">
+                              <span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${
+                                job.category === 'Supply Item' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'
+                              }`}>
                                 {job.category}
                               </span>
                             )}
@@ -488,7 +532,10 @@ export default function SubmitQuotation() {
                           )}
                           <div className="flex flex-wrap gap-4 text-xs text-slate-500 mt-2">
                             {job.estimated_quantity && (
-                              <span><strong>Scope Qty:</strong> {job.estimated_quantity} {job.unit}</span>
+                              <span><strong>Quantity:</strong> {job.estimated_quantity} {job.unit}</span>
+                            )}
+                            {job.unit_rate && (
+                              <span><strong>Estimated Unit Rate:</strong> ₹{job.unit_rate.toLocaleString('en-IN')}</span>
                             )}
                             {job.completion_period && (
                               <span><strong>Period:</strong> {job.completion_period}</span>
@@ -501,11 +548,11 @@ export default function SubmitQuotation() {
                     {isSelected && (
                       <div className="mt-3 pt-3 border-t border-gov-200/60" onClick={(e) => e.stopPropagation()}>
                         <label className="text-[11px] font-bold text-gov-800 block mb-1">
-                          Applicant Remarks / Notes for this Work Package:
+                          Vendor Remarks / Technical Notes for this RFQ Item:
                         </label>
                         <input
                           type="text"
-                          placeholder="e.g. Quoting with dedicated automatic submerged arc welding lines"
+                          placeholder="e.g. Quoting with IS 2062 Grade E250BR certified steel plates"
                           value={jobDataMap[job.job_id]?.remarks || ''}
                           onChange={(e) => handleJobRemarksChange(job.job_id, e.target.value)}
                           className="w-full px-3 py-1.5 text-xs bg-white border rounded-lg focus:ring-2 focus:ring-gov-500 focus:outline-none"
@@ -518,7 +565,7 @@ export default function SubmitQuotation() {
             </div>
           ) : (
             <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-600">
-              This tender does not have partitioned job packages. Your proposal will cover the entire scope of work.
+              This RFQ does not have partitioned items. Your proposal will cover the entire scope of work.
             </div>
           )}
 
@@ -535,7 +582,7 @@ export default function SubmitQuotation() {
               type="button"
               onClick={() => {
                 if (tender?.jobs && tender.jobs.length > 0 && selectedJobIds.length === 0) {
-                  alert('Please select at least one job package before continuing.');
+                  alert('Please select at least one RFQ item before continuing.');
                   return;
                 }
                 setStep(3);
@@ -555,7 +602,7 @@ export default function SubmitQuotation() {
           <div className="flex justify-between items-center">
             <div>
               <h2 className="text-base font-bold text-slate-900">Step 3: Annexure II — Past Technical & Financial Capabilities</h2>
-              <p className="text-xs text-slate-500">Provide details of similar fabrication or infrastructure works executed previously.</p>
+              <p className="text-xs text-slate-500">Provide details of similar engineering or supply works executed previously.</p>
             </div>
             <button
               type="button"
@@ -647,12 +694,12 @@ export default function SubmitQuotation() {
         </div>
       )}
 
-      {/* STEP 4: ANNEXURE III - FLEXIBLE PRICING, UNIT MASTER & DOCUMENT PROVISION */}
+      {/* STEP 4: ANNEXURE III - FLEXIBLE PRICING, UNIT MASTER & RFQ ITEMS */}
       {step === 4 && (
         <div className="bg-white rounded-xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
           <div className="flex justify-between items-center">
             <div>
-              <h2 className="text-base font-bold text-slate-900">Step 4: Annexure III — Job-Wise Technical Proposal & Line Item Pricing</h2>
+              <h2 className="text-base font-bold text-slate-900">Step 4: Annexure III — RFQ Itemized Pricing & BOQ Proposal</h2>
               <p className="text-xs text-slate-500">Enter your firm's quoted unit rate for each item. Amounts calculate automatically.</p>
             </div>
             <button
@@ -665,7 +712,7 @@ export default function SubmitQuotation() {
             </button>
           </div>
 
-          {/* Mandatory Guidance Note */}
+          {/* Guidance Note */}
           <div className="p-4 bg-amber-50 border-l-4 border-amber-500 rounded-r-xl flex items-start space-x-3">
             <Info className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
             <div className="text-xs text-amber-900 space-y-1">
@@ -676,7 +723,7 @@ export default function SubmitQuotation() {
 
           <div className="space-y-3">
             {proposalItems.map((row, idx) => {
-              // Hide item if it belongs to an unselected job
+              // Hide item if it belongs to an unselected item
               if (row.job_id && !selectedJobIds.includes(row.job_id)) return null;
 
               const rowQty = parseFloat(row.quantity) || 0;
@@ -689,13 +736,13 @@ export default function SubmitQuotation() {
 
                   {tender?.jobs && tender.jobs.length > 0 && (
                     <div className="sm:col-span-3">
-                      <label className="text-[10px] text-slate-500 block">Work Package / Job</label>
+                      <label className="text-[10px] text-slate-500 block">RFQ Item</label>
                       <select
                         value={row.job_id || ''}
                         onChange={(e) => handleProposalChange(idx, 'job_id', e.target.value ? parseInt(e.target.value) : null)}
                         className="w-full px-2 py-1.5 border rounded bg-white font-medium"
                       >
-                        <option value="">General / All Jobs</option>
+                        <option value="">General / All Items</option>
                         {tender.jobs.filter(j => selectedJobIds.includes(j.job_id)).map(j => (
                           <option key={j.job_id} value={j.job_id}>
                             {j.job_code} - {j.job_name.slice(0, 25)}...
@@ -794,7 +841,7 @@ export default function SubmitQuotation() {
 
           {/* Grand Total Bar */}
           <div className="p-4 bg-gov-50 rounded-xl border border-gov-200 flex flex-wrap justify-between items-center text-sm gap-2">
-            <span className="font-bold text-gov-900">Your Submitted Total Quoted Amount for {selectedJobIds.length} Job(s):</span>
+            <span className="font-bold text-gov-900">Your Submitted Total Quoted Amount for {selectedJobIds.length} RFQ Item(s):</span>
             <span className="text-xl font-extrabold text-gov-900 flex items-center">
               <IndianRupee className="w-5 h-5 mr-0.5 text-amber-600" />
               ₹{grandTotalQuoted.toLocaleString('en-IN')}
@@ -837,7 +884,7 @@ export default function SubmitQuotation() {
               onClick={() => setStep(5)}
               className="px-5 py-2.5 bg-gov-600 text-white font-bold rounded-lg text-xs hover:bg-gov-700 flex items-center"
             >
-              Next: EMD & Documents
+              Next: EMD & Uploads
               <ArrowRight className="w-4 h-4 ml-1.5" />
             </button>
           </div>
@@ -849,7 +896,7 @@ export default function SubmitQuotation() {
         <div className="bg-white rounded-xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
           <div>
             <h2 className="text-base font-bold text-slate-900">Step 5: EMD Deposit & Verification Uploads</h2>
-            <p className="text-xs text-slate-500">Earnest Money Deposit (EMD) payment and receipt proof are optional if your firm is exempted or tender has nil EMD.</p>
+            <p className="text-xs text-slate-500">Earnest Money Deposit (EMD) payment and receipt proof are optional if your firm is exempted or RFQ has nil EMD.</p>
           </div>
 
           {/* EMD Exemption Toggle */}
@@ -975,11 +1022,11 @@ export default function SubmitQuotation() {
           <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3 text-xs">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <span className="text-slate-400 block text-[10px] uppercase font-semibold">Tender Ref</span>
+                <span className="text-slate-400 block text-[10px] uppercase font-semibold">RFQ Ref</span>
                 <span className="font-bold text-slate-800">{tender.tender_ref_no}</span>
               </div>
               <div>
-                <span className="text-slate-400 block text-[10px] uppercase font-semibold">Applicant Firm</span>
+                <span className="text-slate-400 block text-[10px] uppercase font-semibold">Vendor Firm</span>
                 <span className="font-bold text-slate-800">{user?.firm_name}</span>
               </div>
               <div>
@@ -996,20 +1043,20 @@ export default function SubmitQuotation() {
             </div>
           </div>
 
-          {/* Selected Jobs Summary */}
+          {/* Selected Items Summary */}
           {tender.jobs && tender.jobs.length > 0 && (
             <div className="space-y-2">
               <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
-                Selected Job Packages ({selectedJobIds.length}):
+                Selected RFQ Items ({selectedJobIds.length}):
               </h3>
               <div className="border border-slate-200 rounded-lg overflow-hidden text-xs">
                 <table className="w-full text-left">
                   <thead className="bg-slate-50 border-b border-slate-200 font-bold text-slate-600">
                     <tr>
-                      <th className="p-2.5">Job Code</th>
-                      <th className="p-2.5">Job Name</th>
+                      <th className="p-2.5">Item Code</th>
+                      <th className="p-2.5">Item Description</th>
                       <th className="p-2.5">Category</th>
-                      <th className="p-2.5 text-right">Applicant Quoted Total</th>
+                      <th className="p-2.5 text-right">Vendor Quoted Total</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -1037,7 +1084,7 @@ export default function SubmitQuotation() {
           <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2 text-xs">
             <label className="font-bold text-slate-800 block flex items-center">
               <FileCheck className="w-4 h-4 mr-1.5 text-gov-600" />
-              Attach Signed RFQ Document / Tender Acceptance Undertaking (Optional PDF)
+              Attach Signed RFQ Document / Quotation Acceptance Undertaking (Optional PDF)
             </label>
             <input
               type="file"
@@ -1071,11 +1118,15 @@ export default function SubmitQuotation() {
             </button>
             <button
               type="button"
-              disabled={submitting}
+              disabled={submitting || !isVendorEligible}
               onClick={handleFinalSubmit}
-              className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-sm shadow-md transition flex items-center"
+              className={`px-6 py-3 font-bold rounded-lg text-sm shadow-md transition flex items-center ${
+                !isVendorEligible
+                  ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
+                  : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+              }`}
             >
-              {submitting ? 'Submitting to Database...' : 'Confirm & Submit Quotation'}
+              {submitting ? 'Submitting to Database...' : !isVendorEligible ? 'Ineligible to Submit' : 'Confirm & Submit Quotation'}
               <CheckCircle2 className="w-4 h-4 ml-2" />
             </button>
           </div>

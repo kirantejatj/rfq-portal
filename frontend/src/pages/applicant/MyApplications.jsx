@@ -33,7 +33,7 @@ export default function MyApplications() {
         <div>
           <h1 className="text-2xl font-bold text-slate-900">My Submitted Quotations</h1>
           <p className="text-xs text-slate-500">
-            Role Policy: You can see <strong>ONLY</strong> your own firm's submissions across all tenders.
+            Role Policy: You can see <strong>ONLY</strong> your own firm's submissions across all RFQs.
           </p>
         </div>
         <Link
@@ -53,12 +53,12 @@ export default function MyApplications() {
         <div className="bg-white rounded-xl border border-slate-200 p-12 text-center shadow-sm">
           <FileText className="w-12 h-12 text-slate-300 mx-auto mb-3" />
           <h3 className="text-base font-bold text-slate-700">No Quotations Submitted Yet</h3>
-          <p className="text-slate-500 text-xs mt-1">Browse published tenders and submit your technical & commercial bids.</p>
+          <p className="text-slate-500 text-xs mt-1">Browse published RFQs and submit your technical & commercial bids.</p>
           <Link
             to="/"
             className="mt-4 inline-block px-4 py-2 bg-gov-600 text-white text-xs font-bold rounded-lg"
           >
-            Explore Active Tenders
+            Explore Active RFQs
           </Link>
         </div>
       ) : (
@@ -68,8 +68,8 @@ export default function MyApplications() {
               <thead>
                 <tr className="bg-slate-50 text-slate-600 font-bold border-b border-slate-200 uppercase tracking-wider">
                   <th className="py-3 px-4">App Ref No</th>
-                  <th className="py-3 px-4">Tender Ref / Title</th>
-                  <th className="py-3 px-4">Selected Job Packages</th>
+                  <th className="py-3 px-4">RFQ Ref / Title</th>
+                  <th className="py-3 px-4">Selected RFQ Items</th>
                   <th className="py-3 px-4">Signatory</th>
                   <th className="py-3 px-4">Quoted Amount</th>
                   <th className="py-3 px-4">Submitted Date</th>
@@ -90,7 +90,7 @@ export default function MyApplications() {
                         <div className="flex flex-wrap gap-1">
                           {app.selected_jobs.map(sj => (
                             <span key={sj.job_id} className="px-1.5 py-0.5 bg-gov-50 text-gov-800 font-mono font-semibold rounded text-[10px] border border-gov-200" title={sj.job_name}>
-                              {sj.job_code || `Job #${sj.job_id}`}
+                              {sj.job_code || `Item #${sj.job_id}`}
                             </span>
                           ))}
                         </div>
