@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RFQ Portal — Complete File Directory & Component Guide</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      --primary-dark: #172554;
+      --primary-light: #eff6ff;
+      --accent: #f59e0b;
+      --slate-50: #f8fafc;
+      --slate-100: #f1f5f9;
+      --slate-200: #e2e8f0;
+      --slate-700: #334155;
+      --slate-800: #1e293b;
+      --slate-900: #0f172a;
+      --success: #10b981;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #f8fafc;
+      color: #1e293b;
+      line-height: 1.6;
+      padding: 0;
+    }
+    .header {
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+      color: white;
+      padding: 40px 20px;
+      text-align: center;
+      border-bottom: 4px solid #f59e0b;
+    }
+    .badge {
+      display: inline-block;
+      background: rgba(245, 158, 11, 0.2);
+      color: #fbbf24;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+    }
+    h1 { font-size: 2.2rem; font-weight: 800; margin-bottom: 8px; }
+    .subtitle { font-size: 1rem; color: #93c5fd; max-width: 800px; margin: 0 auto 16px; }
+    .meta-bar {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      font-size: 0.85rem;
+      color: #cbd5e1;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 30px auto;
+      padding: 0 20px 60px;
+    }
+    .search-box {
+      background: white;
+      padding: 16px 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      border: 1px solid var(--slate-200);
+      margin-bottom: 30px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .search-box input {
+      flex: 1;
+      padding: 10px 16px;
+      border: 1px solid var(--slate-200);
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+      transition: all 0.2s;
+    }
+    .search-box input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.15);
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      border: 1px solid var(--slate-200);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+    .card-header {
+      background: #f8fafc;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--slate-200);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .card-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--slate-900);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+    th {
+      background: #f1f5f9;
+      padding: 12px 16px;
+      font-weight: 700;
+      color: var(--slate-700);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--slate-200);
+    }
+    td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--slate-100);
+      vertical-align: top;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background-color: #f8fafc; }
+    .path-code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      background: #f1f5f9;
+      color: #1e3a8a;
+      padding: 3px 8px;
+      border-radius: 6px;
+      border: 1px solid #e2e8f0;
+      display: inline-block;
+      font-weight: 600;
+    }
+    .tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-right: 4px;
+      margin-bottom: 4px;
+    }
+    .tag-blue { background: #dbeafe; color: #1e40af; }
+    .tag-green { background: #d1fae5; color: #065f46; }
+    .tag-purple { background: #f3e8ff; color: #6b21a8; }
+    .tag-amber { background: #fef3c7; color: #92400e; }
+    .btn-copy {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      cursor: pointer;
+      font-weight: 600;
+      color: #475569;
+      margin-top: 4px;
+    }
+    .btn-copy:hover { background: #e2e8f0; color: #0f172a; }
+    .footer {
+      text-align: center;
+      color: #64748b;
+      font-size: 0.85rem;
+      margin-top: 40px;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="badge">Government of Andhra Pradesh • AGIC</div>
+    <h1>RFQ Portal — Complete File Inventory</h1>
+    <div class="subtitle">Complete catalog of every backend router, database model, frontend component, and system utility file with descriptions.</div>
+    <div class="meta-bar">
+      <span>📁 Root: <strong>rfq-portal/</strong></span>
+      <span>⚡ Stack: <strong>FastAPI + PostgreSQL + React (Vite)</strong></span>
+      <span>🚀 Version: <strong>2.0.0</strong></span>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="search-box">
+      <span style="font-size: 1.2rem;">🔍</span>
+      <input type="text" id="filterInput" placeholder="Filter by file path, name, or keyword (e.g. auth, tender, quotation, navbar)..." onkeyup="filterFiles()">
+    </div>
+
+    <!-- SECTION 1: ROOT SCRIPTS -->
+    <div class="card file-group">
+      <div class="card-header">
+        <div class="card-title">🚀 1. Root System Files & Automation Scripts</div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 35%;">File Location</th>
+            <th>Contents & Functional Role</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <span class="path-code">START_PORTAL.bat</span>
+            </td>
+            <td>
+              <span class="tag tag-green">Launcher</span>
+              <strong>One-Click Startup Script:</strong> Checks and starts the PostgreSQL database, launches the FastAPI backend server on <code>localhost:8000</code>, boots Vite frontend on <code>localhost:5173</code>, and automatically opens the portal in the default browser.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span class="path-code">STOP_PORTAL.bat</span>
+            </td>
+            <td>
+              <span class="tag tag-amber">Utility</span>
+              <strong>One-Click Shutdown Script:</strong> Gracefully finds and terminates background Python (uvicorn) and Node.js (Vite) processes running the portal.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span class="path-code">ALL_FILES_DIRECTORY_AND_DESCRIPTIONS.md</span>
+            </td>
+            <td>
+              <span class="tag tag-blue">Documentation</span>
+              <strong>Master File Index:</strong> Comprehensive markdown document providing full path listings and descriptions for all project files.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span class="path-code">SYSTEM_DESIGN_AND_DB_DOCUMENTATION.md</span>
+            </td>
+            <td>
+              <span class="tag tag-blue">Documentation</span>
+              <strong>System Design & Database Architecture:</strong> Detailed specification covering PostgreSQL schemas, entity relationships, security models, and lifecycle states.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span class="path-code">AGIC_RFQ_Portal_Complete_Master_Documentation.html</span>
+            </td>
+            <td>
+              <span class="tag tag-purple">Documentation</span>
+              <strong>Interactive Master HTML Manual:</strong> Standalone offline reference manual containing diagrams, workflows, API specifications, and architecture flows.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span class="path-code">AGIC_RFQ_Portal_KT_and_User_Guide.html</span>
+            </td>
+            <td>
+              <span class="tag tag-purple">KT Guide</span>
+              <strong>Knowledge Transfer & User Guide:</strong> Complete interactive guide for Vendors and Officers with step-by-step submission instructions and role guides.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- SECTION 2: BACKEND -->
+    <div class="card file-group">
+      <div class="card-header">
+        <div class="card-title">⚙️ 2. Backend Application (<code>backend/</code>)</div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 35%;">File Location</th>
+            <th>Contents & Functional Role</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <span class="path-code">backend/app/main.py</span>
+            </td>
+            <td>
+              <span class="tag tag-green">Core</span>
+              <strong>FastAPI App Entrypoint:</strong> Configures CORS middleware, mounts <code>/uploads</code> static directory, registers API routers, customizes OpenAPI metadata, and mounts Scalar interactive API docs at <code>/scalar</code>.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span class="path-code">backend/run.py</span>
+            </td>
+            <td>
+              <span class="tag tag-green">Server</span>
+              <strong>Uvicorn Runner:</strong> Boots the FastAPI app on <code>0.0.0.0:8000</code> with auto-reload enabled.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span class="path-code">backend/seed.py</span>
+            </td>
+            <td>
+              <span class="tag tag-amber">Database</span>
+              <strong>Database Seeding Script:</strong> Populates initial PostgreSQL tables with Officer accounts, sample eligible vendors, active RFQs with RFQ Items, and quotation submissions.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span class="path-code">backend/app/core/config.py</span>
+            </td>
+            <td>
+              <span class="tag tag-blue">Config</span>
+              <strong>Application Settings:</strong> Manages environment variables, database URI, JWT secret key, token expiration, and upload directories.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span class="path-code">backend/app/core/database.py</span>
+            </td>
+            <td>
+              <span class="tag tag-blue">Database</span>
+              <strong>SQLAlchemy Engine:</strong> Initializes PostgreSQL database connection engine, <code>SessionLocal</code> session factory, and <code>get_db</code> dependency.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span class="path-code">backend/app/core/security.py</span>
+            </td>
+            <td>
+              <span class="tag tag-purple">Security</span>
+              <strong>Hashing & JWT Token Handler:</strong> Password hashing via bcrypt, password verification, and JWT creation with subject and role claims.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span class="path-code">backend/app/core/dependencies.py</span>
+            </td>
+            <td>
+              <span class="tag tag-purple">RBAC</span>
+              <strong>Auth Dependencies & Guards:</strong> Role-based access control handlers (<code>get_current_user</code>, <code>require_ce</code>, <code>require_applicant</code>, <code>require_super_admin</code>).
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span class="path-code">backend/app/models/schema.py</span>
+            </td>
+            <td>
+              <span class="tag tag-blue">ORM Models</span>
+              <strong>Database Entities (PostgreSQL):</strong> Defines 14 tables including <code>CEUser</code>, <code>Applicant</code> (with <code>vendor_type</code>), <code>RFQTender</code> (with <code>quotation_valid_upto</code>), <code>RFQJob</code> (with <code>category</code>, <code>unit_rate</code>, <code>amount</code>), <code>Application</code>, and <code>ApplicationStatusHistory</code>.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span class="path-code">backend/app/routers/auth.py</span>
+            </td>
+            <td>
+              <span class="tag tag-green">Endpoints</span>
+              <strong>Auth API Router:</strong> Handles OTP generation/verification, Vendor registration with 4 eligible categories, Vendor login, Officer login, and <code>GET /api/auth/me</code> with eligibility check.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span class="path-code">backend/app/routers/tenders.py</span>
+            </td>
+            <td>
+              <span class="tag tag-green">Endpoints</span>
+              <strong>RFQ Lifecycle Router:</strong> Creates, lists, updates, and publishes RFQs. Manages RFQ Items (Supply Item vs Only Rate), quotation validity periods, and document attachments.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span class="path-code">backend/app/routers/applications.py</span>
+            </td>
+            <td>
+              <span class="tag tag-green">Endpoints</span>
+              <strong>Quotations & Review Router:</strong> Enforces <strong>Vendor Eligibility</strong> on submissions, enforces <strong>Strict Officer Authorization</strong> (403 for non-creator officers), manages evaluation decisions (ACCEPTED/REJECTED), and generates dynamic ZIP document downloads.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span class="path-code">backend/app/routers/clarifications.py</span>
+            </td>
+            <td>
+              <span class="tag tag-green">Endpoints</span>
+              <strong>Clarifications Router:</strong> Handles pre-bid query submission by vendors and official replies by departmental officers.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span class="path-code">backend/app/routers/stats.py</span>
+            </td>
+            <td>
+              <span class="tag tag-green">Endpoints</span>
+              <strong>Analytics Router:</strong> Provides dashboard metrics scoped strictly to RFQs created by the logged-in officer.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span class="path-code">backend/app/schemas/auth.py</span>
+            </td>
+            <td>
+              <span class="tag tag-blue">Schemas</span>
+              <strong>Auth Pydantic Models:</strong> Validates OTP requests, registration schemas with vendor types, and login models.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span class="path-code">backend/app/schemas/tender.py</span>
+            </td>
+            <td>
+              <span class="tag tag-blue">Schemas</span>
+              <strong>RFQ Pydantic Models:</strong> Validates RFQ Items (category, unit rate, amount), quotation validity periods, and tender responses.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span class="path-code">backend/app/schemas/application.py</span>
+            </td>
+            <td>
+              <span class="tag tag-blue">Schemas</span>
+              <strong>Application Pydantic Models:</strong> Validates quotation submissions, Annexure II capabilities, Annexure III itemized pricing breakdown, and status updates.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span class="path-code">backend/app/schemas/clarification.py</span>
+            </td>
+            <td>
+              <span class="tag tag-blue">Schemas</span>
+              <strong>Clarification Schemas:</strong> Request and response models for pre-bid queries.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- SECTION 3: FRONTEND -->
+    <div class="card file-group">
+      <div class="card-header">
+        <div class="card-title">🖥️ 3. Frontend Application (<code>frontend/</code>)</div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 35%;">File Location</th>
+            <th>Contents & Functional Role</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <span class="path-code">frontend/src/App.jsx</span>
+            </td>
+            <td>
+              <span class="tag tag-green">Routing</span>
+              <strong>Main App Router:</strong> Configures application routes, role-based private routes (Vendor vs Officer), global navbar, and footer.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span class="path-code">frontend/src/api/client.js</span>
+            </td>
+            <td>
+              <span class="tag tag-blue">Network</span>
+              <strong>Axios API Client:</strong> Preconfigured HTTP client attaching JWT tokens to outgoing requests and handling global error responses.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span class="path-code">frontend/src/context/AuthContext.jsx</span>
+            </td>
+            <td>
+              <span class="tag tag-purple">State</span>
+              <strong>Auth Context Provider:</strong> React Context managing user authentication, login state, role persistence, and logout workflows.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span class="path-code">frontend/src/components/Navbar.jsx</span>
+            </td>
+            <td>
+              <span class="tag tag-green">UI Component</span>
+              <strong>Header Navigation:</strong> Displays RFQ Portal branding, role-based navigation buttons, active user info, and avatar menu.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span class="path-code">frontend/src/components/Footer.jsx</span>
+            </td>
+            <td>
+              <span class="tag tag-green">UI Component</span>
+              <strong>Portal Footer:</strong> Official state government branding, links, contacts, and copyright information.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span class="path-code">frontend/src/components/StatusBadge.jsx</span>
+            </td>
+            <td>
+              <span class="tag tag-green">UI Component</span>
+              <strong>Status Pill Component:</strong> Dynamic color-coded badges for RFQ states (PUBLISHED, CLOSED) and quotation evaluation states (ACCEPTED, REJECTED, SUBMITTED).
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span class="path-code">frontend/src/components/CountdownTimer.jsx</span>
+            </td>
+            <td>
+              <span class="tag tag-green">UI Component</span>
+              <strong>Live Deadline Countdown:</strong> Real-time countdown timer showing remaining days, hours, minutes, and seconds for RFQ submission.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span class="path-code">frontend/src/pages/Home.jsx</span>
+            </td>
+            <td>
+              <span class="tag tag-blue">Page</span>
+              <strong>Public Home Page:</strong> Hero banner, search bar, active RFQs directory, category filters, and live statistical counters.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span class="path-code">frontend/src/pages/TenderDetails.jsx</span>
+            </td>
+            <td>
+              <span class="tag tag-blue">Page</span>
+              <strong>RFQ Details Dossier:</strong> Detailed RFQ view with Quotation Validity Period, RFQ Items Schedule (Supply Item vs Only Rate), EMD amounts, and pre-bid Q&A.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span class="path-code">frontend/src/pages/auth/ApplicantLogin.jsx</span>
+            </td>
+            <td>
+              <span class="tag tag-purple">Page</span>
+              <strong>Vendor Portal Login:</strong> Mobile OTP and password authentication for registered Vendors.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span class="path-code">frontend/src/pages/auth/ApplicantRegister.jsx</span>
+            </td>
+            <td>
+              <span class="tag tag-purple">Page</span>
+              <strong>Vendor Registration Page:</strong> Registration form with mandatory 4 eligible vendor categories, OTP verification, GSTIN, and PAN details.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span class="path-code">frontend/src/pages/auth/CELogin.jsx</span>
+            </td>
+            <td>
+              <span class="tag tag-purple">Page</span>
+              <strong>Officer Portal Login:</strong> Departmental login page for Chief Engineers and Executive Officers.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span class="path-code">frontend/src/pages/applicant/ApplicantDashboard.jsx</span>
+            </td>
+            <td>
+              <span class="tag tag-blue">Page</span>
+              <strong>Vendor Workspace:</strong> Vendor profile badge, eligibility status indicator, submission counters, and active RFQ shortcuts.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span class="path-code">frontend/src/pages/applicant/MyApplications.jsx</span>
+            </td>
+            <td>
+              <span class="tag tag-blue">Page</span>
+              <strong>Vendor Quotations Matrix:</strong> List of all submitted quotations with custom amounts, dates, and live review statuses.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span class="path-code">frontend/src/pages/applicant/SubmitQuotation.jsx</span>
+            </td>
+            <td>
+              <span class="tag tag-blue">Page</span>
+              <strong>Quotation Submission Wizard:</strong> Multi-step quotation workflow covering Eligibility Check, Covering Letter, RFQ Items selection, Annexure II, Annexure III pricing, and EMD documents.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span class="path-code">frontend/src/pages/ce/CEDashboard.jsx</span>
+            </td>
+            <td>
+              <span class="tag tag-blue">Page</span>
+              <strong>Officer Executive Panel:</strong> Dashboard showing RFQs created by the officer, received quotation counts, pending reviews, and RFQ table.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span class="path-code">frontend/src/pages/ce/CreateTender.jsx</span>
+            </td>
+            <td>
+              <span class="tag tag-blue">Page</span>
+              <strong>Raise New RFQ:</strong> Creation form for Officers to draft and publish RFQs, set Quotation Validity dates, and add multiple RFQ Items with unit rates and quantities.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span class="path-code">frontend/src/pages/ce/TenderSubmissions.jsx</span>
+            </td>
+            <td>
+              <span class="tag tag-blue">Page</span>
+              <strong>Quotation Submissions Matrix:</strong> Comparative price matrix of all vendor bids. Protected by <strong>Strict Officer Authorization Guard</strong>.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span class="path-code">frontend/src/pages/ce/ApplicationReview.jsx</span>
+            </td>
+            <td>
+              <span class="tag tag-blue">Page</span>
+              <strong>Quotation Evaluation & Award Dossier:</strong> Officer evaluation view with vendor profile, line items, ZIP document download, and ACCEPT/REJECT decision box.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span class="path-code">frontend/src/pages/admin/ApiWorkbench.jsx</span>
+            </td>
+            <td>
+              <span class="tag tag-amber">Developer</span>
+              <strong>Interactive API Workbench:</strong> Dedicated development console at <code>/developer</code> to inspect and execute all backend REST endpoints directly.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="footer">
+      RFQ Portal • Government of Andhra Pradesh • Built with FastAPI, PostgreSQL, and React
+    </div>
+  </div>
+
+  <script>
+    function filterFiles() {
+      const input = document.getElementById('filterInput').value.toLowerCase();
+      const rows = document.querySelectorAll('tbody tr');
+      rows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        row.style.display = text.includes(input) ? '' : 'none';
+      });
+    }
+  </script>
+</body>
+</html>
