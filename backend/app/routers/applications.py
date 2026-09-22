@@ -344,9 +344,18 @@ def download_all_application_documents(
     if not app_obj:
         raise HTTPException(status_code=404, detail="Application not found")
 
-    # Security: Applicant only downloads their own, CE downloads any
+    # Security: Applicant only downloads their own quotation docs
     if current_user["role"] == "APPLICANT" and app_obj.applicant_id != current_user["id"]:
-        raise HTTPException(status_code=403, detail="Forbidden")
+        raise HTTPException(status_code=403, detail="Forbidden: You can only download documents for your own quotation")
+
+    # Security: CE/Officer only downloads documents for RFQs created by them (unless SUPER_ADMIN)
+    if current_user["role"] in ["CE", "ADMIN"] and current_user["role"] != "SUPER_ADMIN":
+        tender = db.query(RFQTender).filter(RFQTender.tender_id == app_obj.tender_id).first()
+        if tender and tender.created_by != current_user["id"]:
+            raise HTTPException(
+                status_code=403,
+                detail=f"Access forbidden: Only the Officer who raised RFQ {tender.tender_ref_no or tender.tender_id} has authorization to download submitted quotation documents."
+            )
 
     docs = db.query(ApplicationDocument).filter(ApplicationDocument.application_id == application_id).all()
     applicant_docs = db.query(ApplicantDocument).filter(ApplicantDocument.applicant_id == app_obj.applicant_id).all()
