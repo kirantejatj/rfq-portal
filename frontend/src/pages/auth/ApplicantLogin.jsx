@@ -224,8 +224,77 @@ export default function ApplicantLogin() {
           </form>
         )}
 
-        <div className="pt-4 border-t border-slate-100 text-center space-y-2 text-xs">
-          <div className="text-slate-600">
+        <div className="pt-4 border-t border-slate-100 space-y-3 text-xs">
+          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block text-center">
+            ⚡ Quick Demo Accounts (Select to Auto-Fill):
+          </span>
+          <div className="grid grid-cols-1 gap-1.5 text-left text-xs">
+            <button
+              type="button"
+              onClick={() => { setMobile('9111222333'); setPassword('password123'); setLoginMethod('PASSWORD'); setError(''); }}
+              className="p-2 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 transition flex justify-between items-center text-slate-900"
+            >
+              <div>
+                <strong className="block text-[11px]">Vendor 1: Apex Heavy Engineering</strong>
+                <span className="text-[10px] text-slate-500">Manufacturer (Heavy Steel & Girders)</span>
+              </div>
+              <span className="font-mono text-[10px] font-bold bg-white px-1.5 py-0.5 rounded border border-slate-300">9111222333</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => { setMobile('9222333444'); setPassword('password123'); setLoginMethod('PASSWORD'); setError(''); }}
+              className="p-2 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 transition flex justify-between items-center text-slate-900"
+            >
+              <div>
+                <strong className="block text-[11px]">Vendor 2: Godavari Flow & Hydro Controls</strong>
+                <span className="text-[10px] text-slate-500">Authorised Dealer (Pumps & Valves)</span>
+              </div>
+              <span className="font-mono text-[10px] font-bold bg-white px-1.5 py-0.5 rounded border border-slate-300">9222333444</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => { setMobile('9333444555'); setPassword('password123'); setLoginMethod('PASSWORD'); setError(''); }}
+              className="p-2 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 transition flex justify-between items-center text-slate-900"
+            >
+              <div>
+                <strong className="block text-[11px]">Vendor 3: Amaravati Premier Infra Contractors</strong>
+                <span className="text-[10px] text-slate-500">Contractor (Civil & Precast Works)</span>
+              </div>
+              <span className="font-mono text-[10px] font-bold bg-white px-1.5 py-0.5 rounded border border-slate-300">9333444555</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => { setMobile('9444555666'); setPassword('password123'); setLoginMethod('PASSWORD'); setError(''); }}
+              className="p-2 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 transition flex justify-between items-center text-slate-900"
+            >
+              <div>
+                <strong className="block text-[11px]">Vendor 4: VoltMatrix Electrical & Power</strong>
+                <span className="text-[10px] text-slate-500">Authorised Distributor (Substations & Cables)</span>
+              </div>
+              <span className="font-mono text-[10px] font-bold bg-white px-1.5 py-0.5 rounded border border-slate-300">9444555666</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => { setMobile('9555666777'); setPassword('password123'); setLoginMethod('PASSWORD'); setError(''); }}
+              className="p-2 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 transition flex justify-between items-center text-slate-900"
+            >
+              <div>
+                <strong className="block text-[11px]">Vendor 5: Southern Precision Valves</strong>
+                <span className="text-[10px] text-slate-500">Manufacturer (Precision Valves & Sluice Gates)</span>
+              </div>
+              <span className="font-mono text-[10px] font-bold bg-white px-1.5 py-0.5 rounded border border-slate-300">9555666777</span>
+            </button>
+          </div>
+
+          <div className="text-center pt-1 text-[11px] text-slate-500">
+            Password for all accounts: <code className="bg-slate-100 px-1 py-0.5 rounded text-gov-800 font-bold">password123</code> or <code className="bg-slate-100 px-1 py-0.5 rounded text-gov-800 font-bold">app123</code>
+          </div>
+
+          <div className="text-center text-slate-600 pt-2 border-t border-slate-100">
             First time vendor / bidder?{' '}
             <Link to="/applicant/register" className="text-gov-600 font-bold hover:underline">
               Register Vendor Profile
