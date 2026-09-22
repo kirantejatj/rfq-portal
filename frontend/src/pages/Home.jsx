@@ -145,10 +145,10 @@ export default function Home() {
                 {/* Key Spec Metrics */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50 p-3 rounded-lg border border-slate-100 text-xs mb-3">
                   <div>
-                    <span className="text-slate-400 block text-[10px] uppercase font-semibold">EMD Amount</span>
-                    <span className="font-bold text-slate-800 flex items-center">
-                      <IndianRupee className="w-3 h-3 mr-0.5 text-amber-600" />
-                      ₹{t.emd_amount ? t.emd_amount.toLocaleString('en-IN') : '0'}
+                    <span className="text-slate-400 block text-[10px] uppercase font-semibold">RFQ Scope Items</span>
+                    <span className="font-bold text-gov-800 flex items-center">
+                      <Briefcase className="w-3 h-3 mr-1 text-gov-600" />
+                      {t.jobs && t.jobs.length > 0 ? `${t.jobs.length} Item(s)` : 'Full Scope'}
                     </span>
                   </div>
                   <div>

@@ -101,8 +101,7 @@ export default function TenderSubmissions() {
             )}
           </div>
           <div className="flex items-center space-x-4 text-xs text-slate-500">
-            <span>Total Quotations: <strong>{apps.length}</strong></span>
-            <span>EMD: <strong>₹{(tender.emd_amount || 0).toLocaleString('en-IN')}</strong></span>
+            <span>Total Quotations Received: <strong className="text-slate-800 text-sm font-bold">{apps.length}</strong></span>
           </div>
         </div>
 

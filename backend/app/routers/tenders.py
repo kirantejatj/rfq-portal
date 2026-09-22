@@ -180,6 +180,97 @@ def create_tender(
     db.refresh(tender)
     return build_tender_out(tender, db)
 
+@router.put("/{tender_id}", response_model=TenderOut)
+def update_tender(
+    tender_id: int,
+    payload: TenderUpdate,
+    current_user: dict = Depends(require_ce),
+    db: Session = Depends(get_db)
+):
+    tender = db.query(RFQTender).filter(RFQTender.tender_id == tender_id).first()
+    if not tender:
+        raise HTTPException(status_code=404, detail="Quotation/RFQ not found")
+
+    if current_user["role"] != "SUPER_ADMIN" and tender.created_by != current_user["id"]:
+        raise HTTPException(status_code=403, detail="Access forbidden: Only the Officer who raised this RFQ can edit its details.")
+
+    if payload.title is not None:
+        tender.title = payload.title.strip()
+    if payload.authority_name is not None:
+        tender.authority_name = payload.authority_name.strip()
+    if payload.background is not None:
+        tender.background = payload.background
+    if payload.scope_of_work is not None:
+        tender.scope_of_work = payload.scope_of_work
+    if payload.total_elements is not None:
+        tender.total_elements = payload.total_elements
+    if payload.element_types is not None:
+        tender.element_types = payload.element_types
+    if payload.max_weight_mt is not None:
+        tender.max_weight_mt = payload.max_weight_mt
+    if payload.min_weight_mt is not None:
+        tender.min_weight_mt = payload.min_weight_mt
+    if payload.avg_weight_mt is not None:
+        tender.avg_weight_mt = payload.avg_weight_mt
+    if payload.emd_amount is not None:
+        tender.emd_amount = payload.emd_amount
+    if payload.completion_period is not None:
+        tender.completion_period = payload.completion_period
+    if payload.quotation_from_date is not None:
+        tender.quotation_from_date = payload.quotation_from_date
+    if payload.quotation_to_date is not None:
+        tender.quotation_to_date = payload.quotation_to_date
+    if payload.quotation_valid_upto is not None:
+        tender.quotation_valid_upto = payload.quotation_valid_upto
+    if payload.validity_period is not None:
+        tender.validity_period = payload.validity_period
+    if payload.opening_date is not None:
+        tender.opening_date = payload.opening_date
+    if payload.contact_person is not None:
+        tender.contact_person = payload.contact_person
+    if payload.contact_email is not None:
+        tender.contact_email = payload.contact_email
+    if payload.contact_phone is not None:
+        tender.contact_phone = payload.contact_phone
+    if payload.office_address is not None:
+        tender.office_address = payload.office_address
+    if payload.status is not None:
+        tender.status = payload.status
+
+    tender.updated_at = datetime.now()
+
+    if payload.jobs is not None:
+        db.query(RFQJob).filter(RFQJob.tender_id == tender_id).delete()
+        for idx, job_data in enumerate(payload.jobs):
+            job_code = job_data.job_code or f"ITEM-{tender_id}-{idx + 1}"
+            qty = job_data.estimated_quantity
+            unit_rate = job_data.unit_rate
+            calc_amount = job_data.amount
+            if calc_amount is None and qty and unit_rate:
+                calc_amount = qty * unit_rate
+            elif calc_amount is None:
+                calc_amount = job_data.estimated_cost
+
+            job_obj = RFQJob(
+                tender_id=tender_id,
+                job_code=job_code,
+                job_name=job_data.job_name,
+                job_description=job_data.job_description,
+                category=job_data.category or "Supply Item",
+                estimated_quantity=qty,
+                unit=job_data.unit or "NOS",
+                unit_rate=unit_rate,
+                amount=calc_amount,
+                estimated_cost=calc_amount,
+                completion_period=job_data.completion_period,
+                status=job_data.status or "ACTIVE"
+            )
+            db.add(job_obj)
+
+    db.commit()
+    db.refresh(tender)
+    return build_tender_out(tender, db)
+
 @router.post("/{tender_id}/jobs", response_model=RFQJobOut)
 def add_job_to_tender(
     tender_id: int,

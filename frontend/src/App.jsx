@@ -19,6 +19,7 @@ import SubmitQuotation from './pages/applicant/SubmitQuotation';
 // CE Pages
 import CEDashboard from './pages/ce/CEDashboard';
 import CreateTender from './pages/ce/CreateTender';
+import EditTender from './pages/ce/EditTender';
 import TenderSubmissions from './pages/ce/TenderSubmissions';
 import ApplicationReview from './pages/ce/ApplicationReview';
 
@@ -76,6 +77,11 @@ export default function App() {
           <Route path="/ce/tenders/create" element={
             <ProtectedRoute roleRequired="CE">
               <CreateTender />
+            </ProtectedRoute>
+          } />
+          <Route path="/ce/tenders/:tenderId/edit" element={
+            <ProtectedRoute roleRequired="CE">
+              <EditTender />
             </ProtectedRoute>
           } />
           <Route path="/ce/tenders/:tenderId/submissions" element={

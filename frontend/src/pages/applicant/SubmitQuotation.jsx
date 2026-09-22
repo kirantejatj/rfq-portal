@@ -56,10 +56,7 @@ export default function SubmitQuotation() {
   const [proposalItems, setProposalItems] = useState([]);
   const [annexureDocFile, setAnnexureDocFile] = useState(null);
 
-  // Step 5: EMD Details & Files
-  const [isEmdExempt, setIsEmdExempt] = useState(false);
-  const [emdMode, setEmdMode] = useState('ONLINE_PORTAL');
-  const [emdTxnRef, setEmdTxnRef] = useState('');
+  // Step 5: Supporting Documents & Files
   const [uploadedFiles, setUploadedFiles] = useState([]);
 
   // Step 6: Signed RFQ Document
@@ -76,10 +73,6 @@ export default function SubmitQuotation() {
       setTender(res.data);
       if (!res.data.is_window_open) {
         setError('Quotation window for this RFQ is currently closed.');
-      }
-
-      if (res.data.emd_amount === 0) {
-        setIsEmdExempt(true);
       }
 
       // Initialize selected RFQ items (select all active items by default)
@@ -265,18 +258,13 @@ export default function SubmitQuotation() {
           amount: (parseFloat(p.quantity) || 0) * (parseFloat(p.rate_per_unit) || 0),
           remarks: p.remarks
         })),
-        emd: isEmdExempt ? null : {
-          amount: parseFloat(tender.emd_amount) || 0,
-          payment_mode: emdMode,
-          transaction_ref: emdTxnRef || `TXN-AGIC-${Math.floor(100000 + Math.random() * 900000)}`,
-          payment_date: new Date().toISOString()
-        }
+        emd: null
       };
 
       const res = await api.post('/applications', payload);
       const newAppId = res.data.application_id;
 
-      // Upload attached files (EMD, Annexure III doc, Signed RFQ, etc.)
+      // Upload attached files (Supporting docs, Annexure III doc, Signed RFQ, etc.)
       const allFilesToUpload = [...uploadedFiles];
       if (annexureDocFile) {
         allFilesToUpload.push({ file: annexureDocFile, document_type: 'ANNEXURE_III_DOC', name: annexureDocFile.name });
@@ -316,7 +304,7 @@ export default function SubmitQuotation() {
     { num: 2, label: 'RFQ Items Selection' },
     { num: 3, label: 'Annexure II (Capabilities)' },
     { num: 4, label: 'Annexure III (Line Items & Pricing)' },
-    { num: 5, label: 'EMD & Uploads' },
+    { num: 5, label: 'Supporting Documents' },
     { num: 6, label: 'Review & Submit' }
   ];
 
@@ -884,75 +872,25 @@ export default function SubmitQuotation() {
               onClick={() => setStep(5)}
               className="px-5 py-2.5 bg-gov-600 text-white font-bold rounded-lg text-xs hover:bg-gov-700 flex items-center"
             >
-              Next: EMD & Uploads
+              Next: Supporting Documents
               <ArrowRight className="w-4 h-4 ml-1.5" />
             </button>
           </div>
         </div>
       )}
 
-      {/* STEP 5: EMD & DOCUMENTS (OPTIONAL EMD) */}
+      {/* STEP 5: SUPPORTING DOCUMENTS */}
       {step === 5 && (
         <div className="bg-white rounded-xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
           <div>
-            <h2 className="text-base font-bold text-slate-900">Step 5: EMD Deposit & Verification Uploads</h2>
-            <p className="text-xs text-slate-500">Earnest Money Deposit (EMD) payment and receipt proof are optional if your firm is exempted or RFQ has nil EMD.</p>
+            <h2 className="text-base font-bold text-slate-900">Step 5: Upload Supporting Documents</h2>
+            <p className="text-xs text-slate-500">Attach supporting technical documents, company profile, product specifications, or compliance certificates (optional).</p>
           </div>
 
-          {/* EMD Exemption Toggle */}
-          <div className="flex items-center space-x-2 p-3 bg-slate-50 border rounded-lg text-xs">
-            <input
-              type="checkbox"
-              id="emdExemptCheck"
-              checked={isEmdExempt}
-              onChange={(e) => setIsEmdExempt(e.target.checked)}
-              className="w-4 h-4 text-gov-600 rounded"
-            />
-            <label htmlFor="emdExemptCheck" className="font-semibold text-slate-700 cursor-pointer">
-              Exempted from EMD / MSME Registration / Nil EMD (Payment not required)
-            </label>
-          </div>
-
-          {/* EMD Box (Shown only if not exempt) */}
-          {!isEmdExempt && (
-            <div className="p-5 bg-amber-50 rounded-xl border border-amber-200 space-y-4 text-xs">
-              <div className="flex justify-between items-center">
-                <span className="font-bold text-amber-900 text-sm">Earnest Money Deposit (EMD) Amount</span>
-                <span className="text-base font-extrabold text-amber-900">₹{(tender.emd_amount || 0).toLocaleString('en-IN')}</span>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="font-bold text-amber-900 block mb-1">Payment Mode</label>
-                  <select
-                    value={emdMode}
-                    onChange={(e) => setEmdMode(e.target.value)}
-                    className="w-full px-3 py-2 border border-amber-300 rounded-lg bg-white"
-                  >
-                    <option value="ONLINE_PORTAL">Online Portal Gateway (Simulated Instant)</option>
-                    <option value="NEFT">NEFT / RTGS Transfer</option>
-                    <option value="DD">Demand Draft (DD)</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="font-bold text-amber-900 block mb-1">Transaction Ref / UTR / DD No. (Optional)</label>
-                  <input
-                    type="text"
-                    value={emdTxnRef}
-                    onChange={(e) => setEmdTxnRef(e.target.value)}
-                    placeholder="e.g. UTR-HDFC-998822"
-                    className="w-full px-3 py-2 border border-amber-300 rounded-lg bg-white font-mono"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* File Uploads */}
+          {/* File Uploads Grid */}
           <div className="space-y-4 text-xs">
-            <h3 className="font-bold text-slate-800">Attach Supporting Bid Documents (Optional)</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="p-4 border-2 border-dashed border-slate-300 rounded-xl text-center space-y-2 hover:border-gov-500 transition">
+              <div className="p-4 border-2 border-dashed border-slate-300 rounded-xl text-center space-y-2 hover:border-gov-500 transition bg-slate-50/50">
                 <Upload className="w-6 h-6 text-slate-400 mx-auto" />
                 <span className="font-bold block text-slate-700">Covering Letter / Technical Bid (PDF)</span>
                 <input
@@ -962,17 +900,15 @@ export default function SubmitQuotation() {
                 />
               </div>
 
-              {!isEmdExempt && (
-                <div className="p-4 border-2 border-dashed border-slate-300 rounded-xl text-center space-y-2 hover:border-gov-500 transition">
-                  <Upload className="w-6 h-6 text-slate-400 mx-auto" />
-                  <span className="font-bold block text-slate-700">EMD Payment Receipt / Bank Chalan (Optional)</span>
-                  <input
-                    type="file"
-                    onChange={(e) => handleFileUpload(e, 'EMD_PROOF')}
-                    className="text-[11px] text-slate-500 mx-auto block"
-                  />
-                </div>
-              )}
+              <div className="p-4 border-2 border-dashed border-slate-300 rounded-xl text-center space-y-2 hover:border-gov-500 transition bg-slate-50/50">
+                <Upload className="w-6 h-6 text-slate-400 mx-auto" />
+                <span className="font-bold block text-slate-700">Quality Certificates / Technical Specs (PDF / ZIP)</span>
+                <input
+                  type="file"
+                  onChange={(e) => handleFileUpload(e, 'TECHNICAL_SPECS')}
+                  className="text-[11px] text-slate-500 mx-auto block"
+                />
+              </div>
             </div>
 
             {uploadedFiles.length > 0 && (

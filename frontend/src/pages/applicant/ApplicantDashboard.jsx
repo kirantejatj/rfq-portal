@@ -151,7 +151,7 @@ export default function ApplicantDashboard() {
                 </div>
                 <div className="flex justify-between items-center pt-2">
                   <span className="text-slate-500 text-[11px]">
-                    EMD: <strong>₹{t.emd_amount.toLocaleString('en-IN')}</strong>
+                    Validity: <strong>{t.validity_period || 'Standard'}</strong>
                   </span>
                   <Link
                     to={`/applicant/apply/${t.tender_id}`}

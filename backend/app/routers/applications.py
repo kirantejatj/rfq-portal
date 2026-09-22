@@ -402,6 +402,21 @@ def get_my_applications(
     apps = db.query(Application).filter(Application.applicant_id == applicant_id).order_by(Application.submitted_at.desc()).all()
     return [build_application_out(a, db) for a in apps]
 
+@router.get("/officer/all", response_model=List[ApplicationOut])
+def get_officer_all_applications(
+    current_user: dict = Depends(require_ce),
+    db: Session = Depends(get_db)
+):
+    if current_user["role"] == "SUPER_ADMIN":
+        apps = db.query(Application).order_by(Application.submitted_at.desc()).all()
+    else:
+        ce_tenders = db.query(RFQTender.tender_id).filter(RFQTender.created_by == current_user["id"]).all()
+        tender_ids = [t[0] for t in ce_tenders]
+        if not tender_ids:
+            return []
+        apps = db.query(Application).filter(Application.tender_id.in_(tender_ids)).order_by(Application.submitted_at.desc()).all()
+    return [build_application_out(a, db) for a in apps]
+
 @router.get("/tender/{tender_id}", response_model=List[ApplicationOut])
 def get_tender_applications(
     tender_id: int,

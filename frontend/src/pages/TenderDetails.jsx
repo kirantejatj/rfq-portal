@@ -6,7 +6,7 @@ import StatusBadge from '../components/StatusBadge';
 import CountdownTimer from '../components/CountdownTimer';
 import { 
   Building2, Calendar, IndianRupee, Layers, FileText, Download, 
-  HelpCircle, MessageSquare, ArrowRight, UserCheck, Phone, Mail, MapPin, Send
+  HelpCircle, MessageSquare, ArrowRight, UserCheck, Phone, Mail, MapPin, Send, Edit3, ShieldAlert
 } from 'lucide-react';
 
 export default function TenderDetails() {
@@ -84,6 +84,8 @@ export default function TenderDetails() {
     return <div className="text-center py-20 text-slate-500">Tender not found.</div>;
   }
 
+  const isCreatorOfficer = isCE && (user?.id === tender.created_by || user?.role === 'SUPER_ADMIN');
+
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-8 py-8 space-y-8">
       {/* Header Card */}
@@ -118,7 +120,17 @@ export default function TenderDetails() {
           </div>
 
           <div className="flex items-center space-x-3">
-            {isCE && (
+            {isCreatorOfficer && (
+              <Link
+                to={`/ce/tenders/${tender.tender_id}/edit`}
+                className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-gov-950 font-bold rounded-lg shadow-sm text-xs transition flex items-center"
+              >
+                <Edit3 className="w-3.5 h-3.5 mr-1.5" />
+                Edit RFQ & Extend Dates
+              </Link>
+            )}
+
+            {isCreatorOfficer && (
               <Link
                 to={`/ce/tenders/${tender.tender_id}/submissions`}
                 className="px-4 py-2 bg-gov-800 hover:bg-gov-900 text-white font-semibold rounded-lg shadow-sm text-xs transition"
@@ -174,15 +186,6 @@ export default function TenderDetails() {
                           </span>
                         )}
                       </div>
-                      <div className="text-right">
-                        {job.amount || job.estimated_cost ? (
-                          <span className="font-extrabold text-gov-800 text-sm flex items-center">
-                            <IndianRupee className="w-3.5 h-3.5 mr-0.5 text-amber-600" />
-                            ₹{(job.amount || job.estimated_cost).toLocaleString('en-IN')}
-                          </span>
-                        ) : null}
-                        <span className="text-[10px] text-slate-400 block">Est. Amount</span>
-                      </div>
                     </div>
 
                     {job.job_description && (
@@ -192,9 +195,6 @@ export default function TenderDetails() {
                     <div className="pt-2 border-t border-slate-200/60 flex flex-wrap gap-4 text-[11px] text-slate-600">
                       {job.estimated_quantity && (
                         <span>Quantity: <strong>{job.estimated_quantity} {job.unit || 'units'}</strong></span>
-                      )}
-                      {job.unit_rate && (
-                        <span>Unit Rate: <strong>₹{job.unit_rate.toLocaleString('en-IN')}</strong></span>
                       )}
                       {job.completion_period && (
                         <span>Period: <strong>{job.completion_period}</strong></span>
@@ -376,17 +376,15 @@ export default function TenderDetails() {
 
         {/* Right 1 Col: Key Info & Authority Contact */}
         <div className="space-y-6">
-          {/* EMD & Commercial Card */}
+          {/* Timelines & Validity Card (EMD Removed) */}
           <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm space-y-3">
-            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">Commercial Summary</h3>
+            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">Quotation Timelines</h3>
             <div className="space-y-3 text-xs">
-              <div className="p-3 bg-amber-50 rounded-lg border border-amber-200">
-                <span className="text-amber-800 block text-[11px] font-semibold">Earnest Money Deposit (EMD)</span>
-                <span className="text-xl font-extrabold text-amber-900 flex items-center mt-0.5">
-                  <IndianRupee className="w-5 h-5 mr-0.5" />
-                  ₹{tender.emd_amount ? tender.emd_amount.toLocaleString('en-IN') : '0'}
+              <div>
+                <span className="text-slate-400 block text-[11px]">Submission Deadline</span>
+                <span className="font-bold text-gov-800 text-sm">
+                  {new Date(tender.quotation_to_date).toLocaleString()}
                 </span>
-                <span className="text-[10px] text-amber-700 block mt-1">Payable online via Portal / NEFT / RTGS</span>
               </div>
 
               <div>
@@ -397,11 +395,16 @@ export default function TenderDetails() {
               </div>
 
               {tender.validity_period && (
-                <div>
-                  <span className="text-slate-400 block text-[11px]">Quotation Validity Period</span>
-                  <span className="font-bold text-indigo-800">
+                <div className="p-3 bg-indigo-50/70 rounded-lg border border-indigo-100">
+                  <span className="text-indigo-900 block text-[11px] font-semibold">Quotation Validity Period</span>
+                  <span className="font-extrabold text-indigo-950 text-sm mt-0.5 block">
                     {tender.validity_period}
                   </span>
+                  {tender.quotation_valid_upto && (
+                    <span className="text-[10px] text-indigo-700 block mt-1">
+                      Valid Upto: {new Date(tender.quotation_valid_upto).toLocaleDateString()}
+                    </span>
+                  )}
                 </div>
               )}
             </div>

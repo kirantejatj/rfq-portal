@@ -1,24 +1,23 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import api from '../../api/client';
-import { Building2, Layers, Calendar, FileText, Upload, ArrowRight, Plus, Trash2, Briefcase, Clock, ShieldCheck, AlertCircle } from 'lucide-react';
+import { 
+  Building2, Layers, Calendar, FileText, ArrowLeft, ArrowRight, 
+  Plus, Trash2, Briefcase, Clock, ShieldCheck, AlertCircle, Save, ShieldAlert 
+} from 'lucide-react';
 
-export default function CreateTender() {
+export default function EditTender() {
+  const { tenderId } = useParams();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-
-  const now = new Date();
-  const nextMonth = new Date();
-  nextMonth.setDate(now.getDate() + 30);
-
-  const validityDefault = new Date();
-  validityDefault.setDate(now.getDate() + 90);
+  const [authError, setAuthError] = useState('');
 
   const [formData, setFormData] = useState({
-    tender_ref_no: `RFQ/AGIC/2026/ITEM-${Math.floor(10 + Math.random() * 90)}`,
+    tender_ref_no: '',
     title: '',
-    authority_name: 'Amaravati Growth and Infrastructure Corporation Limited',
+    authority_name: '',
     background: '',
     scope_of_work: '',
     total_elements: 500,
@@ -27,42 +26,102 @@ export default function CreateTender() {
     min_weight_mt: 1.0,
     avg_weight_mt: 4.5,
     completion_period: '12 Months',
-    quotation_from_date: now.toISOString().slice(0, 16),
-    quotation_to_date: nextMonth.toISOString().slice(0, 16),
-    opening_date: nextMonth.toISOString().slice(0, 16),
-    quotation_valid_upto: validityDefault.toISOString().slice(0, 16),
+    quotation_from_date: '',
+    quotation_to_date: '',
+    opening_date: '',
+    quotation_valid_upto: '',
     validity_period: '90 Days from Quotation Opening',
-    contact_person: 'Chief Engineer (Procurement & Contracts)',
-    contact_email: 'rfq.officer@agic.gov.in',
-    contact_phone: '+91 866 2459800',
-    office_address: 'AGIC Bhavan, Sector 4, Capital Complex, Amaravati - 522503',
+    contact_person: '',
+    contact_email: '',
+    contact_phone: '',
+    office_address: '',
     status: 'PUBLISHED'
   });
 
-  const [jobs, setJobs] = useState([
-    {
-      job_code: 'ITEM-01',
-      job_name: 'Structural Steel Fabrication & Surface Preparation',
-      job_description: 'Precision fabrication of heavy steel columns, beams and trusses with zinc-rich epoxy primer coating.',
-      category: 'Supply Item',
-      estimated_quantity: 250,
-      unit: 'MT',
-      completion_period: '6 Months',
-      status: 'ACTIVE'
-    },
-    {
-      job_code: 'ITEM-02',
-      job_name: 'Crane Erection, Torque Bolting & Structural Alignment',
-      job_description: 'On-site mobile crane positioning, alignment, torque tension bolting, and temporary bracing.',
-      category: 'Only Rate',
-      estimated_quantity: 250,
-      unit: 'MT',
-      completion_period: '6 Months',
-      status: 'ACTIVE'
-    }
-  ]);
+  const [jobs, setJobs] = useState([]);
 
-  const [tenderFile, setTenderFile] = useState(null);
+  useEffect(() => {
+    fetchTenderDetails();
+  }, [tenderId]);
+
+  const fetchTenderDetails = async () => {
+    setLoading(true);
+    setAuthError('');
+    try {
+      const res = await api.get(`/tenders/${tenderId}`);
+      const t = res.data;
+
+      // Format ISO dates to datetime-local format (YYYY-MM-DDTHH:MM)
+      const formatDateForInput = (isoStr) => {
+        if (!isoStr) return '';
+        try {
+          return new Date(isoStr).toISOString().slice(0, 16);
+        } catch (e) {
+          return '';
+        }
+      };
+
+      setFormData({
+        tender_ref_no: t.tender_ref_no || '',
+        title: t.title || '',
+        authority_name: t.authority_name || 'Amaravati Growth and Infrastructure Corporation Limited',
+        background: t.background || '',
+        scope_of_work: t.scope_of_work || '',
+        total_elements: t.total_elements || 500,
+        element_types: t.element_types || 10,
+        max_weight_mt: t.max_weight_mt || 10.0,
+        min_weight_mt: t.min_weight_mt || 1.0,
+        avg_weight_mt: t.avg_weight_mt || 4.5,
+        completion_period: t.completion_period || '12 Months',
+        quotation_from_date: formatDateForInput(t.quotation_from_date),
+        quotation_to_date: formatDateForInput(t.quotation_to_date),
+        opening_date: formatDateForInput(t.opening_date),
+        quotation_valid_upto: formatDateForInput(t.quotation_valid_upto),
+        validity_period: t.validity_period || '90 Days from Quotation Opening',
+        contact_person: t.contact_person || '',
+        contact_email: t.contact_email || '',
+        contact_phone: t.contact_phone || '',
+        office_address: t.office_address || '',
+        status: t.status || 'PUBLISHED'
+      });
+
+      if (t.jobs && t.jobs.length > 0) {
+        setJobs(t.jobs.map(j => ({
+          job_id: j.job_id,
+          job_code: j.job_code || `ITEM-${j.job_id}`,
+          job_name: j.job_name || '',
+          job_description: j.job_description || '',
+          category: j.category || 'Supply Item',
+          estimated_quantity: j.estimated_quantity || 100,
+          unit: j.unit || 'MT',
+          completion_period: j.completion_period || '6 Months',
+          status: j.status || 'ACTIVE'
+        })));
+      } else {
+        setJobs([
+          {
+            job_code: 'ITEM-01',
+            job_name: 'Structural Work',
+            job_description: '',
+            category: 'Supply Item',
+            estimated_quantity: 100,
+            unit: 'MT',
+            completion_period: '6 Months',
+            status: 'ACTIVE'
+          }
+        ]);
+      }
+    } catch (err) {
+      console.error('Failed to load RFQ for editing', err);
+      if (err.response?.status === 403) {
+        setAuthError(err.response?.data?.detail || 'Access Restricted: You do not have authorization to edit this RFQ.');
+      } else {
+        setError('Failed to load RFQ details. Please verify the RFQ ID.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -99,21 +158,30 @@ export default function CreateTender() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    setLoading(true);
+    setSaving(true);
     try {
       const payload = {
-        ...formData,
+        title: formData.title,
+        authority_name: formData.authority_name,
+        background: formData.background,
+        scope_of_work: formData.scope_of_work,
         total_elements: parseInt(formData.total_elements) || null,
         element_types: parseInt(formData.element_types) || null,
         max_weight_mt: parseFloat(formData.max_weight_mt) || null,
         min_weight_mt: parseFloat(formData.min_weight_mt) || null,
         avg_weight_mt: parseFloat(formData.avg_weight_mt) || null,
         emd_amount: 0.0,
-        quotation_from_date: new Date(formData.quotation_from_date).toISOString(),
-        quotation_to_date: new Date(formData.quotation_to_date).toISOString(),
+        completion_period: formData.completion_period,
+        quotation_from_date: formData.quotation_from_date ? new Date(formData.quotation_from_date).toISOString() : null,
+        quotation_to_date: formData.quotation_to_date ? new Date(formData.quotation_to_date).toISOString() : null,
         opening_date: formData.opening_date ? new Date(formData.opening_date).toISOString() : null,
         quotation_valid_upto: formData.quotation_valid_upto ? new Date(formData.quotation_valid_upto).toISOString() : null,
         validity_period: formData.validity_period || '90 Days from Quotation Opening',
+        contact_person: formData.contact_person,
+        contact_email: formData.contact_email,
+        contact_phone: formData.contact_phone,
+        office_address: formData.office_address,
+        status: formData.status,
         jobs: jobs.map((j, idx) => ({
           job_code: j.job_code || `ITEM-${idx + 1}`,
           job_name: j.job_name,
@@ -126,38 +194,62 @@ export default function CreateTender() {
         }))
       };
 
-      const res = await api.post('/tenders', payload);
-      const newTenderId = res.data.tender_id;
-
-      if (tenderFile) {
-        const fData = new FormData();
-        fData.append('document_type', 'RFQ_DOCUMENT');
-        fData.append('file', tenderFile);
-        try {
-          await api.post(`/tenders/${newTenderId}/documents`, fData);
-        } catch (fErr) {
-          console.error('File upload failed', fErr);
-        }
-      }
-
-      alert(`RFQ ${res.data.tender_ref_no} raised with ${jobs.length} RFQ Items and published successfully!`);
+      const res = await api.put(`/tenders/${tenderId}`, payload);
+      alert(`RFQ ${res.data.tender_ref_no} updated successfully with extended dates and modified details!`);
       navigate('/ce/dashboard');
     } catch (err) {
-      setError(err.response?.data?.detail || 'Failed to create RFQ');
+      setError(err.response?.data?.detail || 'Failed to update RFQ');
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
+  if (loading) {
+    return (
+      <div className="text-center py-20">
+        <div className="animate-spin w-8 h-8 border-4 border-gov-600 border-t-transparent rounded-full mx-auto mb-3"></div>
+        <p className="text-slate-500 text-sm">Loading RFQ for editing...</p>
+      </div>
+    );
+  }
+
+  if (authError) {
+    return (
+      <div className="max-w-xl mx-auto px-4 py-16 text-center space-y-4">
+        <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto shadow-inner">
+          <ShieldAlert className="w-8 h-8" />
+        </div>
+        <h2 className="text-xl font-bold text-slate-900">Officer Authorization Restriction</h2>
+        <p className="text-sm text-slate-600">{authError}</p>
+        <Link to="/ce/dashboard" className="inline-block px-5 py-2.5 bg-gov-600 text-white font-bold rounded-lg text-xs hover:bg-gov-700">
+          Back to Officer Dashboard
+        </Link>
+      </div>
+    );
+  }
+
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8">
+    <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
+      <Link to="/ce/dashboard" className="inline-flex items-center text-xs font-bold text-gov-700 hover:underline">
+        <ArrowLeft className="w-4 h-4 mr-1" />
+        Back to Officer Dashboard
+      </Link>
+
       <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-xl space-y-6">
-        <div>
-          <span className="text-xs font-bold text-gov-600 uppercase tracking-wider">Officer RFQ Creation Module</span>
-          <h1 className="text-2xl font-bold text-slate-900">Raise New RFQ</h1>
-          <p className="text-xs text-slate-500">
-            Define technical scope, schedule of RFQ items, and quotation validity timelines. (Quoted rates and amounts will be submitted by bidders).
-          </p>
+        <div className="flex flex-wrap justify-between items-start gap-4 border-b pb-4">
+          <div>
+            <span className="text-xs font-bold text-amber-600 uppercase tracking-wider">Officer RFQ Modification Panel</span>
+            <h1 className="text-2xl font-bold text-slate-900 mt-1">Edit RFQ & Extend Dates</h1>
+            <p className="text-xs text-slate-500 font-mono">
+              Reference: <strong className="text-gov-800">{formData.tender_ref_no}</strong>
+            </p>
+          </div>
+          <div className="flex items-center space-x-2">
+            <span className="text-xs font-semibold text-slate-500">Current Status:</span>
+            <span className="px-2.5 py-1 bg-gov-50 text-gov-700 font-bold rounded text-xs border border-gov-200">
+              {formData.status}
+            </span>
+          </div>
         </div>
 
         {error && (
@@ -167,21 +259,81 @@ export default function CreateTender() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6 text-xs">
-          {/* Section 1: RFQ Identification */}
-          <div className="space-y-3">
-            <h3 className="font-bold text-slate-800 border-b pb-1 text-sm">1. RFQ Identification & Title</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {/* Section 1: Timelines & Date Extensions */}
+          <div className="p-5 bg-amber-50/60 rounded-xl border border-amber-200 space-y-4">
+            <div className="flex items-center justify-between border-b border-amber-200 pb-2">
+              <h3 className="font-bold text-amber-950 text-sm flex items-center">
+                <Calendar className="w-4 h-4 mr-1.5 text-amber-700" />
+                1. Quotation Window & Date Extensions
+              </h3>
+              <span className="text-[11px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded">
+                Extend Cutoff & Validity Here
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               <div>
-                <label className="font-bold text-slate-700 block mb-1">RFQ Ref No *</label>
+                <label className="font-bold text-slate-700 block mb-1">Quotation Window START *</label>
                 <input
-                  type="text"
-                  name="tender_ref_no"
-                  value={formData.tender_ref_no}
+                  type="datetime-local"
+                  name="quotation_from_date"
+                  value={formData.quotation_from_date}
                   onChange={handleChange}
                   required
-                  className="w-full px-3 py-2 border rounded-lg font-mono font-bold"
+                  className="w-full px-3 py-2 border rounded-lg bg-white"
                 />
               </div>
+              <div>
+                <label className="font-bold text-amber-950 block mb-1">Submission Deadline (Extend Date) *</label>
+                <input
+                  type="datetime-local"
+                  name="quotation_to_date"
+                  value={formData.quotation_to_date}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-3 py-2 border-2 border-amber-400 rounded-lg bg-white font-bold text-gov-900 shadow-sm"
+                />
+              </div>
+              <div>
+                <label className="font-bold text-slate-700 block mb-1">Quotation Opening Date</label>
+                <input
+                  type="datetime-local"
+                  name="opening_date"
+                  value={formData.opening_date}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border rounded-lg bg-white"
+                />
+              </div>
+              <div>
+                <label className="font-bold text-indigo-950 block mb-1">Quotation Valid Upto (Date) *</label>
+                <input
+                  type="datetime-local"
+                  name="quotation_valid_upto"
+                  value={formData.quotation_valid_upto}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-3 py-2 border-2 border-indigo-300 rounded-lg bg-white font-bold text-indigo-900 shadow-sm"
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="font-bold text-slate-700 block mb-1">Quotation Validity Period (Text) *</label>
+                <input
+                  type="text"
+                  name="validity_period"
+                  value={formData.validity_period}
+                  onChange={handleChange}
+                  placeholder="e.g. 90 Days from Quotation Opening"
+                  required
+                  className="w-full px-3 py-2 border rounded-lg font-semibold text-slate-800 bg-white"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Section 2: RFQ Identification & Details */}
+          <div className="space-y-3">
+            <h3 className="font-bold text-slate-800 border-b pb-1 text-sm">2. RFQ Title & Status</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="sm:col-span-2">
                 <label className="font-bold text-slate-700 block mb-1">RFQ Title / Work Description *</label>
                 <input
@@ -189,24 +341,37 @@ export default function CreateTender() {
                   name="title"
                   value={formData.title}
                   onChange={handleChange}
-                  placeholder="e.g. Design, Fabrication, and Erection of Pre-Engineered Steel Structures..."
                   required
                   className="w-full px-3 py-2 border rounded-lg font-semibold"
                 />
               </div>
+              <div>
+                <label className="font-bold text-slate-700 block mb-1">RFQ Status</label>
+                <select
+                  name="status"
+                  value={formData.status}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border rounded-lg font-bold text-slate-800 bg-white"
+                >
+                  <option value="PUBLISHED">PUBLISHED (Open for Quotations)</option>
+                  <option value="DRAFT">DRAFT (Saved as Draft)</option>
+                  <option value="CLOSED">CLOSED (Submissions Ended)</option>
+                  <option value="CANCELLED">CANCELLED</option>
+                </select>
+              </div>
             </div>
           </div>
 
-          {/* Section 2: RFQ Items */}
+          {/* Section 3: RFQ Items Schedule */}
           <div className="space-y-4">
             <div className="flex justify-between items-center border-b pb-2">
               <div>
                 <h3 className="font-bold text-slate-800 text-sm flex items-center">
                   <Briefcase className="w-4 h-4 mr-1.5 text-gov-600" />
-                  2. RFQ Items Schedule ({jobs.length})
+                  3. RFQ Items Schedule ({jobs.length})
                 </h3>
                 <p className="text-[11px] text-slate-500">
-                  Specify item requirements, category (<strong>Supply Item</strong> / <strong>Only Rate</strong>), quantity & units. Bidders will provide unit rates & total quoted amounts.
+                  Update itemized line items, category types, quantities, and specifications.
                 </p>
               </div>
               <button
@@ -243,7 +408,6 @@ export default function CreateTender() {
                         type="text"
                         value={job.job_code}
                         onChange={(e) => handleJobChange(idx, 'job_code', e.target.value)}
-                        placeholder="e.g. ITEM-01"
                         required
                         className="w-full px-2.5 py-1.5 border rounded bg-white font-mono"
                       />
@@ -254,7 +418,6 @@ export default function CreateTender() {
                         type="text"
                         value={job.job_name}
                         onChange={(e) => handleJobChange(idx, 'job_name', e.target.value)}
-                        placeholder="e.g. Structural Steel Fabrication & Surface Preparation"
                         required
                         className="w-full px-2.5 py-1.5 border rounded bg-white font-semibold"
                       />
@@ -307,7 +470,6 @@ export default function CreateTender() {
                         type="text"
                         value={job.completion_period}
                         onChange={(e) => handleJobChange(idx, 'completion_period', e.target.value)}
-                        placeholder="e.g. 6 Months"
                         className="w-full px-2.5 py-1.5 border rounded bg-white"
                       />
                     </div>
@@ -318,7 +480,6 @@ export default function CreateTender() {
                         rows={2}
                         value={job.job_description}
                         onChange={(e) => handleJobChange(idx, 'job_description', e.target.value)}
-                        placeholder="Detailed technical specifications, tolerance, and deliverables for this item..."
                         className="w-full px-2.5 py-1.5 border rounded bg-white"
                       />
                     </div>
@@ -326,18 +487,11 @@ export default function CreateTender() {
                 </div>
               ))}
             </div>
-
-            <div className="p-3 bg-blue-50/80 rounded-xl border border-blue-200 text-blue-900 text-xs flex items-center">
-              <AlertCircle className="w-4 h-4 mr-2 text-blue-600 shrink-0" />
-              <span>
-                <strong>Note on Pricing:</strong> As per procurement policy, the Officer specifies item quantities and specifications without fixed amounts. Bidders will submit their individual unit rates and total quoted amount.
-              </span>
-            </div>
           </div>
 
-          {/* Section 3: Scope & Background */}
+          {/* Section 4: Scope & Background */}
           <div className="space-y-3">
-            <h3 className="font-bold text-slate-800 border-b pb-1 text-sm">3. Scope of Work & Background</h3>
+            <h3 className="font-bold text-slate-800 border-b pb-1 text-sm">4. Scope of Work & Background</h3>
             <div className="space-y-3">
               <div>
                 <label className="font-bold text-slate-700 block mb-1">Overall Scope of Work *</label>
@@ -347,7 +501,6 @@ export default function CreateTender() {
                   value={formData.scope_of_work}
                   onChange={handleChange}
                   required
-                  placeholder="Detailed deliverables, standards (IS codes), painting, quality specs..."
                   className="w-full px-3 py-2 border rounded-lg"
                 />
               </div>
@@ -358,16 +511,15 @@ export default function CreateTender() {
                   name="background"
                   value={formData.background}
                   onChange={handleChange}
-                  placeholder="Infrastructure area / sector context..."
                   className="w-full px-3 py-2 border rounded-lg"
                 />
               </div>
             </div>
           </div>
 
-          {/* Section 4: Technical Specs & Weight Parameters */}
+          {/* Section 5: Technical Specs & Weight Parameters */}
           <div className="space-y-3">
-            <h3 className="font-bold text-slate-800 border-b pb-1 text-sm">4. Technical Specs & Weight Parameters</h3>
+            <h3 className="font-bold text-slate-800 border-b pb-1 text-sm">5. Technical Specs & Weight Parameters</h3>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <div>
                 <label className="font-bold text-slate-700 block mb-1">Total Elements (pcs)</label>
@@ -414,69 +566,7 @@ export default function CreateTender() {
             </div>
           </div>
 
-          {/* Section 5: Quotation Window & Validity Period */}
-          <div className="space-y-3">
-            <h3 className="font-bold text-slate-800 border-b pb-1 text-sm">5. Quotation Timelines & Validity Period</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">Quotation Window START *</label>
-                <input
-                  type="datetime-local"
-                  name="quotation_from_date"
-                  value={formData.quotation_from_date}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-3 py-2 border rounded-lg"
-                />
-              </div>
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">Submission Deadline (Cutoff) *</label>
-                <input
-                  type="datetime-local"
-                  name="quotation_to_date"
-                  value={formData.quotation_to_date}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-3 py-2 border rounded-lg font-bold text-gov-700"
-                />
-              </div>
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">Quotation Opening Date</label>
-                <input
-                  type="datetime-local"
-                  name="opening_date"
-                  value={formData.opening_date}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border rounded-lg"
-                />
-              </div>
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">Quotation Valid Upto (Date) *</label>
-                <input
-                  type="datetime-local"
-                  name="quotation_valid_upto"
-                  value={formData.quotation_valid_upto}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-3 py-2 border rounded-lg font-bold text-indigo-700"
-                />
-              </div>
-              <div className="sm:col-span-2">
-                <label className="font-bold text-slate-700 block mb-1">Quotation Validity Period (Text) *</label>
-                <input
-                  type="text"
-                  name="validity_period"
-                  value={formData.validity_period}
-                  onChange={handleChange}
-                  placeholder="e.g. 90 Days from Quotation Opening"
-                  required
-                  className="w-full px-3 py-2 border rounded-lg font-semibold text-slate-800"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Section 6: Contact Person & Office Details */}
+          {/* Section 6: Contact Officer Details */}
           <div className="space-y-3">
             <h3 className="font-bold text-slate-800 border-b pb-1 text-sm">6. Authority Contact & Office Details</h3>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -523,36 +613,7 @@ export default function CreateTender() {
             </div>
           </div>
 
-          {/* Section 7: Attachments & Publishing Status */}
-          <div className="space-y-3">
-            <h3 className="font-bold text-slate-800 border-b pb-1 text-sm">7. Official RFQ Document & Publication Status</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">Attach Official RFQ Document (PDF / DOC)</label>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="file"
-                    onChange={(e) => setTenderFile(e.target.files[0])}
-                    className="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-gov-50 file:text-gov-700 hover:file:bg-gov-100"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">RFQ Status</label>
-                <select
-                  name="status"
-                  value={formData.status}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border rounded-lg font-bold text-slate-800 bg-white"
-                >
-                  <option value="PUBLISHED">PUBLISHED (Open for Quotations)</option>
-                  <option value="DRAFT">DRAFT (Save for later)</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          {/* Submit Action */}
+          {/* Save Action */}
           <div className="pt-4 border-t border-slate-200 flex justify-end space-x-3">
             <button
               type="button"
@@ -563,11 +624,11 @@ export default function CreateTender() {
             </button>
             <button
               type="submit"
-              disabled={loading}
-              className="px-6 py-2.5 bg-gov-600 hover:bg-gov-700 text-white font-bold rounded-xl shadow transition flex items-center disabled:opacity-50"
+              disabled={saving}
+              className="px-6 py-2.5 bg-amber-500 hover:bg-amber-600 text-gov-950 font-black rounded-xl shadow transition flex items-center disabled:opacity-50"
             >
-              {loading ? 'Raising RFQ...' : 'Publish & Raise RFQ'}
-              <ArrowRight className="w-4 h-4 ml-2" />
+              <Save className="w-4 h-4 mr-2" />
+              {saving ? 'Saving Changes...' : 'Save & Update RFQ'}
             </button>
           </div>
         </form>

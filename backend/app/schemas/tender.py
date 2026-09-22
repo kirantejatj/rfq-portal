@@ -71,7 +71,7 @@ class TenderCreate(BaseModel):
     max_weight_mt: Optional[float] = None
     min_weight_mt: Optional[float] = None
     avg_weight_mt: Optional[float] = None
-    emd_amount: float = 0.0
+    emd_amount: Optional[float] = 0.0
     completion_period: Optional[str] = None
     quotation_from_date: Optional[datetime] = None
     quotation_to_date: Optional[datetime] = None
@@ -87,6 +87,7 @@ class TenderCreate(BaseModel):
 
 class TenderUpdate(BaseModel):
     title: Optional[str] = None
+    authority_name: Optional[str] = None
     background: Optional[str] = None
     scope_of_work: Optional[str] = None
     total_elements: Optional[int] = None
@@ -94,7 +95,7 @@ class TenderUpdate(BaseModel):
     max_weight_mt: Optional[float] = None
     min_weight_mt: Optional[float] = None
     avg_weight_mt: Optional[float] = None
-    emd_amount: Optional[float] = None
+    emd_amount: Optional[float] = 0.0
     completion_period: Optional[str] = None
     quotation_from_date: Optional[datetime] = None
     quotation_to_date: Optional[datetime] = None
@@ -106,6 +107,7 @@ class TenderUpdate(BaseModel):
     contact_phone: Optional[str] = None
     office_address: Optional[str] = None
     status: Optional[str] = None
+    jobs: Optional[List[RFQJobCreate]] = None
 
 class TenderOut(BaseModel):
     tender_id: int
@@ -119,7 +121,7 @@ class TenderOut(BaseModel):
     max_weight_mt: Optional[float] = None
     min_weight_mt: Optional[float] = None
     avg_weight_mt: Optional[float] = None
-    emd_amount: float
+    emd_amount: Optional[float] = 0.0
     completion_period: Optional[str] = None
     quotation_from_date: datetime
     quotation_to_date: datetime
