@@ -54,6 +54,14 @@ export default function Navbar() {
           {isCE && (
             <>
               <Link
+                to="/ce/approved-non-sor-items"
+                className="flex items-center text-xs font-bold text-amber-950 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 px-3 py-2 rounded-md shadow-sm transition border border-amber-600/30 tracking-wide uppercase"
+                title="View Official Minutes & 24 Approved Non-SOR Items Schedule"
+              >
+                <FileCheck className="w-4 h-4 mr-1.5 text-amber-950" />
+                APPROVED NON SOR ITEMS
+              </Link>
+              <Link
                 to="/ce/dashboard"
                 className="flex items-center text-sm font-medium text-gov-700 hover:text-gov-800 bg-gov-50 hover:bg-gov-100 px-3 py-2 rounded-md transition"
               >

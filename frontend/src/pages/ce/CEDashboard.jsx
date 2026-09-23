@@ -112,13 +112,23 @@ export default function CEDashboard() {
             Government of Andhra Pradesh • Total RFQs Raised: <strong>{tenders.length}</strong> | Total Quotations Received: <strong>{allQuotes.length}</strong>
           </p>
         </div>
-        <Link
-          to="/ce/tenders/create"
-          className="px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-gov-900 font-bold rounded-lg shadow text-xs transition flex items-center shrink-0"
-        >
-          <PlusCircle className="w-4 h-4 mr-1.5" />
-          Raise New RFQ
-        </Link>
+        <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+          <Link
+            to="/ce/approved-non-sor-items"
+            className="px-4 py-2.5 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-amber-950 font-black rounded-lg shadow-md text-xs transition flex items-center border border-amber-300/40 tracking-wide uppercase"
+            title="View 24 Approved Non-SOR Items Schedule & Committee Minutes"
+          >
+            <FileCheck className="w-4 h-4 mr-1.5 text-amber-950" />
+            APPROVED NON SOR ITEMS
+          </Link>
+          <Link
+            to="/ce/tenders/create"
+            className="px-4 py-2.5 bg-gov-700 hover:bg-gov-600 text-white font-bold rounded-lg shadow text-xs transition flex items-center border border-gov-600"
+          >
+            <PlusCircle className="w-4 h-4 mr-1.5 text-amber-400" />
+            Raise New RFQ
+          </Link>
+        </div>
       </div>
 
       {/* KPI Metric Cards */}

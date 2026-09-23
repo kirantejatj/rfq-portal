@@ -22,6 +22,7 @@ import CreateTender from './pages/ce/CreateTender';
 import EditTender from './pages/ce/EditTender';
 import TenderSubmissions from './pages/ce/TenderSubmissions';
 import ApplicationReview from './pages/ce/ApplicationReview';
+import ApprovedNonSorItems from './pages/ce/ApprovedNonSorItems';
 
 // Developer / API Workbench
 import ApiWorkbench from './pages/admin/ApiWorkbench';
@@ -92,6 +93,11 @@ export default function App() {
           <Route path="/ce/applications/:applicationId/review" element={
             <ProtectedRoute roleRequired="CE">
               <ApplicationReview />
+            </ProtectedRoute>
+          } />
+          <Route path="/ce/approved-non-sor-items" element={
+            <ProtectedRoute roleRequired="CE">
+              <ApprovedNonSorItems />
             </ProtectedRoute>
           } />
 
