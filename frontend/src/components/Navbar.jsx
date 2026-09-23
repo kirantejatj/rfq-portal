@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Building2, FileText, User, LogOut, PlusCircle, LayoutDashboard, Shield, Send, Terminal } from 'lucide-react';
+import { Building2, FileText, FileCheck, User, LogOut, PlusCircle, LayoutDashboard, Shield, Send, Terminal } from 'lucide-react';
 
 export default function Navbar() {
   const { user, isCE, isApplicant, logout } = useAuth();
