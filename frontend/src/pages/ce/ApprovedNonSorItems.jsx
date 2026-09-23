@@ -3,7 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { 
   FileCheck, Shield, Building2, Search, Filter, Printer, Download, 
   ChevronDown, ChevronUp, PlusCircle, Copy, Check, Info, ArrowLeft,
-  DollarSign, Layers, CheckCircle2, FileText, Sparkles, ExternalLink
+  DollarSign, Layers, CheckCircle2, FileText, Sparkles, ExternalLink,
+  Eye, FileSpreadsheet, Maximize2
 } from 'lucide-react';
 
 export const APPROVED_NON_SOR_ITEMS = [
@@ -312,6 +313,7 @@ export const COMMITTEE_MEMBERS = [
 
 export default function ApprovedNonSorItems() {
   const navigate = useNavigate();
+  const [activeView, setActiveView] = useState('table'); // 'table' | 'original_pdf'
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('ALL');
   const [expandedItems, setExpandedItems] = useState({});
@@ -368,34 +370,40 @@ export default function ApprovedNonSorItems() {
     });
   };
 
+  const originalPdfUrl = "/docs/APCRDA_Approved_Non_SOR_Items_Original_Signed_Order.pdf";
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-8 py-8 space-y-8">
-      {/* Top Breadcrumb & Quick Actions */}
+      {/* Top Breadcrumb & Dual Action Download Bar */}
       <div className="flex flex-wrap justify-between items-center gap-4">
         <Link
           to="/ce/dashboard"
-          className="inline-flex items-center text-xs font-semibold text-slate-600 hover:text-gov-700 bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-sm transition"
+          className="inline-flex items-center text-xs font-semibold text-slate-600 hover:text-gov-700 bg-white border border-slate-200 px-3 py-2 rounded-lg shadow-sm transition"
         >
           <ArrowLeft className="w-3.5 h-3.5 mr-1.5" />
           Back to Officer Dashboard
         </Link>
-        <div className="flex items-center space-x-2">
+        
+        <div className="flex flex-wrap items-center gap-2.5">
+          {/* PRIMARY DOWNLOAD: EXACT ORIGINAL SIGNED SCANNED PDF */}
+          <a
+            href={originalPdfUrl}
+            download="APCRDA_Approved_Non_SOR_Items_Original_Signed_Order.pdf"
+            className="inline-flex items-center text-xs font-black text-amber-950 bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-400 hover:from-amber-500 hover:to-yellow-500 px-4 py-2.5 rounded-lg shadow-md transition border border-amber-500/50 uppercase tracking-wide"
+            title="Download the exact original scanned order with all 20 pages, signatures, and stamps"
+          >
+            <Download className="w-4 h-4 mr-1.5 text-amber-950" />
+            <span>Download Original Signed Order (PDF • 2.38 MB)</span>
+          </a>
+
+          {/* PRINT BUTTON */}
           <button
             onClick={() => window.print()}
-            className="inline-flex items-center text-xs font-semibold text-slate-700 hover:text-gov-800 bg-white border border-slate-300 hover:bg-slate-50 px-3.5 py-2 rounded-lg shadow-sm transition"
+            className="inline-flex items-center text-xs font-semibold text-slate-700 hover:text-gov-800 bg-white border border-slate-300 hover:bg-slate-50 px-3.5 py-2.5 rounded-lg shadow-sm transition"
           >
             <Printer className="w-3.5 h-3.5 mr-1.5 text-slate-500" />
             Print Schedule
           </button>
-          <a
-            href="/docs/approved_non_sor_items_committee_minutes.pdf"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center text-xs font-bold text-white bg-gov-700 hover:bg-gov-800 px-3.5 py-2 rounded-lg shadow-sm transition"
-          >
-            <Download className="w-3.5 h-3.5 mr-1.5" />
-            Download PDF Report
-          </a>
         </div>
       </div>
 
@@ -413,10 +421,12 @@ export default function ApprovedNonSorItems() {
               </span>
               <span className="text-slate-400 text-xs font-mono">• Committee Date: 06-08-2026 @ 5:00 PM</span>
             </div>
-            <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-3 py-1 rounded-full text-xs font-bold flex items-center">
-              <CheckCircle2 className="w-3.5 h-3.5 mr-1 text-emerald-400" />
-              STATUS: APPROVED & ADOPTED
-            </span>
+            <div className="flex items-center space-x-2">
+              <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-3 py-1 rounded-full text-xs font-bold flex items-center">
+                <CheckCircle2 className="w-3.5 h-3.5 mr-1 text-emerald-400" />
+                STATUS: APPROVED & SIGNED
+              </span>
+            </div>
           </div>
 
           <div className="space-y-2">
@@ -470,184 +480,256 @@ export default function ApprovedNonSorItems() {
           <span className="text-[10px] text-slate-400 mt-0.5 block">20 Elevators Retrofitted</span>
         </div>
         <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-          <span className="text-purple-600 font-semibold block">Committee Composition</span>
-          <span className="text-2xl font-black text-purple-700 mt-1 block">10 Members</span>
-          <span className="text-[10px] text-slate-400 mt-0.5 block">Group Director (ENC) & CEs</span>
+          <span className="text-purple-600 font-semibold block">Original Signed Order</span>
+          <span className="text-2xl font-black text-purple-700 mt-1 block">20 Pages</span>
+          <a href={originalPdfUrl} target="_blank" rel="noopener noreferrer" className="text-[10px] text-gov-600 hover:underline font-bold mt-0.5 block">
+            Open Scanned PDF &rarr;
+          </a>
         </div>
       </div>
 
-      {/* Filter & Search Bar */}
-      <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm space-y-3">
-        <div className="flex flex-wrap justify-between items-center gap-3">
-          <div className="relative flex-1 min-w-[280px]">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
-            <input
-              type="text"
-              placeholder="Search by Item code, description, specification, or make (e.g. Lifts, PU Foam, BIZZAR, FIBA)..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 text-xs border border-slate-300 rounded-lg bg-slate-50 focus:bg-white focus:ring-2 focus:ring-gov-500 focus:outline-none"
+      {/* View Mode Switcher Tabs */}
+      <div className="flex border-b border-slate-200 bg-white rounded-xl p-1.5 shadow-sm">
+        <button
+          onClick={() => setActiveView('table')}
+          className={`flex-1 py-2.5 px-4 rounded-lg font-bold text-xs flex items-center justify-center space-x-2 transition ${
+            activeView === 'table'
+              ? 'bg-gov-800 text-white shadow-sm'
+              : 'text-slate-600 hover:bg-slate-100'
+          }`}
+        >
+          <Layers className="w-4 h-4" />
+          <span>Interactive Items Schedule & BOQ Search (24 Items)</span>
+        </button>
+        <button
+          onClick={() => setActiveView('original_pdf')}
+          className={`flex-1 py-2.5 px-4 rounded-lg font-bold text-xs flex items-center justify-center space-x-2 transition ${
+            activeView === 'original_pdf'
+              ? 'bg-gov-800 text-white shadow-sm'
+              : 'text-slate-600 hover:bg-slate-100'
+          }`}
+        >
+          <FileText className="w-4 h-4 text-amber-400" />
+          <span>Original Signed Scanned Document Viewer (20 Pages)</span>
+        </button>
+      </div>
+
+      {/* VIEW 1: INTERACTIVE TABLE & BOQ SEARCH */}
+      {activeView === 'table' && (
+        <div className="space-y-6">
+          {/* Filter & Search Bar */}
+          <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm space-y-3">
+            <div className="flex flex-wrap justify-between items-center gap-3">
+              <div className="relative flex-1 min-w-[280px]">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                <input
+                  type="text"
+                  placeholder="Search by Item code, description, specification, or make (e.g. Lifts, PU Foam, BIZZAR, FIBA)..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2 text-xs border border-slate-300 rounded-lg bg-slate-50 focus:bg-white focus:ring-2 focus:ring-gov-500 focus:outline-none"
+                />
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={expandAll}
+                  className="text-xs text-slate-600 hover:text-gov-700 font-medium px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 rounded transition"
+                >
+                  Expand All
+                </button>
+                <button
+                  onClick={collapseAll}
+                  className="text-xs text-slate-600 hover:text-gov-700 font-medium px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 rounded transition"
+                >
+                  Collapse All
+                </button>
+              </div>
+            </div>
+
+            {/* Category Pills */}
+            <div className="flex items-center space-x-1.5 overflow-x-auto pb-1 text-xs">
+              <span className="text-slate-400 font-semibold text-[11px] mr-1 flex items-center">
+                <Filter className="w-3 h-3 mr-1" /> Category:
+              </span>
+              {categories.map(cat => (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`px-3 py-1 rounded-full whitespace-nowrap transition text-xs font-semibold ${
+                    selectedCategory === cat
+                      ? 'bg-gov-800 text-white shadow-sm'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  {cat === 'ALL' ? 'All 24 Items' : cat}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 24 Approved Items List */}
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="p-4 bg-slate-50/80 border-b border-slate-200 flex justify-between items-center">
+              <div className="flex items-center space-x-2">
+                <FileText className="w-4 h-4 text-gov-700" />
+                <span className="text-xs font-bold text-slate-800 uppercase tracking-wide">
+                  Schedule of Approved Non-SoR Items ({filteredItems.length} of {APPROVED_NON_SOR_ITEMS.length})
+                </span>
+              </div>
+              <span className="text-xs font-bold text-gov-800">
+                Filtered Subtotal: ₹{filteredItems.reduce((s, i) => s + i.amount, 0).toLocaleString('en-IN')}
+              </span>
+            </div>
+
+            <div className="divide-y divide-slate-200">
+              {filteredItems.map((item) => {
+                const isExpanded = !!expandedItems[item.sno];
+                return (
+                  <div key={item.sno} className="p-4 sm:p-5 hover:bg-slate-50/60 transition">
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                      <div className="flex items-start space-x-3 flex-1">
+                        <span className="w-8 h-8 rounded-lg bg-gov-100 text-gov-800 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
+                          {item.sno}
+                        </span>
+                        <div className="space-y-1 flex-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="px-2 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300 font-mono text-[10px] font-bold">
+                              {item.item_code}
+                            </span>
+                            <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-medium text-[10px]">
+                              {item.category}
+                            </span>
+                            <h3 className="text-sm font-bold text-slate-900 leading-snug">
+                              {item.name}
+                            </h3>
+                          </div>
+
+                          {/* Summary Metrics Row */}
+                          <div className="flex flex-wrap items-center gap-4 text-xs pt-1 text-slate-600">
+                            <div>
+                              <span className="text-slate-400">Unit:</span> <strong>{item.unit}</strong>
+                            </div>
+                            <div>
+                              <span className="text-slate-400">Quantity:</span> <strong>{item.qty.toLocaleString('en-IN')}</strong>
+                            </div>
+                            <div>
+                              <span className="text-slate-400">Adopted Rate:</span> <strong className="text-gov-800">₹{item.rate.toLocaleString('en-IN')}</strong> / {item.unit}
+                            </div>
+                            <div>
+                              <span className="text-slate-400">Total Sanction Amount:</span> <strong className="text-emerald-700 font-black">₹{item.amount.toLocaleString('en-IN')}</strong>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Actions Right */}
+                      <div className="flex items-center space-x-2 shrink-0 self-end sm:self-start">
+                        <button
+                          onClick={() => handleCopySpec(item)}
+                          className="px-2.5 py-1.5 text-xs text-slate-600 hover:text-gov-700 bg-slate-100 hover:bg-slate-200 rounded-md transition flex items-center"
+                          title="Copy full item details and specification to clipboard"
+                        >
+                          {copiedId === item.sno ? (
+                            <>
+                              <Check className="w-3.5 h-3.5 mr-1 text-emerald-600" />
+                              <span className="text-emerald-600 font-semibold">Copied</span>
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="w-3.5 h-3.5 mr-1 text-slate-500" />
+                              <span>Copy Spec</span>
+                            </>
+                          )}
+                        </button>
+
+                        <button
+                          onClick={() => handleCreateRfqFromItem(item)}
+                          className="px-3 py-1.5 text-xs font-bold text-white bg-gov-700 hover:bg-gov-800 rounded-md transition flex items-center shadow-sm"
+                          title="Raise New RFQ for this item directly"
+                        >
+                          <PlusCircle className="w-3.5 h-3.5 mr-1" />
+                          Raise RFQ
+                        </button>
+
+                        <button
+                          onClick={() => toggleExpand(item.sno)}
+                          className="p-1.5 text-slate-400 hover:text-slate-700 rounded-md hover:bg-slate-100 transition"
+                          title={isExpanded ? "Collapse" : "View Full Specification"}
+                        >
+                          {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Expanded Specifications & Justification */}
+                    {isExpanded && (
+                      <div className="mt-4 pt-4 border-t border-slate-200 text-xs space-y-3 bg-slate-50/70 p-4 rounded-xl">
+                        <div>
+                          <span className="font-bold text-slate-800 uppercase tracking-wider text-[10px] block text-gov-800 mb-1">
+                            Detailed Technical Specification (Verbatim Committee Minutes)
+                          </span>
+                          <p className="text-slate-700 leading-relaxed font-sans text-xs bg-white p-3 rounded-lg border border-slate-200 whitespace-pre-wrap">
+                            {item.description}
+                          </p>
+                        </div>
+
+                        <div>
+                          <span className="font-bold text-slate-800 uppercase tracking-wider text-[10px] block text-amber-800 mb-1">
+                            Market Quotation Analysis & Technical Justification Remarks
+                          </span>
+                          <p className="text-slate-700 leading-relaxed font-sans text-xs bg-amber-50/60 p-3 rounded-lg border border-amber-200">
+                            {item.remarks}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* VIEW 2: ORIGINAL SCANNED PDF VIEWER */}
+      {activeView === 'original_pdf' && (
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
+          <div className="flex flex-wrap justify-between items-center gap-3 pb-4 border-b border-slate-200">
+            <div>
+              <h3 className="text-base font-bold text-slate-900">Original Scanned Committee Order (20 Pages)</h3>
+              <p className="text-xs text-slate-500">Includes original signatures, stamps, official minutes, and scanned annexures.</p>
+            </div>
+            <div className="flex items-center space-x-2">
+              <a
+                href={originalPdfUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-3.5 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition flex items-center"
+              >
+                <ExternalLink className="w-3.5 h-3.5 mr-1.5 text-slate-500" />
+                Open in Full Window
+              </a>
+              <a
+                href={originalPdfUrl}
+                download="APCRDA_Approved_Non_SOR_Items_Original_Signed_Order.pdf"
+                className="px-4 py-2 text-xs font-bold text-white bg-gov-800 hover:bg-gov-900 rounded-lg shadow-sm transition flex items-center"
+              >
+                <Download className="w-3.5 h-3.5 mr-1.5 text-amber-400" />
+                Download Original PDF
+              </a>
+            </div>
+          </div>
+
+          <div className="w-full h-[900px] border border-slate-300 rounded-xl overflow-hidden bg-slate-100">
+            <iframe
+              src={`${originalPdfUrl}#toolbar=1&navpanes=1`}
+              title="Original Signed APCRDA Order"
+              className="w-full h-full"
             />
           </div>
-
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={expandAll}
-              className="text-xs text-slate-600 hover:text-gov-700 font-medium px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 rounded transition"
-            >
-              Expand All
-            </button>
-            <button
-              onClick={collapseAll}
-              className="text-xs text-slate-600 hover:text-gov-700 font-medium px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 rounded transition"
-            >
-              Collapse All
-            </button>
-          </div>
         </div>
-
-        {/* Category Pills */}
-        <div className="flex items-center space-x-1.5 overflow-x-auto pb-1 text-xs">
-          <span className="text-slate-400 font-semibold text-[11px] mr-1 flex items-center">
-            <Filter className="w-3 h-3 mr-1" /> Category:
-          </span>
-          {categories.map(cat => (
-            <button
-              key={cat}
-              onClick={() => setSelectedCategory(cat)}
-              className={`px-3 py-1 rounded-full whitespace-nowrap transition text-xs font-semibold ${
-                selectedCategory === cat
-                  ? 'bg-gov-800 text-white shadow-sm'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-              }`}
-            >
-              {cat === 'ALL' ? 'All 24 Items' : cat}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* 24 Approved Items List */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="p-4 bg-slate-50/80 border-b border-slate-200 flex justify-between items-center">
-          <div className="flex items-center space-x-2">
-            <FileText className="w-4 h-4 text-gov-700" />
-            <span className="text-xs font-bold text-slate-800 uppercase tracking-wide">
-              Official Schedule of Approved Non-SoR Items ({filteredItems.length} of {APPROVED_NON_SOR_ITEMS.length})
-            </span>
-          </div>
-          <span className="text-xs font-bold text-gov-800">
-            Filtered Subtotal: ₹{filteredItems.reduce((s, i) => s + i.amount, 0).toLocaleString('en-IN')}
-          </span>
-        </div>
-
-        <div className="divide-y divide-slate-200">
-          {filteredItems.map((item) => {
-            const isExpanded = !!expandedItems[item.sno];
-            return (
-              <div key={item.sno} className="p-4 sm:p-5 hover:bg-slate-50/60 transition">
-                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
-                  <div className="flex items-start space-x-3 flex-1">
-                    <span className="w-8 h-8 rounded-lg bg-gov-100 text-gov-800 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
-                      {item.sno}
-                    </span>
-                    <div className="space-y-1 flex-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="px-2 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300 font-mono text-[10px] font-bold">
-                          {item.item_code}
-                        </span>
-                        <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-medium text-[10px]">
-                          {item.category}
-                        </span>
-                        <h3 className="text-sm font-bold text-slate-900 leading-snug">
-                          {item.name}
-                        </h3>
-                      </div>
-
-                      {/* Summary Metrics Row */}
-                      <div className="flex flex-wrap items-center gap-4 text-xs pt-1 text-slate-600">
-                        <div>
-                          <span className="text-slate-400">Unit:</span> <strong>{item.unit}</strong>
-                        </div>
-                        <div>
-                          <span className="text-slate-400">Quantity:</span> <strong>{item.qty.toLocaleString('en-IN')}</strong>
-                        </div>
-                        <div>
-                          <span className="text-slate-400">Adopted Rate:</span> <strong className="text-gov-800">₹{item.rate.toLocaleString('en-IN')}</strong> / {item.unit}
-                        </div>
-                        <div>
-                          <span className="text-slate-400">Total Sanction Amount:</span> <strong className="text-emerald-700 font-black">₹{item.amount.toLocaleString('en-IN')}</strong>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Actions Right */}
-                  <div className="flex items-center space-x-2 shrink-0 self-end sm:self-start">
-                    <button
-                      onClick={() => handleCopySpec(item)}
-                      className="px-2.5 py-1.5 text-xs text-slate-600 hover:text-gov-700 bg-slate-100 hover:bg-slate-200 rounded-md transition flex items-center"
-                      title="Copy full item details and specification to clipboard"
-                    >
-                      {copiedId === item.sno ? (
-                        <>
-                          <Check className="w-3.5 h-3.5 mr-1 text-emerald-600" />
-                          <span className="text-emerald-600 font-semibold">Copied</span>
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="w-3.5 h-3.5 mr-1 text-slate-500" />
-                          <span>Copy Spec</span>
-                        </>
-                      )}
-                    </button>
-
-                    <button
-                      onClick={() => handleCreateRfqFromItem(item)}
-                      className="px-3 py-1.5 text-xs font-bold text-white bg-gov-700 hover:bg-gov-800 rounded-md transition flex items-center shadow-sm"
-                      title="Raise New RFQ for this item directly"
-                    >
-                      <PlusCircle className="w-3.5 h-3.5 mr-1" />
-                      Raise RFQ
-                    </button>
-
-                    <button
-                      onClick={() => toggleExpand(item.sno)}
-                      className="p-1.5 text-slate-400 hover:text-slate-700 rounded-md hover:bg-slate-100 transition"
-                      title={isExpanded ? "Collapse" : "View Full Specification"}
-                    >
-                      {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Expanded Specifications & Justification */}
-                {isExpanded && (
-                  <div className="mt-4 pt-4 border-t border-slate-200 text-xs space-y-3 bg-slate-50/70 p-4 rounded-xl">
-                    <div>
-                      <span className="font-bold text-slate-800 uppercase tracking-wider text-[10px] block text-gov-800 mb-1">
-                        Detailed Technical Specification (Verbatim Committee Minutes)
-                      </span>
-                      <p className="text-slate-700 leading-relaxed font-sans text-xs bg-white p-3 rounded-lg border border-slate-200 whitespace-pre-wrap">
-                        {item.description}
-                      </p>
-                    </div>
-
-                    <div>
-                      <span className="font-bold text-slate-800 uppercase tracking-wider text-[10px] block text-amber-800 mb-1">
-                        Market Quotation Analysis & Technical Justification Remarks
-                      </span>
-                      <p className="text-slate-700 leading-relaxed font-sans text-xs bg-amber-50/60 p-3 rounded-lg border border-amber-200">
-                        {item.remarks}
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
+      )}
 
       {/* Official Committee Resolution Section */}
       <div className="bg-amber-50/80 border border-amber-200 rounded-2xl p-6 shadow-sm space-y-4">
