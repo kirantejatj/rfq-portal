@@ -29,13 +29,20 @@ import ApiWorkbench from './pages/admin/ApiWorkbench';
 
 const ProtectedRoute = ({ children, roleRequired }) => {
   const { user, loading } = useAuth();
-  if (loading) return <div className="text-center py-20">Authenticating...</div>;
-  if (!user) return <Navigate to="/applicant/login" replace />;
+  if (loading) return (
+    <div className="min-h-[50vh] flex items-center justify-center">
+      <div className="animate-spin w-8 h-8 border-4 border-gov-600 border-t-transparent rounded-full mx-auto"></div>
+    </div>
+  );
+  if (!user) {
+    if (roleRequired === 'CE') return <Navigate to="/ce/login" replace />;
+    return <Navigate to="/applicant/login" replace />;
+  }
   if (roleRequired === 'CE' && !['CE', 'ADMIN', 'SUPER_ADMIN'].includes(user.role)) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/ce/login" replace />;
   }
   if (roleRequired === 'APPLICANT' && user.role !== 'APPLICANT') {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/applicant/login" replace />;
   }
   return children;
 };
@@ -100,6 +107,7 @@ export default function App() {
               <ApprovedNonSorItems />
             </ProtectedRoute>
           } />
+          <Route path="/approved-non-sor-items" element={<ApprovedNonSorItems />} />
 
           {/* Developer / API Workbench Route */}
           <Route path="/developer" element={<ApiWorkbench />} />
