@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RFQ Portal — Brand Theme & Color Palette UI Showcase</title>
+<style>
+  :root {
+    --primary-1: #7A1315; /* Deep Maroon */
+    --primary-2: #A31E22; /* Red Maroon */
+    --sec-1: #231F20;     /* Black */
+    --sec-2: #414042;     /* Dark Grey */
+    --opt-1: #FBB97D;     /* Peach */
+    --opt-2: #58595B;     /* Grey */
+    --opt-3: #FDE6D3;     /* Light Peach */
+    --opt-4: #A7A9AC;     /* Light Grey */
+    --opt-5: #CB902E;     /* Gold */
+    --opt-6: #67491C;     /* Dark Gold/Brown */
+    --opt-7: #CA6E28;     /* Burnt Orange */
+    --opt-8: #0E2C49;     /* Deep Blue */
+    --bg-light: #FAF8F5;
+    --card-bg: #FFFFFF;
+  }
+
+  @page {
+    size: A4 portrait;
+    margin: 12mm 10mm 12mm 10mm;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--sec-1);
+    background-color: var(--bg-light);
+    line-height: 1.5;
+    font-size: 13px;
+    padding: 24px;
+  }
+
+  .doc-container {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .header-cover {
+    background: linear-gradient(135deg, var(--primary-1) 0%, var(--primary-2) 60%, var(--sec-1) 100%);
+    color: #ffffff;
+    border-radius: 16px;
+    padding: 32px;
+    margin-bottom: 28px;
+    box-shadow: 0 10px 25px -5px rgba(122, 19, 21, 0.3);
+    border: 1px solid rgba(203, 144, 46, 0.4);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .header-cover::after {
+    content: "";
+    position: absolute;
+    right: -40px;
+    bottom: -40px;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(203, 144, 46, 0.2) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+
+  .govt-tag {
+    display: inline-block;
+    background: rgba(203, 144, 46, 0.25);
+    color: var(--opt-1);
+    border: 1px solid var(--opt-5);
+    padding: 4px 12px;
+    border-radius: 9999px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+  }
+
+  h1 {
+    font-size: 26px;
+    font-weight: 900;
+    color: #ffffff;
+    line-height: 1.2;
+    margin-bottom: 8px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+    color: var(--opt-3);
+    max-width: 780px;
+    line-height: 1.6;
+  }
+
+  .section-title {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--primary-1);
+    border-bottom: 2px solid var(--opt-5);
+    padding-bottom: 8px;
+    margin: 32px 0 16px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    page-break-after: avoid;
+  }
+
+  .section-badge {
+    font-size: 11px;
+    font-weight: 600;
+    background: var(--opt-3);
+    color: var(--primary-1);
+    padding: 3px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--opt-1);
+  }
+
+  /* Palette Grid */
+  .swatch-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+
+  .swatch-card {
+    background: #ffffff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    border: 1px solid #e2e8f0;
+    transition: transform 0.2s;
+  }
+
+  .swatch-preview {
+    height: 70px;
+    width: 100%;
+    display: flex;
+    align-items: flex-end;
+    padding: 8px;
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 11px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  }
+
+  .swatch-details {
+    padding: 10px;
+  }
+
+  .swatch-name {
+    font-weight: 800;
+    font-size: 12px;
+    color: var(--sec-1);
+    margin-bottom: 2px;
+  }
+
+  .swatch-hex {
+    font-family: monospace;
+    font-weight: 700;
+    font-size: 11px;
+    color: var(--primary-2);
+  }
+
+  .swatch-role {
+    font-size: 10px;
+    color: var(--sec-2);
+    margin-top: 4px;
+    border-top: 1px dashed #e2e8f0;
+    padding-top: 4px;
+  }
+
+  /* Mockup Windows */
+  .mockup-window {
+    background: #ffffff;
+    border-radius: 14px;
+    border: 2px solid #e2e8f0;
+    box-shadow: 0 8px 24px rgba(35, 31, 32, 0.08);
+    margin-bottom: 28px;
+    overflow: hidden;
+    page-break-inside: avoid;
+  }
+
+  .mockup-bar {
+    background: #f1f5f9;
+    padding: 8px 14px;
+    border-bottom: 1px solid #cbd5e1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .dots {
+    display: flex;
+    gap: 5px;
+  }
+
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .dot-r { background: #ef4444; }
+  .dot-y { background: #f59e0b; }
+  .dot-g { background: #10b981; }
+
+  .mockup-url {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    padding: 2px 20px;
+    font-family: monospace;
+    font-size: 10.5px;
+    color: var(--sec-2);
+  }
+
+  .mockup-content {
+    background: #ffffff;
+  }
+
+  /* Component: Navbar Simulation */
+  .sim-top-bar {
+    background-color: var(--sec-1);
+    color: var(--opt-3);
+    font-size: 10.5px;
+    padding: 6px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--primary-1);
+  }
+
+  .sim-navbar {
+    background-color: #ffffff;
+    border-bottom: 3px solid var(--primary-1);
+    padding: 12px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+  }
+
+  .sim-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .sim-logo-icon {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, var(--primary-1), var(--primary-2));
+    color: var(--opt-5);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 16px;
+    border: 1px solid var(--opt-5);
+  }
+
+  .sim-logo-text {
+    font-weight: 800;
+    font-size: 16px;
+    color: var(--primary-1);
+    line-height: 1.1;
+  }
+
+  .sim-logo-sub {
+    font-size: 10px;
+    color: var(--opt-2);
+    font-weight: 500;
+  }
+
+  .sim-nav-links {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .btn-gold {
+    background: linear-gradient(135deg, var(--opt-5), var(--opt-7));
+    color: #ffffff;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-weight: 800;
+    font-size: 11px;
+    border: 1px solid var(--opt-6);
+    box-shadow: 0 2px 4px rgba(203, 144, 46, 0.3);
+    text-transform: uppercase;
+  }
+
+  .btn-maroon {
+    background: var(--primary-1);
+    color: #ffffff;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 11px;
+    border: 1px solid var(--primary-2);
+  }
+
+  .btn-outline-maroon {
+    background: var(--opt-3);
+    color: var(--primary-1);
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 11px;
+    border: 1px solid var(--opt-1);
+  }
+
+  /* Component: CE Dashboard Mockup */
+  .dashboard-banner {
+    background: linear-gradient(135deg, var(--primary-1) 0%, var(--sec-1) 100%);
+    color: #ffffff;
+    padding: 20px;
+    border-radius: 12px;
+    margin: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-left: 6px solid var(--opt-5);
+  }
+
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 12px;
+    padding: 0 16px 16px 16px;
+  }
+
+  .kpi-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 12px;
+    text-align: left;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  }
+
+  .kpi-title {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--sec-2);
+    text-transform: uppercase;
+  }
+
+  .kpi-num {
+    font-size: 20px;
+    font-weight: 900;
+    margin-top: 4px;
+  }
+
+  .text-maroon { color: var(--primary-1); }
+  .text-red-maroon { color: var(--primary-2); }
+  .text-gold { color: var(--opt-5); }
+  .text-blue { color: var(--opt-8); }
+  .text-orange { color: var(--opt-7); }
+
+  /* RFQ Card Mockup */
+  .rfq-card {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    margin: 16px;
+    padding: 16px;
+    border-left: 5px solid var(--primary-1);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  }
+
+  .rfq-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .rfq-ref {
+    font-family: monospace;
+    font-weight: 800;
+    color: var(--primary-2);
+    background: var(--opt-3);
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid var(--opt-1);
+    font-size: 11px;
+  }
+
+  .status-badge {
+    padding: 3px 10px;
+    border-radius: 9999px;
+    font-size: 10.5px;
+    font-weight: 800;
+  }
+
+  .status-published {
+    background: rgba(203, 144, 46, 0.15);
+    color: var(--opt-6);
+    border: 1px solid var(--opt-5);
+  }
+
+  .status-accepted {
+    background: rgba(14, 44, 73, 0.12);
+    color: var(--opt-8);
+    border: 1px solid var(--opt-8);
+  }
+
+  .rfq-title {
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--sec-1);
+    margin-bottom: 6px;
+  }
+
+  .rfq-grid-details {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    background: var(--bg-light);
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 10px;
+    margin: 10px 0;
+    font-size: 11px;
+  }
+
+  .rfq-item-tag {
+    display: inline-block;
+    background: #ffffff;
+    border: 1px solid var(--opt-4);
+    color: var(--sec-1);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10.5px;
+    margin-right: 6px;
+  }
+
+  /* Non-SOR Table Simulation */
+  .table-container {
+    padding: 16px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+  }
+
+  th {
+    background: var(--primary-1);
+    color: #ffffff;
+    padding: 8px 10px;
+    text-align: left;
+    font-weight: 700;
+    border: 1px solid var(--primary-2);
+  }
+
+  td {
+    padding: 8px 10px;
+    border: 1px solid #cbd5e1;
+    vertical-align: top;
+  }
+
+  tr:nth-child(even) {
+    background-color: var(--opt-3);
+  }
+
+  .amount-highlight {
+    font-weight: 800;
+    color: var(--primary-1);
+  }
+
+  /* Comparison Matrix */
+  .comparison-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 20px 0;
+  }
+
+  .comp-card {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 16px;
+    border: 1px solid #cbd5e1;
+  }
+
+  .comp-header {
+    font-weight: 800;
+    font-size: 13px;
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+    border-bottom: 2px solid;
+  }
+
+  .comp-current { border-color: #0284c7; color: #0284c7; }
+  .comp-new { border-color: var(--primary-1); color: var(--primary-1); }
+
+  /* Interactive Wizard Steps */
+  .wizard-bar {
+    display: flex;
+    justify-content: space-between;
+    background: var(--bg-light);
+    padding: 12px 20px;
+    border-bottom: 1px solid #cbd5e1;
+  }
+
+  .wizard-step {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--opt-2);
+  }
+
+  .wizard-step.active {
+    color: var(--primary-1);
+  }
+
+  .step-circle {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--opt-4);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+  }
+
+  .wizard-step.active .step-circle {
+    background: var(--primary-1);
+    color: var(--opt-3);
+  }
+
+  .wizard-step.completed .step-circle {
+    background: var(--opt-5);
+    color: #ffffff;
+  }
+
+  .notes-box {
+    background: var(--opt-3);
+    border-left: 4px solid var(--primary-1);
+    padding: 12px 16px;
+    border-radius: 0 8px 8px 0;
+    margin-top: 24px;
+    font-size: 11.5px;
+    color: var(--sec-1);
+  }
+
+  .footer-text {
+    margin-top: 36px;
+    text-align: center;
+    font-size: 11px;
+    color: var(--opt-2);
+    border-top: 1px solid #cbd5e1;
+    padding-top: 14px;
+  }
+</style>
+</head>
+<body>
+
+<div class="doc-container">
+
+  <!-- COVER / HEADER -->
+  <div class="header-cover">
+    <div class="govt-tag">Official Theme & Color System Proposal</div>
+    <h1>RFQ Portal — New Brand Color Palette & UI Design Showcase</h1>
+    <div class="subtitle">
+      A comprehensive design demonstration applying the requested 12-color palette (Deep Maroon, Red Maroon, Black, Dark Grey, Peach, Grey, Light Peach, Light Grey, Gold, Dark Gold, Burnt Orange, and Deep Blue) across all portal pages, navigation, dashboards, and tables — <strong>Prepared for Review</strong>.
+    </div>
+  </div>
+
+  <!-- SECTION 1: COLOR SYSTEM SPECIFICATION -->
+  <div class="section-title">
+    <span>1. Master Color Palette Specifications</span>
+    <span class="section-badge">12 Distinct Palette Tokens</span>
+  </div>
+
+  <div class="swatch-grid">
+    <!-- Primary 1 -->
+    <div class="swatch-card">
+      <div class="swatch-preview" style="background-color: #7A1315;">Deep Maroon</div>
+      <div class="swatch-details">
+        <div class="swatch-name">Primary 1</div>
+        <div class="swatch-hex">#7A1315</div>
+        <div class="swatch-role">Primary brand headers, top navbar, major buttons</div>
+      </div>
+    </div>
+
+    <!-- Primary 2 -->
+    <div class="swatch-card">
+      <div class="swatch-preview" style="background-color: #A31E22;">Red Maroon</div>
+      <div class="swatch-details">
+        <div class="swatch-name">Primary 2</div>
+        <div class="swatch-hex">#A31E22</div>
+        <div class="swatch-role">Hover states, critical alerts, active item borders</div>
+      </div>
+    </div>
+
+    <!-- Secondary 1 -->
+    <div class="swatch-card">
+      <div class="swatch-preview" style="background-color: #231F20;">Black</div>
+      <div class="swatch-details">
+        <div class="swatch-name">Secondary 1</div>
+        <div class="swatch-hex">#231F20</div>
+        <div class="swatch-role">Top govt bar, dark footers, high-contrast text</div>
+      </div>
+    </div>
+
+    <!-- Secondary 2 -->
+    <div class="swatch-card">
+      <div class="swatch-preview" style="background-color: #414042;">Dark Grey</div>
+      <div class="swatch-details">
+        <div class="swatch-name">Secondary 2</div>
+        <div class="swatch-hex">#414042</div>
+        <div class="swatch-role">Body headings, modal backdrops, labels</div>
+      </div>
+    </div>
+
+    <!-- Optional 1 -->
+    <div class="swatch-card">
+      <div class="swatch-preview" style="background-color: #FBB97D; color: #231F20;">Peach</div>
+      <div class="swatch-details">
+        <div class="swatch-name">Optional 1</div>
+        <div class="swatch-hex">#FBB97D</div>
+        <div class="swatch-role">Warning badges, subtle alerts, focus rings</div>
+      </div>
+    </div>
+
+    <!-- Optional 2 -->
+    <div class="swatch-card">
+      <div class="swatch-preview" style="background-color: #58595B;">Grey</div>
+      <div class="swatch-details">
+        <div class="swatch-name">Optional 2</div>
+        <div class="swatch-hex">#58595B</div>
+        <div class="swatch-role">Secondary body copy, timestamps, inactive steps</div>
+      </div>
+    </div>
+
+    <!-- Optional 3 -->
+    <div class="swatch-card">
+      <div class="swatch-preview" style="background-color: #FDE6D3; color: #231F20;">Light Peach</div>
+      <div class="swatch-details">
+        <div class="swatch-name">Optional 3</div>
+        <div class="swatch-hex">#FDE6D3</div>
+        <div class="swatch-role">Table zebra rows, subtle cards, tag backgrounds</div>
+      </div>
+    </div>
+
+    <!-- Optional 4 -->
+    <div class="swatch-card">
+      <div class="swatch-preview" style="background-color: #A7A9AC; color: #231F20;">Light Grey</div>
+      <div class="swatch-details">
+        <div class="swatch-name">Optional 4</div>
+        <div class="swatch-hex">#A7A9AC</div>
+        <div class="swatch-role">Card borders, disabled inputs, dividers</div>
+      </div>
+    </div>
+
+    <!-- Optional 5 -->
+    <div class="swatch-card">
+      <div class="swatch-preview" style="background-color: #CB902E;">Gold</div>
+      <div class="swatch-details">
+        <div class="swatch-name">Optional 5</div>
+        <div class="swatch-hex">#CB902E</div>
+        <div class="swatch-role">APPROVED NON-SOR button, verified badges, crowns</div>
+      </div>
+    </div>
+
+    <!-- Optional 6 -->
+    <div class="swatch-card">
+      <div class="swatch-preview" style="background-color: #67491C;">Dark Gold/Brown</div>
+      <div class="swatch-details">
+        <div class="swatch-name">Optional 6</div>
+        <div class="swatch-hex">#67491C</div>
+        <div class="swatch-role">Gold text on light background, formal borders</div>
+      </div>
+    </div>
+
+    <!-- Optional 7 -->
+    <div class="swatch-card">
+      <div class="swatch-preview" style="background-color: #CA6E28;">Burnt Orange</div>
+      <div class="swatch-details">
+        <div class="swatch-name">Optional 7</div>
+        <div class="swatch-hex">#CA6E28</div>
+        <div class="swatch-role">Closing Soon badges, urgent notices, accents</div>
+      </div>
+    </div>
+
+    <!-- Optional 8 -->
+    <div class="swatch-card">
+      <div class="swatch-preview" style="background-color: #0E2C49;">Deep Blue</div>
+      <div class="swatch-details">
+        <div class="swatch-name">Optional 8</div>
+        <div class="swatch-hex">#0E2C49</div>
+        <div class="swatch-role">Officer Review tags, document downloads, contrasts</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 2: UI MOCKUP 1 - TOP NAVBAR & HEADER -->
+  <div class="section-title">
+    <span>2. Global Navigation & Header UI Mockup</span>
+    <span class="section-badge">Deep Maroon (#7A1315) & Gold (#CB902E)</span>
+  </div>
+
+  <div class="mockup-window">
+    <div class="mockup-bar">
+      <div class="dots"><span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span></div>
+      <div class="mockup-url">http://localhost:5173/ — Global Navigation</div>
+      <div></div>
+    </div>
+    <div class="mockup-content">
+      <!-- Govt Top Bar in Black #231F20 -->
+      <div class="sim-top-bar">
+        <div>
+          <strong style="color: #ffffff;">Government of Andhra Pradesh</strong> | <span>Amaravati Growth & Infrastructure Corporation Limited (AGIC)</span>
+        </div>
+        <div>
+          <span style="background: rgba(203, 144, 46, 0.2); color: var(--opt-1); border: 1px solid var(--opt-5); padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 9px;">
+            SECURE RFQ SYSTEM v2.0
+          </span>
+        </div>
+      </div>
+
+      <!-- Main Navbar in White with Deep Maroon & Gold Highlights -->
+      <div class="sim-navbar">
+        <div class="sim-logo">
+          <div class="sim-logo-icon">🏛️</div>
+          <div>
+            <div class="sim-logo-text">RFQ Portal</div>
+            <div class="sim-logo-sub">Officer & Vendor Quotation Management</div>
+          </div>
+        </div>
+
+        <div class="sim-nav-links">
+          <span style="font-weight: 700; color: var(--sec-2); font-size: 11px; padding: 6px 10px;">Quotations / RFQs</span>
+          
+          <!-- Golden Highlight Button: APPROVED NON SOR ITEMS -->
+          <span class="btn-gold" style="cursor: pointer;">
+            📑 APPROVED NON SOR ITEMS
+          </span>
+
+          <span class="btn-outline-maroon">
+            📊 Officer Dashboard
+          </span>
+
+          <span class="btn-maroon">
+            ➕ Raise New RFQ
+          </span>
+
+          <div style="border-left: 1px solid #cbd5e1; padding-left: 12px; font-size: 10px; text-align: right;">
+            <strong style="color: var(--primary-1); display: block;">Er. K. V. Ramanathan CE</strong>
+            <span style="color: var(--opt-2); font-family: monospace;">Officer • 9876543210</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 3: UI MOCKUP 2 - CE EXECUTIVE DASHBOARD -->
+  <div class="section-title">
+    <span>3. Chief Engineer Executive Control Panel Mockup</span>
+    <span class="section-badge">Deep Maroon (#7A1315) + KPI Gradient</span>
+  </div>
+
+  <div class="mockup-window">
+    <div class="mockup-bar">
+      <div class="dots"><span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span></div>
+      <div class="mockup-url">http://localhost:5173/ce/dashboard — Officer Control Panel</div>
+      <div></div>
+    </div>
+    <div class="mockup-content">
+      <!-- Dashboard Banner -->
+      <div class="dashboard-banner">
+        <div>
+          <div style="color: var(--opt-1); font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">
+            🛡️ Officer Executive Control Panel
+          </div>
+          <h2 style="font-size: 18px; color: #ffffff; font-weight: 800; margin: 4px 0;">RFQ Management & Quotations Evaluation Center</h2>
+          <p style="font-size: 11px; color: var(--opt-3);">
+            Government of Andhra Pradesh • Total RFQs Raised: <strong>14</strong> | Total Quotations Received: <strong>29</strong>
+          </p>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <span class="btn-gold">📑 APPROVED NON SOR ITEMS</span>
+          <span class="btn-maroon" style="background: var(--primary-2); border-color: var(--opt-5);">➕ Raise New RFQ</span>
+        </div>
+      </div>
+
+      <!-- KPI 6-Grid with new theme colors -->
+      <div class="kpi-grid">
+        <div class="kpi-card" style="border-top: 3px solid var(--primary-1);">
+          <div class="kpi-title">Total RFQs Raised</div>
+          <div class="kpi-num text-maroon">14</div>
+        </div>
+        <div class="kpi-card" style="border-top: 3px solid var(--opt-5);">
+          <div class="kpi-title">Active Windows</div>
+          <div class="kpi-num text-gold">12</div>
+        </div>
+        <div class="kpi-card" style="border-top: 3px solid var(--opt-8);">
+          <div class="kpi-title">Total Quotes</div>
+          <div class="kpi-num text-blue">29</div>
+        </div>
+        <div class="kpi-card" style="border-top: 3px solid var(--opt-7);">
+          <div class="kpi-title">Under Review</div>
+          <div class="kpi-num text-orange">7</div>
+        </div>
+        <div class="kpi-card" style="border-top: 3px solid var(--primary-2);">
+          <div class="kpi-title">Accepted (L1)</div>
+          <div class="kpi-num text-red-maroon">9</div>
+        </div>
+        <div class="kpi-card" style="border-top: 3px solid var(--sec-2);">
+          <div class="kpi-title">Rejected</div>
+          <div class="kpi-num" style="color: var(--sec-2);">2</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 4: UI MOCKUP 3 - RFQ CARD DESIGN & BID DISCOVERY -->
+  <div class="section-title">
+    <span>4. RFQ Card & Item Breakdown Layout</span>
+    <span class="section-badge">Amber/Maroon Border (#7A1315) + Gold Badges (#CB902E)</span>
+  </div>
+
+  <div class="mockup-window">
+    <div class="mockup-bar">
+      <div class="dots"><span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span></div>
+      <div class="mockup-url">http://localhost:5173/ — Active Quotations List</div>
+      <div></div>
+    </div>
+    <div class="mockup-content">
+      <!-- RFQ Card Example -->
+      <div class="rfq-card">
+        <div class="rfq-header">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span class="rfq-ref">AGIC/CE/2026/RFQ-01</span>
+            <span style="background: var(--opt-3); color: var(--opt-6); border: 1px solid var(--opt-1); padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 800;">
+              👑 Raised by You
+            </span>
+          </div>
+          <span class="status-badge status-published">
+            ● PUBLISHED & OPEN
+          </span>
+        </div>
+
+        <div class="rfq-title">
+          Supply & Fabrication of Structural Steel Girders & Bridge Bearings for Seed Access Flyover
+        </div>
+
+        <div class="rfq-grid-details">
+          <div>
+            <span style="color: var(--opt-2); font-size: 9.5px; text-transform: uppercase; font-weight: 700; display: block;">RFQ Scope Items</span>
+            <strong style="color: var(--primary-1);">3 Item(s) Configured</strong>
+          </div>
+          <div>
+            <span style="color: var(--opt-2); font-size: 9.5px; text-transform: uppercase; font-weight: 700; display: block;">Completion Period</span>
+            <strong style="color: var(--sec-1);">9 Calendar Months</strong>
+          </div>
+          <div>
+            <span style="color: var(--opt-2); font-size: 9.5px; text-transform: uppercase; font-weight: 700; display: block;">Quotation Validity</span>
+            <strong style="color: var(--opt-7);">90 Days from Opening</strong>
+          </div>
+          <div>
+            <span style="color: var(--opt-2); font-size: 9.5px; text-transform: uppercase; font-weight: 700; display: block;">Weight Spec</span>
+            <strong style="color: var(--sec-1);">Avg 450 MT (Max 850 MT)</strong>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 12px;">
+          <span class="rfq-item-tag"><strong>ITEM-BR-01</strong>: IS 2062 Grade E350BR Structural Steel (350 MT)</span>
+          <span class="rfq-item-tag"><strong>ITEM-BR-02</strong>: Pot-PTFE Bearings (24 NOS)</span>
+          <span class="rfq-item-tag"><strong>ITEM-BR-03</strong>: NDT Testing & UT Inspection (Rate Only)</span>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f1f5f9; padding-top: 10px;">
+          <span style="color: var(--opt-2); font-size: 10.5px;">
+            🕒 Window: <strong>17-09-2026</strong> to <strong>12-10-2026</strong>
+          </span>
+          <div style="display: flex; gap: 8px;">
+            <span class="btn-outline-maroon">View Details & Docs</span>
+            <span class="btn-maroon">Submit Quotation &rarr;</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 5: UI MOCKUP 4 - APPROVED NON-SOR ITEMS TABLE -->
+  <div class="section-title">
+    <span>5. Approved Non-SOR Items Schedule Table Mockup</span>
+    <span class="section-badge">Deep Maroon Headers (#7A1315) + Light Peach Zebra (#FDE6D3)</span>
+  </div>
+
+  <div class="mockup-window">
+    <div class="mockup-bar">
+      <div class="dots"><span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span></div>
+      <div class="mockup-url">http://localhost:5173/approved-non-sor-items — Approved Items Table</div>
+      <div></div>
+    </div>
+    <div class="mockup-content table-container">
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 50px; text-align: center;">S.No</th>
+            <th>Item Code & Category</th>
+            <th>Item Description</th>
+            <th style="width: 60px;">Unit</th>
+            <th style="width: 70px;">Qty</th>
+            <th style="width: 100px;">Adopted Rate (₹)</th>
+            <th style="width: 120px;">Sanction Amount (₹)</th>
+            <th style="width: 80px; text-align: center;">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="text-align: center; font-weight: bold;">1</td>
+            <td>
+              <span style="background: var(--opt-3); color: var(--primary-1); padding: 1px 6px; border-radius: 4px; font-weight: bold; font-family: monospace;">Non-SOR-1</span>
+              <div style="font-size: 9.5px; color: var(--sec-2); margin-top: 2px;">Civil & Doors</div>
+            </td>
+            <td><strong>Mild Steel Shaft Door</strong> (Skin-Pass GI Sheet 1.20mm frame / 0.80mm shutter with PUF insulation, vision glass, hinges, sash lock)</td>
+            <td>Sqm</td>
+            <td>442</td>
+            <td>₹10,957.00</td>
+            <td class="amount-highlight">₹48,45,843.00</td>
+            <td style="text-align: center;"><span class="btn-maroon" style="padding: 3px 8px; font-size: 9.5px;">Raise RFQ</span></td>
+          </tr>
+          <tr>
+            <td style="text-align: center; font-weight: bold;">2</td>
+            <td>
+              <span style="background: var(--opt-3); color: var(--primary-1); padding: 1px 6px; border-radius: 4px; font-weight: bold; font-family: monospace;">Non-SOR-2</span>
+              <div style="font-size: 9.5px; color: var(--sec-2); margin-top: 2px;">Sports Infra</div>
+            </td>
+            <td><strong>Basketball Goal Post Set</strong> conforming to FIBA standards, heavy duty MS pipe pole (3-5mm thickness), base plate (12mm)</td>
+            <td>No</td>
+            <td>3</td>
+            <td>₹80,250.00</td>
+            <td class="amount-highlight">₹2,40,750.00</td>
+            <td style="text-align: center;"><span class="btn-maroon" style="padding: 3px 8px; font-size: 9.5px;">Raise RFQ</span></td>
+          </tr>
+          <tr>
+            <td style="text-align: center; font-weight: bold;">3</td>
+            <td>
+              <span style="background: var(--opt-3); color: var(--primary-1); padding: 1px 6px; border-radius: 4px; font-weight: bold; font-family: monospace;">Non-SOR-3</span>
+              <div style="font-size: 9.5px; color: var(--sec-2); margin-top: 2px;">Flooring</div>
+            </td>
+            <td><strong>Rubberized Flooring</strong> Base coat 34mm + Top Layer 6mm over podium slabs (IS 809:1992 / IS 1197:1970) for Kids Play Area & Track</td>
+            <td>Sqm</td>
+            <td>2,900</td>
+            <td>₹5,191.00</td>
+            <td class="amount-highlight">₹1,50,52,448.00</td>
+            <td style="text-align: center;"><span class="btn-maroon" style="padding: 3px 8px; font-size: 9.5px;">Raise RFQ</span></td>
+          </tr>
+          <tr>
+            <td style="text-align: center; font-weight: bold;">9</td>
+            <td>
+              <span style="background: var(--opt-3); color: var(--primary-1); padding: 1px 6px; border-radius: 4px; font-weight: bold; font-family: monospace;">Non-SOR-9</span>
+              <div style="font-size: 9.5px; color: var(--sec-2); margin-top: 2px;">Grouting</div>
+            </td>
+            <td><strong>PU Foam & Resin Injection Grouting</strong> for active leakage from concrete walls (expansion >30x, adhesion >2.5 MPa, ASTM D 2196)</td>
+            <td>Nos</td>
+            <td>14,400</td>
+            <td>₹1,800.00</td>
+            <td class="amount-highlight">₹2,59,20,000.00</td>
+            <td style="text-align: center;"><span class="btn-maroon" style="padding: 3px 8px; font-size: 9.5px;">Raise RFQ</span></td>
+          </tr>
+          <tr>
+            <td style="text-align: center; font-weight: bold;">21</td>
+            <td>
+              <span style="background: var(--opt-3); color: var(--primary-1); padding: 1px 6px; border-radius: 4px; font-weight: bold; font-family: monospace;">Non-SOR-21</span>
+              <div style="font-size: 9.5px; color: var(--sec-2); margin-top: 2px;">Elevators</div>
+            </td>
+            <td><strong>Retrofitting of Passenger Lifts</strong> Thyssenkrupp G+12 Floors (15 Pass/1020Kg, MRL 1.75 mps, VVVF, ARD, CCTV, Braille, VAS)</td>
+            <td>No</td>
+            <td>10</td>
+            <td>₹34,61,452.00</td>
+            <td class="amount-highlight">₹3,46,14,520.00</td>
+            <td style="text-align: center;"><span class="btn-maroon" style="padding: 3px 8px; font-size: 9.5px;">Raise RFQ</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 6: UI MOCKUP 5 - VENDOR QUOTATION WIZARD -->
+  <div class="section-title">
+    <span>6. Vendor 6-Step Quotation Wizard Mockup</span>
+    <span class="section-badge">Step Tracker in Deep Maroon (#7A1315) & Gold (#CB902E)</span>
+  </div>
+
+  <div class="mockup-window">
+    <div class="mockup-bar">
+      <div class="dots"><span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span></div>
+      <div class="mockup-url">http://localhost:5173/applicant/apply/1 — Quotation Wizard</div>
+      <div></div>
+    </div>
+    <div class="mockup-content">
+      <!-- Wizard Step Tracker -->
+      <div class="wizard-bar">
+        <div class="wizard-step completed">
+          <span class="step-circle">✓</span>
+          <span>1. Verify Vendor</span>
+        </div>
+        <div class="wizard-step completed">
+          <span class="step-circle">✓</span>
+          <span>2. Select Items</span>
+        </div>
+        <div class="wizard-step completed">
+          <span class="step-circle">✓</span>
+          <span>3. Annexure I</span>
+        </div>
+        <div class="wizard-step completed">
+          <span class="step-circle">✓</span>
+          <span>4. Annexure II</span>
+        </div>
+        <div class="wizard-step active">
+          <span class="step-circle">5</span>
+          <span>5. Annexure III (BOQ Rates)</span>
+        </div>
+        <div class="wizard-step">
+          <span class="step-circle">6</span>
+          <span>6. Review & Submit</span>
+        </div>
+      </div>
+
+      <div style="padding: 20px;">
+        <h3 style="font-size: 14px; font-weight: 800; color: var(--primary-1); margin-bottom: 6px;">
+          Step 5: Annexure III — Itemized Price Schedule Quotation
+        </h3>
+        <p style="font-size: 11px; color: var(--sec-2); margin-bottom: 14px;">
+          Please enter your competitive unit rates for each of the selected RFQ items below.
+        </p>
+
+        <table style="margin-bottom: 16px;">
+          <thead>
+            <tr>
+              <th>Item Code</th>
+              <th>Description</th>
+              <th>Quantity</th>
+              <th>Your Quoted Rate / Unit (₹)</th>
+              <th>Total Amount (₹)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span style="font-family: monospace; font-weight: bold; color: var(--primary-1);">ITEM-BR-01</span></td>
+              <td>Structural Steel Girders (IS 2062 Grade E350BR)</td>
+              <td>350 MT</td>
+              <td><input type="text" value="78,500.00" style="padding: 4px 8px; border: 1px solid var(--primary-2); border-radius: 4px; font-weight: bold; width: 120px; color: var(--sec-1);"></td>
+              <td class="amount-highlight">₹2,74,75,000.00</td>
+            </tr>
+            <tr>
+              <td><span style="font-family: monospace; font-weight: bold; color: var(--primary-1);">ITEM-BR-02</span></td>
+              <td>Pot-PTFE Bridge Bearings (500 Ton Capacity)</td>
+              <td>24 NOS</td>
+              <td><input type="text" value="1,25,000.00" style="padding: 4px 8px; border: 1px solid var(--primary-2); border-radius: 4px; font-weight: bold; width: 120px; color: var(--sec-1);"></td>
+              <td class="amount-highlight">₹30,00,000.00</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; background: var(--opt-3); padding: 12px; border-radius: 8px; border: 1px solid var(--opt-1);">
+          <span style="font-size: 12px; font-weight: 800; color: var(--sec-1);">Grand Total Quoted Amount:</span>
+          <span style="font-size: 16px; font-weight: 900; color: var(--primary-1);">₹3,04,75,000.00 (INR 3.0475 Crores)</span>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px;">
+          <span class="btn-outline-maroon">Back to Step 4</span>
+          <span class="btn-maroon">Proceed to Step 6: Review &amp; Submit &rarr;</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTES / REVIEW DISCLAIMER -->
+  <div class="notes-box">
+    <strong style="color: var(--primary-1); font-size: 12px; display: block; margin-bottom: 4px;">📌 Review & Implementation Confirmation Notice:</strong>
+    As per your instructions, these styles have been prepared in this standalone review document and demonstration asset. 
+    <strong>No changes have been made to the live portal frontend styles yet.</strong> 
+    Once you review and approve this color scheme, we can seamlessly apply these exact color variables across the production portal with a single update!
+  </div>
+
+  <div class="footer-text">
+    RFQ Portal Theme System &bull; Amaravati Growth & Infrastructure Corporation Limited &bull; Confidential &bull; September 2026
+  </div>
+
+</div>
+
+</body>
+</html>
