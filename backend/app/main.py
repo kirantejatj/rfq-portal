@@ -1,7 +1,9 @@
+import os
+from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.openapi.utils import get_openapi
 from app.core.config import settings
 from app.core.database import engine
@@ -65,6 +67,7 @@ app.add_middleware(
 # Mount uploads directory for static file access
 app.mount("/uploads", StaticFiles(directory=settings.UPLOAD_DIR), name="uploads")
 
+# Include all API Routers
 app.include_router(auth.router)
 app.include_router(tenders.router)
 app.include_router(applications.router)
@@ -99,10 +102,10 @@ def custom_openapi():
 
 app.openapi = custom_openapi
 
-@app.get("/")
-def root():
+@app.get("/api/health")
+def health_check():
     return {
-        "message": "Welcome to RFQ Applicant Submission Portal API",
+        "message": "RFQ Applicant Submission Portal API is Healthy",
         "swagger_docs": "/docs",
         "redoc_docs": "/redoc",
         "scalar_docs": "/scalar",
@@ -133,3 +136,25 @@ def scalar_docs():
     </html>
     """
 
+# Mount Production Frontend SPA if built
+FRONTEND_DIST = Path(__file__).resolve().parent.parent.parent / "frontend" / "dist"
+if FRONTEND_DIST.exists():
+    assets_dir = FRONTEND_DIST / "assets"
+    if assets_dir.exists():
+        app.mount("/assets", StaticFiles(directory=assets_dir), name="frontend_assets")
+    
+    docs_static_dir = FRONTEND_DIST / "docs"
+    if docs_static_dir.exists():
+        app.mount("/docs-files", StaticFiles(directory=docs_static_dir), name="frontend_docs_files")
+
+    @app.get("/{full_path:path}", include_in_schema=False)
+    async def serve_spa(full_path: str):
+        # Serve exact file if exists
+        target_file = FRONTEND_DIST / full_path
+        if target_file.is_file():
+            return FileResponse(target_file)
+        # Fallback to SPA index.html
+        index_file = FRONTEND_DIST / "index.html"
+        if index_file.exists():
+            return FileResponse(index_file)
+        return HTMLResponse("<h1>RFQ Portal Frontend Building...</h1>", status_code=200)

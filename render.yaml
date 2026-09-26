@@ -1,0 +1,22 @@
+services:
+  # Web Service hosting unified FastAPI + React SPA
+  - type: web
+    name: rfq-portal
+    env: python
+    plan: free
+    buildCommand: "cd frontend && npm install && npm run build && cd ../backend && pip install -r <(python -c 'import tomli; f=open(\"pyproject.toml\",\"rb\"); p=tomli.load(f); print(\"\\n\".join(p[\"project\"][\"dependencies\"]))' 2>/dev/null || pip install uvicorn fastapi sqlalchemy psycopg2-binary pydantic-settings python-multipart python-jose[cryptography] passlib[bcrypt])"
+    startCommand: "cd backend && python -m uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: rfq-database
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+
+databases:
+  # Managed PostgreSQL database
+  - name: rfq-database
+    databaseName: RFQ_DB
+    user: postgres
+    plan: free
