@@ -73,35 +73,35 @@ export default function ApplicantLogin() {
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
-      <div className="max-w-md w-full bg-white rounded-2xl p-8 border border-slate-200 shadow-xl space-y-6">
+      <div className="max-w-md w-full bg-white rounded-2xl p-8 border border-[#A7A9AC]/30 shadow-xl space-y-6">
         <div className="text-center space-y-2">
-          <div className="w-12 h-12 rounded-xl bg-gov-600 text-white flex items-center justify-center mx-auto shadow-md">
+          <div className="w-12 h-12 rounded-xl bg-[#7A1315] text-[#CB902E] flex items-center justify-center mx-auto shadow-md">
             <Building2 className="w-7 h-7" />
           </div>
-          <h1 className="text-xl font-bold text-slate-900">Vendor Portal Login</h1>
-          <p className="text-xs text-slate-500">Sign in to participate in RFQs, submit quotations, and track quotation status</p>
+          <h1 className="text-xl font-black text-[#231F20]">Vendor Portal Login</h1>
+          <p className="text-xs text-[#58595B]">Sign in to participate in RFQs, submit quotations, and track quotation status</p>
         </div>
 
         {/* Method Toggle */}
-        <div className="flex bg-slate-100 p-1 rounded-lg text-xs font-semibold">
+        <div className="flex bg-[#FAF8F5] p-1 rounded-lg text-xs font-bold border border-[#FDE6D3]">
           <button
             type="button"
             onClick={() => { setLoginMethod('OTP'); setError(''); }}
-            className={`flex-1 py-1.5 rounded-md transition ${loginMethod === 'OTP' ? 'bg-white text-gov-700 shadow-sm' : 'text-slate-600'}`}
+            className={`flex-1 py-1.5 rounded-md transition ${loginMethod === 'OTP' ? 'bg-[#7A1315] text-white shadow-sm' : 'text-[#58595B] hover:text-[#231F20]'}`}
           >
             Mobile OTP Login
           </button>
           <button
             type="button"
             onClick={() => { setLoginMethod('PASSWORD'); setError(''); }}
-            className={`flex-1 py-1.5 rounded-md transition ${loginMethod === 'PASSWORD' ? 'bg-white text-gov-700 shadow-sm' : 'text-slate-600'}`}
+            className={`flex-1 py-1.5 rounded-md transition ${loginMethod === 'PASSWORD' ? 'bg-[#7A1315] text-white shadow-sm' : 'text-[#58595B] hover:text-[#231F20]'}`}
           >
             Password Login
           </button>
         </div>
 
         {error && (
-          <div className="p-3 bg-red-50 text-red-700 rounded-lg text-xs flex items-center border border-red-200">
+          <div className="p-3 bg-[#7A1315]/10 text-[#7A1315] rounded-lg text-xs flex items-center border border-[#7A1315]/30">
             <AlertCircle className="w-4 h-4 mr-2 shrink-0" />
             <span>{error}</span>
           </div>
@@ -111,16 +111,16 @@ export default function ApplicantLogin() {
           !otpSent ? (
             <form onSubmit={handleSendOTP} className="space-y-4 text-xs">
               <div>
-                <label className="font-bold text-slate-700 block mb-1">Registered Mobile Number</label>
+                <label className="font-bold text-[#414042] block mb-1">Registered Mobile Number</label>
                 <div className="relative">
-                  <Phone className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
+                  <Phone className="w-4 h-4 absolute left-3 top-3 text-[#58595B]" />
                   <input
                     type="text"
                     placeholder="Enter 10-digit mobile number"
                     value={mobile}
                     onChange={(e) => setMobile(e.target.value)}
                     required
-                    className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-gov-500 focus:outline-none"
+                    className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-[#A7A9AC]/50 focus:ring-2 focus:ring-[#CB902E] focus:outline-none bg-[#FAF8F5] font-mono"
                   />
                 </div>
               </div>
@@ -128,7 +128,7 @@ export default function ApplicantLogin() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-2.5 bg-gov-600 hover:bg-gov-700 text-white font-bold rounded-lg shadow-sm transition text-sm flex items-center justify-center"
+                className="w-full py-2.5 bg-[#A31E22] hover:bg-[#7A1315] text-white font-bold rounded-lg shadow-sm transition text-sm flex items-center justify-center"
               >
                 {loading ? 'Sending OTP...' : 'Send Login OTP'}
                 <ArrowRight className="w-4 h-4 ml-1.5" />
@@ -136,29 +136,29 @@ export default function ApplicantLogin() {
             </form>
           ) : (
             <form onSubmit={handleVerifyOTP} className="space-y-4 text-xs">
-              <div className="p-3 bg-emerald-50 text-emerald-800 rounded-lg text-xs border border-emerald-200">
+              <div className="p-3 bg-emerald-50 text-emerald-900 rounded-lg text-xs border border-emerald-200">
                 <div className="flex items-center font-bold">
                   <CheckCircle2 className="w-4 h-4 mr-1 text-emerald-600" />
                   OTP sent to +91 {mobile}
                 </div>
                 {debugOtp && (
-                  <div className="mt-1 font-mono text-[11px] text-emerald-700">
+                  <div className="mt-1 font-mono text-[11px] text-emerald-700 font-bold">
                     Test Auto-Code: <strong>{debugOtp}</strong>
                   </div>
                 )}
               </div>
 
               <div>
-                <label className="font-bold text-slate-700 block mb-1">Enter 6-Digit OTP</label>
+                <label className="font-bold text-[#414042] block mb-1">Enter 6-Digit OTP</label>
                 <div className="relative">
-                  <KeyRound className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
+                  <KeyRound className="w-4 h-4 absolute left-3 top-3 text-[#58595B]" />
                   <input
                     type="text"
                     placeholder="e.g. 123456"
                     value={otpCode}
                     onChange={(e) => setOtpCode(e.target.value)}
                     required
-                    className="w-full pl-9 pr-4 py-2.5 text-center tracking-widest font-mono text-base rounded-lg border border-slate-300 focus:ring-2 focus:ring-gov-500 focus:outline-none"
+                    className="w-full pl-9 pr-4 py-2.5 text-center tracking-widest font-mono text-base font-bold rounded-lg border border-[#A7A9AC]/50 focus:ring-2 focus:ring-[#CB902E] focus:outline-none bg-[#FAF8F5]"
                   />
                 </div>
               </div>
@@ -167,14 +167,14 @@ export default function ApplicantLogin() {
                 <button
                   type="button"
                   onClick={() => setOtpSent(false)}
-                  className="w-1/3 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg text-xs transition"
+                  className="w-1/3 py-2.5 bg-[#FAF8F5] hover:bg-[#FDE6D3] text-[#414042] font-semibold rounded-lg text-xs transition border border-[#A7A9AC]/30"
                 >
                   Change No.
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-2/3 py-2.5 bg-gov-600 hover:bg-gov-700 text-white font-bold rounded-lg shadow-sm transition text-sm flex items-center justify-center"
+                  className="w-2/3 py-2.5 bg-[#A31E22] hover:bg-[#7A1315] text-white font-bold rounded-lg shadow-sm transition text-sm flex items-center justify-center"
                 >
                   {loading ? 'Verifying...' : 'Verify & Enter'}
                 </button>
@@ -184,31 +184,31 @@ export default function ApplicantLogin() {
         ) : (
           <form onSubmit={handlePasswordLogin} className="space-y-4 text-xs">
             <div>
-              <label className="font-bold text-slate-700 block mb-1">Mobile Number</label>
+              <label className="font-bold text-[#414042] block mb-1">Mobile Number</label>
               <div className="relative">
-                <Phone className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
+                <Phone className="w-4 h-4 absolute left-3 top-3 text-[#58595B]" />
                 <input
                   type="text"
                   placeholder="Enter 10-digit mobile number"
                   value={mobile}
                   onChange={(e) => setMobile(e.target.value)}
                   required
-                  className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-gov-500 focus:outline-none"
+                  className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-[#A7A9AC]/50 focus:ring-2 focus:ring-[#CB902E] focus:outline-none bg-[#FAF8F5] font-mono"
                 />
               </div>
             </div>
 
             <div>
-              <label className="font-bold text-slate-700 block mb-1">Password</label>
+              <label className="font-bold text-[#414042] block mb-1">Password</label>
               <div className="relative">
-                <Lock className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
+                <Lock className="w-4 h-4 absolute left-3 top-3 text-[#58595B]" />
                 <input
                   type="password"
                   placeholder="Enter your account password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-gov-500 focus:outline-none"
+                  className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-[#A7A9AC]/50 focus:ring-2 focus:ring-[#CB902E] focus:outline-none bg-[#FAF8F5]"
                 />
               </div>
             </div>
@@ -216,7 +216,7 @@ export default function ApplicantLogin() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2.5 bg-gov-600 hover:bg-gov-700 text-white font-bold rounded-lg shadow-sm transition text-sm flex items-center justify-center"
+              className="w-full py-2.5 bg-[#A31E22] hover:bg-[#7A1315] text-white font-bold rounded-lg shadow-sm transition text-sm flex items-center justify-center"
             >
               {loading ? 'Signing in...' : 'Sign In'}
               <ArrowRight className="w-4 h-4 ml-1.5" />
@@ -224,79 +224,79 @@ export default function ApplicantLogin() {
           </form>
         )}
 
-        <div className="pt-4 border-t border-slate-100 space-y-3 text-xs">
-          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block text-center">
+        <div className="pt-4 border-t border-[#FDE6D3] space-y-3 text-xs">
+          <span className="text-[11px] font-bold text-[#58595B] uppercase tracking-wider block text-center">
             ⚡ Quick Demo Accounts (Select to Auto-Fill):
           </span>
           <div className="grid grid-cols-1 gap-1.5 text-left text-xs">
             <button
               type="button"
               onClick={() => { setMobile('9111222333'); setPassword('password123'); setLoginMethod('PASSWORD'); setError(''); }}
-              className="p-2 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 transition flex justify-between items-center text-slate-900"
+              className="p-2 rounded-lg bg-[#FAF8F5] hover:bg-[#FDE6D3]/60 border border-[#FDE6D3] transition flex justify-between items-center text-[#231F20]"
             >
               <div>
-                <strong className="block text-[11px]">Vendor 1: Apex Heavy Engineering</strong>
-                <span className="text-[10px] text-slate-500">Manufacturer (Heavy Steel & Girders)</span>
+                <strong className="block text-[11px] text-[#7A1315]">Vendor 1: Apex Heavy Engineering</strong>
+                <span className="text-[10px] text-[#58595B]">Manufacturer (Heavy Steel & Girders)</span>
               </div>
-              <span className="font-mono text-[10px] font-bold bg-white px-1.5 py-0.5 rounded border border-slate-300">9111222333</span>
+              <span className="font-mono text-[10px] font-bold bg-white px-1.5 py-0.5 rounded border border-[#A7A9AC]/40">9111222333</span>
             </button>
 
             <button
               type="button"
               onClick={() => { setMobile('9222333444'); setPassword('password123'); setLoginMethod('PASSWORD'); setError(''); }}
-              className="p-2 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 transition flex justify-between items-center text-slate-900"
+              className="p-2 rounded-lg bg-[#FAF8F5] hover:bg-[#FDE6D3]/60 border border-[#FDE6D3] transition flex justify-between items-center text-[#231F20]"
             >
               <div>
-                <strong className="block text-[11px]">Vendor 2: Godavari Flow & Hydro Controls</strong>
-                <span className="text-[10px] text-slate-500">Authorised Dealer (Pumps & Valves)</span>
+                <strong className="block text-[11px] text-[#7A1315]">Vendor 2: Godavari Flow & Hydro Controls</strong>
+                <span className="text-[10px] text-[#58595B]">Authorised Dealer (Pumps & Valves)</span>
               </div>
-              <span className="font-mono text-[10px] font-bold bg-white px-1.5 py-0.5 rounded border border-slate-300">9222333444</span>
+              <span className="font-mono text-[10px] font-bold bg-white px-1.5 py-0.5 rounded border border-[#A7A9AC]/40">9222333444</span>
             </button>
 
             <button
               type="button"
               onClick={() => { setMobile('9333444555'); setPassword('password123'); setLoginMethod('PASSWORD'); setError(''); }}
-              className="p-2 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 transition flex justify-between items-center text-slate-900"
+              className="p-2 rounded-lg bg-[#FAF8F5] hover:bg-[#FDE6D3]/60 border border-[#FDE6D3] transition flex justify-between items-center text-[#231F20]"
             >
               <div>
-                <strong className="block text-[11px]">Vendor 3: Amaravati Premier Infra Contractors</strong>
-                <span className="text-[10px] text-slate-500">Contractor (Civil & Precast Works)</span>
+                <strong className="block text-[11px] text-[#7A1315]">Vendor 3: Amaravati Premier Infra Contractors</strong>
+                <span className="text-[10px] text-[#58595B]">Contractor (Civil & Precast Works)</span>
               </div>
-              <span className="font-mono text-[10px] font-bold bg-white px-1.5 py-0.5 rounded border border-slate-300">9333444555</span>
+              <span className="font-mono text-[10px] font-bold bg-white px-1.5 py-0.5 rounded border border-[#A7A9AC]/40">9333444555</span>
             </button>
 
             <button
               type="button"
               onClick={() => { setMobile('9444555666'); setPassword('password123'); setLoginMethod('PASSWORD'); setError(''); }}
-              className="p-2 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 transition flex justify-between items-center text-slate-900"
+              className="p-2 rounded-lg bg-[#FAF8F5] hover:bg-[#FDE6D3]/60 border border-[#FDE6D3] transition flex justify-between items-center text-[#231F20]"
             >
               <div>
-                <strong className="block text-[11px]">Vendor 4: VoltMatrix Electrical & Power</strong>
-                <span className="text-[10px] text-slate-500">Authorised Distributor (Substations & Cables)</span>
+                <strong className="block text-[11px] text-[#7A1315]">Vendor 4: VoltMatrix Electrical & Power</strong>
+                <span className="text-[10px] text-[#58595B]">Authorised Distributor (Substations & Cables)</span>
               </div>
-              <span className="font-mono text-[10px] font-bold bg-white px-1.5 py-0.5 rounded border border-slate-300">9444555666</span>
+              <span className="font-mono text-[10px] font-bold bg-white px-1.5 py-0.5 rounded border border-[#A7A9AC]/40">9444555666</span>
             </button>
 
             <button
               type="button"
               onClick={() => { setMobile('9555666777'); setPassword('password123'); setLoginMethod('PASSWORD'); setError(''); }}
-              className="p-2 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 transition flex justify-between items-center text-slate-900"
+              className="p-2 rounded-lg bg-[#FAF8F5] hover:bg-[#FDE6D3]/60 border border-[#FDE6D3] transition flex justify-between items-center text-[#231F20]"
             >
               <div>
-                <strong className="block text-[11px]">Vendor 5: Southern Precision Valves</strong>
-                <span className="text-[10px] text-slate-500">Manufacturer (Precision Valves & Sluice Gates)</span>
+                <strong className="block text-[11px] text-[#7A1315]">Vendor 5: Southern Precision Valves</strong>
+                <span className="text-[10px] text-[#58595B]">Manufacturer (Precision Valves & Sluice Gates)</span>
               </div>
-              <span className="font-mono text-[10px] font-bold bg-white px-1.5 py-0.5 rounded border border-slate-300">9555666777</span>
+              <span className="font-mono text-[10px] font-bold bg-white px-1.5 py-0.5 rounded border border-[#A7A9AC]/40">9555666777</span>
             </button>
           </div>
 
-          <div className="text-center pt-1 text-[11px] text-slate-500">
-            Password for all accounts: <code className="bg-slate-100 px-1 py-0.5 rounded text-gov-800 font-bold">password123</code> or <code className="bg-slate-100 px-1 py-0.5 rounded text-gov-800 font-bold">app123</code>
+          <div className="text-center pt-1 text-[11px] text-[#58595B]">
+            Password for all accounts: <code className="bg-[#FDE6D3] px-1 py-0.5 rounded text-[#7A1315] font-bold">password123</code> or <code className="bg-[#FDE6D3] px-1 py-0.5 rounded text-[#7A1315] font-bold">app123</code>
           </div>
 
-          <div className="text-center text-slate-600 pt-2 border-t border-slate-100">
+          <div className="text-center text-[#58595B] pt-2 border-t border-[#FDE6D3]">
             First time vendor / bidder?{' '}
-            <Link to="/applicant/register" className="text-gov-600 font-bold hover:underline">
+            <Link to="/applicant/register" className="text-[#A31E22] font-bold hover:underline">
               Register Vendor Profile
             </Link>
           </div>

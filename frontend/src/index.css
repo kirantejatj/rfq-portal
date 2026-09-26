@@ -2,11 +2,26 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --brand-maroon: #7A1315;
+  --brand-red-maroon: #A31E22;
+  --brand-black: #231F20;
+  --brand-dark-grey: #414042;
+  --brand-peach: #FBB97D;
+  --brand-grey: #58595B;
+  --brand-light-peach: #FDE6D3;
+  --brand-light-grey: #A7A9AC;
+  --brand-gold: #CB902E;
+  --brand-dark-gold: #67491C;
+  --brand-burnt-orange: #CA6E28;
+  --brand-deep-blue: #0E2C49;
+}
+
 body {
   margin: 0;
   font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  background-color: #f8fafc;
-  color: #1e293b;
+  background-color: #FAF8F5;
+  color: #231F20;
 }
 
 /* Custom scrollbars */
@@ -15,12 +30,42 @@ body {
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: #F4EBE2;
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #CB902E;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #7A1315;
+}
+
+/* Brand Button Styles */
+.btn-brand-primary {
+  background: linear-gradient(135deg, #7A1315 0%, #A31E22 100%);
+  color: #FFFFFF;
+  transition: all 0.2s ease-in-out;
+}
+.btn-brand-primary:hover {
+  background: linear-gradient(135deg, #600E10 0%, #7A1315 100%);
+  box-shadow: 0 4px 12px rgba(122, 19, 21, 0.25);
+}
+
+.btn-brand-gold {
+  background: linear-gradient(135deg, #CB902E 0%, #CA6E28 100%);
+  color: #FFFFFF;
+  transition: all 0.2s ease-in-out;
+}
+.btn-brand-gold:hover {
+  background: linear-gradient(135deg, #B07B23 0%, #B25D1D 100%);
+  box-shadow: 0 4px 12px rgba(203, 144, 46, 0.3);
+}
+
+.btn-brand-dark {
+  background-color: #231F20;
+  color: #FFFFFF;
+  transition: all 0.2s ease-in-out;
+}
+.btn-brand-dark:hover {
+  background-color: #414042;
 }
