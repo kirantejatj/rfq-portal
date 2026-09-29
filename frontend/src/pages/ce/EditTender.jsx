@@ -580,7 +580,7 @@ export default function EditTender() {
                       />
                     </div>
 
-                    <div className="sm:col-span-2">
+                    <div className="sm:col-span-3">
                       <label className="font-semibold text-[#58595B] block mb-1">Unit of Measure *</label>
                       <select
                         value={job.unit}
@@ -599,30 +599,6 @@ export default function EditTender() {
                         <option value="LOT">LOT</option>
                         <option value="JOB">JOB</option>
                       </select>
-                    </div>
-
-                    <div className="sm:col-span-2">
-                      <label className="font-semibold text-[#58595B] block mb-1">Officer Ref Rate (₹)</label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        value={job.unit_rate || ''}
-                        onChange={(e) => handleJobChange(idx, 'unit_rate', e.target.value)}
-                        placeholder="Ref Rate"
-                        className="w-full px-2.5 py-1.5 border border-[#A7A9AC]/50 rounded bg-white font-mono"
-                      />
-                    </div>
-
-                    <div className="sm:col-span-2">
-                      <label className="font-semibold text-[#58595B] block mb-1">Estimated Amount (₹)</label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        value={job.amount || ''}
-                        onChange={(e) => handleJobChange(idx, 'amount', e.target.value)}
-                        placeholder="Amount"
-                        className="w-full px-2.5 py-1.5 border border-[#A7A9AC]/50 rounded bg-white font-mono font-bold text-[#7A1315]"
-                      />
                     </div>
 
                     <div className="sm:col-span-12">

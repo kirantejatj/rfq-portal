@@ -314,7 +314,9 @@ export default function CEDashboard() {
                             <Link to={`/tenders/${t.tender_id}`} className="font-bold text-[#231F20] hover:text-[#7A1315] line-clamp-1">
                               {t.title}
                             </Link>
-                            <span className="text-[10px] text-[#58595B] block">{t.completion_period || 'Standard timeline'}</span>
+                            <span className="text-[10px] text-[#7A1315] font-semibold block">
+                              {t.revealing_date ? `Reveals: ${new Date(t.revealing_date).toLocaleDateString()}` : 'Standard schedule'}
+                            </span>
                           </td>
                           <td className="py-3 px-3 font-semibold text-[#414042]">
                             {t.jobs ? t.jobs.length : 0} Items

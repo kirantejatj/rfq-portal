@@ -152,8 +152,10 @@ export default function Home() {
                     </span>
                   </div>
                   <div>
-                    <span className="text-[#58595B] block text-[10px] uppercase font-bold">Completion Period</span>
-                    <span className="font-bold text-[#231F20]">{t.completion_period || 'N/A'}</span>
+                    <span className="text-[#58595B] block text-[10px] uppercase font-bold">Revealing Date</span>
+                    <span className="font-bold text-[#7A1315]">
+                      {t.revealing_date ? new Date(t.revealing_date).toLocaleDateString() : 'On Opening'}
+                    </span>
                   </div>
                   <div>
                     <span className="text-[#58595B] block text-[10px] uppercase font-bold">Quotation Validity</span>
