@@ -7,6 +7,8 @@ class RFQJobCreate(BaseModel):
     job_name: str
     job_description: Optional[str] = None
     category: Optional[str] = "Supply Item" # "Supply Item" or "Only Rate"
+    work_type: Optional[str] = None # e.g. Earth Work, Electrical works.. etc
+    cl_number: Optional[str] = None # APSS / Morth Cl. Number
     estimated_quantity: Optional[float] = None
     unit: Optional[str] = None
     unit_rate: Optional[float] = None
@@ -20,6 +22,8 @@ class RFQJobUpdate(BaseModel):
     job_name: Optional[str] = None
     job_description: Optional[str] = None
     category: Optional[str] = None
+    work_type: Optional[str] = None
+    cl_number: Optional[str] = None
     estimated_quantity: Optional[float] = None
     unit: Optional[str] = None
     unit_rate: Optional[float] = None
@@ -35,6 +39,8 @@ class RFQJobOut(BaseModel):
     job_name: str
     job_description: Optional[str] = None
     category: Optional[str] = None
+    work_type: Optional[str] = None
+    cl_number: Optional[str] = None
     estimated_quantity: Optional[float] = None
     unit: Optional[str] = None
     unit_rate: Optional[float] = None
@@ -75,6 +81,7 @@ class TenderCreate(BaseModel):
     completion_period: Optional[str] = None
     quotation_from_date: Optional[datetime] = None
     quotation_to_date: Optional[datetime] = None
+    revealing_date: Optional[datetime] = None # Quotation Revealing Date
     quotation_valid_upto: Optional[datetime] = None
     validity_period: Optional[str] = None
     opening_date: Optional[datetime] = None
@@ -99,6 +106,7 @@ class TenderUpdate(BaseModel):
     completion_period: Optional[str] = None
     quotation_from_date: Optional[datetime] = None
     quotation_to_date: Optional[datetime] = None
+    revealing_date: Optional[datetime] = None
     quotation_valid_upto: Optional[datetime] = None
     validity_period: Optional[str] = None
     opening_date: Optional[datetime] = None
@@ -125,6 +133,7 @@ class TenderOut(BaseModel):
     completion_period: Optional[str] = None
     quotation_from_date: datetime
     quotation_to_date: datetime
+    revealing_date: Optional[datetime] = None # Quotation Revealing Date
     quotation_valid_upto: Optional[datetime] = None
     validity_period: Optional[str] = None
     opening_date: Optional[datetime] = None
@@ -143,4 +152,3 @@ class TenderOut(BaseModel):
 
     class Config:
         from_attributes = True
-

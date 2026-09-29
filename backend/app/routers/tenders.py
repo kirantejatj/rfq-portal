@@ -1,8 +1,10 @@
 from datetime import datetime, timedelta
+import io
 import shutil
 from pathlib import Path
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, status
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.config import settings
@@ -38,6 +40,8 @@ def build_tender_out(tender: RFQTender, db: Session) -> TenderOut:
                 job_name=j.job_name,
                 job_description=j.job_description,
                 category=j.category or "Supply Item",
+                work_type=j.work_type,
+                cl_number=j.cl_number,
                 estimated_quantity=float(j.estimated_quantity) if j.estimated_quantity is not None else None,
                 unit=j.unit or "NOS",
                 unit_rate=calc_rate,
@@ -66,6 +70,7 @@ def build_tender_out(tender: RFQTender, db: Session) -> TenderOut:
         completion_period=tender.completion_period,
         quotation_from_date=tender.quotation_from_date,
         quotation_to_date=tender.quotation_to_date,
+        revealing_date=tender.revealing_date,
         quotation_valid_upto=tender.quotation_valid_upto or (to_date + timedelta(days=90)),
         validity_period=tender.validity_period or "90 Days from Quotation Opening",
         opening_date=tender.opening_date,
@@ -81,6 +86,87 @@ def build_tender_out(tender: RFQTender, db: Session) -> TenderOut:
         jobs=jobs_out,
         is_window_open=is_open,
         submission_count=sub_count
+    )
+
+@router.get("/template/excel")
+def download_excel_template():
+    """Generates and downloads the official 8-column RFQ Items Excel template."""
+    import openpyxl
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "RFQ Items Template"
+
+    headers = [
+        "Estimate Quantity (only Figures)",
+        "Item Detailed Specification Description",
+        "Work Type (eg. Earth Work, Electrical works.. etc - upto 200 Characters)",
+        "Item Short Description (upto 100 Characters)",
+        "APSS / Morth Cl. Number (upto 200 Characters)",
+        "Rate (INR) (Upto 2 Decimals)",
+        "UOM (upto 50 Characters)",
+        "Amount (INR) (Upto 2 Decimals)"
+    ]
+
+    header_fill = PatternFill(start_color="7A1315", end_color="7A1315", fill_type="solid")
+    header_font = Font(name="Calibri", size=11, bold=True, color="FFFFFF")
+    thin_border = Border(
+        left=Side(style='thin', color='D0D7DE'),
+        right=Side(style='thin', color='D0D7DE'),
+        top=Side(style='thin', color='D0D7DE'),
+        bottom=Side(style='thin', color='D0D7DE')
+    )
+
+    ws.append(headers)
+    for col_num, cell in enumerate(ws[1], 1):
+        cell.fill = header_fill
+        cell.font = header_font
+        cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+
+    # Sample rows for user guidance
+    sample_rows = [
+        [
+            100,
+            "Providing and fixing powder coated mild steel shaft door with frame and shutter fabricated from skin-pass galvanized iron sheets conforming to IS:513 with PUF insulation.",
+            "Civil & Architectural Finishes",
+            "Mild Steel Shaft Door (GI Skin-Pass 1.20mm)",
+            "APSS Cl. 1204 / MORTH 2000",
+            10957.00,
+            "Sqm",
+            1095700.00
+        ],
+        [
+            250,
+            "Fabrication, supply, transportation and erection of structural steel members, trusses, columns, and rafters conforming to IS:2062 Grade E250.",
+            "Structural Steel Works",
+            "Structural Steel Fabrication & Erection",
+            "APSS Cl. 1400 / IS:800",
+            75000.00,
+            "MT",
+            18750000.00
+        ]
+    ]
+
+    for row in sample_rows:
+        ws.append(row)
+
+    # Set column widths
+    col_widths = [20, 45, 30, 30, 25, 18, 15, 20]
+    for i, width in enumerate(col_widths, 1):
+        col_letter = openpyxl.utils.get_column_letter(i)
+        ws.column_dimensions[col_letter].width = width
+
+    ws.row_dimensions[1].height = 40
+
+    out = io.BytesIO()
+    wb.save(out)
+    out.seek(0)
+
+    return StreamingResponse(
+        out,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": "attachment; filename=RFQ_Items_Upload_Template.xlsx"}
     )
 
 @router.get("", response_model=List[TenderOut])
@@ -116,6 +202,8 @@ def create_tender(
     if q_to <= q_from:
         q_to = q_from + timedelta(days=30)
 
+    # Revealing date defaults to opening_date or quotation_to_date if not set
+    rev_date = payload.revealing_date or payload.opening_date or q_to
     q_valid_upto = payload.quotation_valid_upto or (q_to + timedelta(days=90))
     valid_text = payload.validity_period or "90 Days from Quotation Opening"
 
@@ -134,6 +222,7 @@ def create_tender(
         completion_period=payload.completion_period,
         quotation_from_date=q_from,
         quotation_to_date=q_to,
+        revealing_date=rev_date,
         quotation_valid_upto=q_valid_upto,
         validity_period=valid_text,
         opening_date=payload.opening_date or q_to,
@@ -166,6 +255,8 @@ def create_tender(
                 job_name=job_data.job_name,
                 job_description=job_data.job_description,
                 category=job_data.category or "Supply Item",
+                work_type=job_data.work_type,
+                cl_number=job_data.cl_number,
                 estimated_quantity=qty,
                 unit=job_data.unit or "NOS",
                 unit_rate=unit_rate,
@@ -220,6 +311,8 @@ def update_tender(
         tender.quotation_from_date = payload.quotation_from_date
     if payload.quotation_to_date is not None:
         tender.quotation_to_date = payload.quotation_to_date
+    if payload.revealing_date is not None:
+        tender.revealing_date = payload.revealing_date
     if payload.quotation_valid_upto is not None:
         tender.quotation_valid_upto = payload.quotation_valid_upto
     if payload.validity_period is not None:
@@ -257,6 +350,8 @@ def update_tender(
                 job_name=job_data.job_name,
                 job_description=job_data.job_description,
                 category=job_data.category or "Supply Item",
+                work_type=job_data.work_type,
+                cl_number=job_data.cl_number,
                 estimated_quantity=qty,
                 unit=job_data.unit or "NOS",
                 unit_rate=unit_rate,
@@ -302,6 +397,8 @@ def add_job_to_tender(
         job_name=payload.job_name,
         job_description=payload.job_description,
         category=payload.category or "Supply Item",
+        work_type=payload.work_type,
+        cl_number=payload.cl_number,
         estimated_quantity=qty,
         unit=payload.unit or "NOS",
         unit_rate=unit_rate,
@@ -313,27 +410,10 @@ def add_job_to_tender(
     db.add(job_obj)
     db.commit()
     db.refresh(job_obj)
-    
-    return RFQJobOut(
-        job_id=job_obj.job_id,
-        tender_id=job_obj.tender_id,
-        job_code=job_obj.job_code,
-        job_name=job_obj.job_name,
-        job_description=job_obj.job_description,
-        category=job_obj.category,
-        estimated_quantity=float(job_obj.estimated_quantity) if job_obj.estimated_quantity is not None else None,
-        unit=job_obj.unit,
-        unit_rate=float(job_obj.unit_rate) if job_obj.unit_rate is not None else None,
-        amount=float(job_obj.amount) if job_obj.amount is not None else None,
-        estimated_cost=float(job_obj.estimated_cost) if job_obj.estimated_cost is not None else None,
-        completion_period=job_obj.completion_period,
-        status=job_obj.status,
-        created_at=job_obj.created_at,
-        updated_at=job_obj.updated_at
-    )
+    return RFQJobOut.from_orm(job_obj)
 
 @router.delete("/{tender_id}/jobs/{job_id}")
-def delete_tender_job(
+def delete_job(
     tender_id: int,
     job_id: int,
     current_user: dict = Depends(require_ce),
@@ -380,7 +460,7 @@ def update_tender_status(
 @router.post("/{tender_id}/documents")
 def upload_tender_document(
     tender_id: int,
-    document_type: str = Form("RFQ_DOCUMENT"),
+    document_type: str = Form("RFQ_DOCUMENT"), # RFQ_DOCUMENT | PAPER_CLIPPING
     file: UploadFile = File(...),
     current_user: dict = Depends(require_ce),
     db: Session = Depends(get_db)
@@ -392,7 +472,7 @@ def upload_tender_document(
     if current_user["role"] != "SUPER_ADMIN" and tender.created_by != current_user["id"]:
         raise HTTPException(status_code=403, detail="Access forbidden: Only the Officer who raised this RFQ can upload documents.")
 
-    safe_filename = f"rfq_{tender_id}_{datetime.now().strftime('%Y%m%d%H%M%S')}_{file.filename}"
+    safe_filename = f"rfq_{tender_id}_{document_type.lower()}_{datetime.now().strftime('%Y%m%d%H%M%S')}_{file.filename}"
     file_dest = settings.UPLOAD_DIR / safe_filename
 
     with open(file_dest, "wb") as buffer:
@@ -412,4 +492,3 @@ def upload_tender_document(
     db.commit()
     db.refresh(doc)
     return doc
-

@@ -17,11 +17,15 @@ class ProposalItemSchema(BaseModel):
     quantity: Optional[float] = None
     rate_per_unit: Optional[float] = None
     amount: Optional[float] = None
+    valid_upto: Optional[date] = None # Valid Upto date for this item
+    min_supply_time: Optional[str] = None # Minimum Time Required to Supply (e.g. 15 Days, 2 months)
     remarks: Optional[str] = None
 
 class ApplicationJobSchema(BaseModel):
     job_id: int
     quoted_amount: Optional[float] = None
+    valid_upto: Optional[date] = None
+    min_supply_time: Optional[str] = None
     remarks: Optional[str] = None
 
 class ApplicationJobOut(BaseModel):
@@ -29,12 +33,16 @@ class ApplicationJobOut(BaseModel):
     application_id: int
     job_id: int
     quoted_amount: Optional[float] = None
+    valid_upto: Optional[date] = None
+    min_supply_time: Optional[str] = None
     remarks: Optional[str] = None
     status: str
     created_at: datetime
     job_code: Optional[str] = None
     job_name: Optional[str] = None
     category: Optional[str] = None
+    work_type: Optional[str] = None
+    cl_number: Optional[str] = None
     estimated_quantity: Optional[float] = None
     unit: Optional[str] = None
     estimated_cost: Optional[float] = None
@@ -67,6 +75,8 @@ class ApplicationSubmitRequest(BaseModel):
     signatory_name: Optional[str] = None
     signatory_designation: Optional[str] = None
     quoted_amount: Optional[float] = None
+    valid_upto: Optional[date] = None # Overall / Itemized Valid Upto date
+    min_supply_time: Optional[str] = None # Overall / Itemized Minimum supply time
     remarks: Optional[str] = None
     selected_jobs: List[ApplicationJobSchema] = []
     capabilities: List[CapabilityItemSchema] = []
@@ -98,6 +108,10 @@ class ApplicationOut(BaseModel):
     signatory_name: Optional[str] = None
     signatory_designation: Optional[str] = None
     quoted_amount: Optional[float] = None
+    valid_upto: Optional[date] = None
+    min_supply_time: Optional[str] = None
+    is_sealed: Optional[bool] = False # True if before Quotation Revealing Date
+    revealing_date: Optional[datetime] = None
     status: str
     remarks: Optional[str] = None
     submitted_at: datetime
@@ -111,6 +125,7 @@ class ApplicationOut(BaseModel):
     turnover: Optional[str] = None
     work_experience: Optional[str] = None
     registration_type: Optional[str] = None
+    vendor_type: Optional[str] = None
     prime_line_business: Optional[str] = None
     tender_title: Optional[str] = None
     tender_ref_no: Optional[str] = None
@@ -123,4 +138,3 @@ class ApplicationOut(BaseModel):
 
     class Config:
         from_attributes = True
-

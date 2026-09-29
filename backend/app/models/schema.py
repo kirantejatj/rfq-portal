@@ -56,7 +56,6 @@ class ApplicantDocument(Base):
     uploaded_at = Column(DateTime, server_default=text("now()"), nullable=False)
 
 
-
 class OTPVerification(Base):
     __tablename__ = "otp_verifications"
 
@@ -87,6 +86,7 @@ class RFQTender(Base):
     completion_period = Column(String(50), nullable=True)
     quotation_from_date = Column(DateTime, nullable=False)
     quotation_to_date = Column(DateTime, nullable=False)
+    revealing_date = Column(DateTime, nullable=True) # Quotation Revealing Date
     quotation_valid_upto = Column(DateTime, nullable=True)
     validity_period = Column(String(100), nullable=True)
     opening_date = Column(DateTime, nullable=True)
@@ -109,6 +109,8 @@ class RFQJob(Base):
     job_name = Column(String(255), nullable=False)
     job_description = Column(Text, nullable=True)
     category = Column(String(100), nullable=True)
+    work_type = Column(String(200), nullable=True) # Work Type (e.g. Earth Work, Electrical works)
+    cl_number = Column(String(200), nullable=True) # APSS / Morth Cl. Number
     estimated_quantity = Column(Numeric(12, 2), nullable=True)
     unit = Column(String(30), nullable=True)
     unit_rate = Column(Numeric(16, 2), nullable=True)
@@ -125,7 +127,7 @@ class TenderDocument(Base):
 
     tender_document_id = Column(BigInteger, primary_key=True, index=True)
     tender_id = Column(BigInteger, nullable=False, index=True)
-    document_type = Column(String(50), nullable=False, default="RFQ_DOCUMENT")
+    document_type = Column(String(50), nullable=False, default="RFQ_DOCUMENT") # RFQ_DOCUMENT | PAPER_CLIPPING
     file_name = Column(String(255), nullable=False)
     file_path = Column(Text, nullable=False)
     file_size_kb = Column(Integer, nullable=True)
@@ -144,6 +146,8 @@ class Application(Base):
     signatory_name = Column(String(150), nullable=True)
     signatory_designation = Column(String(150), nullable=True)
     quoted_amount = Column(Numeric(16, 2), nullable=True)
+    valid_upto = Column(Date, nullable=True) # RFQ Itemized Pricing Valid Upto Date
+    min_supply_time = Column(String(100), nullable=True) # Minimum Time Required to Supply
     status = Column(String(30), nullable=False, default="SUBMITTED", index=True)
     remarks = Column(Text, nullable=True)
     submitted_at = Column(DateTime, server_default=text("now()"), nullable=False)
@@ -158,6 +162,8 @@ class ApplicationJob(Base):
     application_id = Column(BigInteger, nullable=False, index=True)
     job_id = Column(BigInteger, nullable=False, index=True)
     quoted_amount = Column(Numeric(16, 2), nullable=True)
+    valid_upto = Column(Date, nullable=True)
+    min_supply_time = Column(String(100), nullable=True)
     remarks = Column(Text, nullable=True)
     status = Column(String(20), nullable=False, default="SUBMITTED")
     created_at = Column(DateTime, server_default=text("now()"), nullable=False)
@@ -200,6 +206,8 @@ class TechnicalProposalItem(Base):
     quantity = Column(Numeric(14, 2), nullable=True)
     rate_per_unit = Column(Numeric(14, 2), nullable=True)
     amount = Column(Numeric(16, 2), nullable=True)
+    valid_upto = Column(Date, nullable=True) # Valid Upto Date
+    min_supply_time = Column(String(100), nullable=True) # Minimum Time Required to Supply
     remarks = Column(Text, nullable=True)
     created_at = Column(DateTime, server_default=text("now()"), nullable=False)
 

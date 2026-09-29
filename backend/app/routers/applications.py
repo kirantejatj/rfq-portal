@@ -23,27 +23,37 @@ from app.schemas.application import (
 
 router = APIRouter(prefix="/api/applications", tags=["Applications"])
 
-def build_application_out(app_obj: Application, db: Session) -> ApplicationOut:
+def build_application_out(app_obj: Application, db: Session, user_role: Optional[str] = None, user_id: Optional[int] = None) -> ApplicationOut:
     applicant = db.query(Applicant).filter(Applicant.applicant_id == app_obj.applicant_id).first()
     tender = db.query(RFQTender).filter(RFQTender.tender_id == app_obj.tender_id).first()
-    capabilities = db.query(TechnicalFinancialCapability).filter(
+    now = datetime.now()
+
+    # Sealed check: If caller is CE/Officer and tender has a revealing_date in future, seal the quotation details!
+    is_sealed = False
+    if tender and tender.revealing_date and now < tender.revealing_date and user_role in ["CE", "ADMIN"]:
+        is_sealed = True
+
+    capabilities = [] if is_sealed else db.query(TechnicalFinancialCapability).filter(
         TechnicalFinancialCapability.application_id == app_obj.application_id
     ).order_by(TechnicalFinancialCapability.sl_no).all()
-    proposal_items = db.query(TechnicalProposalItem).filter(
+
+    proposal_items = [] if is_sealed else db.query(TechnicalProposalItem).filter(
         TechnicalProposalItem.application_id == app_obj.application_id
     ).order_by(TechnicalProposalItem.sl_no).all()
-    documents = db.query(ApplicationDocument).filter(
+
+    documents = [] if is_sealed else db.query(ApplicationDocument).filter(
         ApplicationDocument.application_id == app_obj.application_id
     ).all()
-    emd = db.query(EMDPayment).filter(
+
+    emd = None if is_sealed else db.query(EMDPayment).filter(
         EMDPayment.application_id == app_obj.application_id
     ).first()
+
     history = db.query(ApplicationStatusHistory).filter(
         ApplicationStatusHistory.application_id == app_obj.application_id
     ).order_by(ApplicationStatusHistory.changed_at.desc()).all()
 
-    # Fetch selected jobs with RFQJob metadata
-    app_jobs = db.query(ApplicationJob).filter(
+    app_jobs = [] if is_sealed else db.query(ApplicationJob).filter(
         ApplicationJob.application_id == app_obj.application_id
     ).order_by(ApplicationJob.application_job_id.asc()).all()
 
@@ -56,12 +66,16 @@ def build_application_out(app_obj: Application, db: Session) -> ApplicationOut:
                 application_id=aj.application_id,
                 job_id=aj.job_id,
                 quoted_amount=float(aj.quoted_amount) if aj.quoted_amount is not None else None,
+                valid_upto=aj.valid_upto or app_obj.valid_upto,
+                min_supply_time=aj.min_supply_time or app_obj.min_supply_time,
                 remarks=aj.remarks,
                 status=aj.status,
                 created_at=aj.created_at,
                 job_code=job_meta.job_code if job_meta else None,
                 job_name=job_meta.job_name if job_meta else f"Job #{aj.job_id}",
                 category=job_meta.category if job_meta else None,
+                work_type=job_meta.work_type if job_meta else None,
+                cl_number=job_meta.cl_number if job_meta else None,
                 estimated_quantity=float(job_meta.estimated_quantity) if job_meta and job_meta.estimated_quantity is not None else None,
                 unit=job_meta.unit if job_meta else None,
                 estimated_cost=float(job_meta.estimated_cost) if job_meta and job_meta.estimated_cost is not None else None,
@@ -69,28 +83,36 @@ def build_application_out(app_obj: Application, db: Session) -> ApplicationOut:
             )
         )
 
+    quoted_amount_val = None if is_sealed else (float(app_obj.quoted_amount) if app_obj.quoted_amount is not None else None)
+    status_val = app_obj.status
+
     return ApplicationOut(
         application_id=app_obj.application_id,
         tender_id=app_obj.tender_id,
         applicant_id=app_obj.applicant_id,
         application_no=app_obj.application_no,
         covering_letter_date=app_obj.covering_letter_date,
-        signatory_name=app_obj.signatory_name,
-        signatory_designation=app_obj.signatory_designation,
-        quoted_amount=float(app_obj.quoted_amount) if app_obj.quoted_amount is not None else None,
-        status=app_obj.status,
-        remarks=app_obj.remarks,
+        signatory_name=None if is_sealed else app_obj.signatory_name,
+        signatory_designation=None if is_sealed else app_obj.signatory_designation,
+        quoted_amount=quoted_amount_val,
+        valid_upto=None if is_sealed else app_obj.valid_upto,
+        min_supply_time=None if is_sealed else app_obj.min_supply_time,
+        is_sealed=is_sealed,
+        revealing_date=tender.revealing_date if tender else None,
+        status=status_val,
+        remarks=None if is_sealed else app_obj.remarks,
         submitted_at=app_obj.submitted_at,
         created_at=app_obj.created_at,
         updated_at=app_obj.updated_at,
         firm_name=applicant.firm_name if applicant else None,
-        mobile_no=applicant.mobile_no if applicant else None,
-        email=applicant.email if applicant else None,
-        gstin=applicant.gstin if applicant else None,
-        pan_no=applicant.pan_no if applicant else None,
-        turnover=applicant.turnover or applicant.md_ceo_name if applicant else None,
-        work_experience=applicant.work_experience or applicant.chairperson_name if applicant else None,
+        mobile_no=None if is_sealed else (applicant.mobile_no if applicant else None),
+        email=None if is_sealed else (applicant.email if applicant else None),
+        gstin=None if is_sealed else (applicant.gstin if applicant else None),
+        pan_no=None if is_sealed else (applicant.pan_no if applicant else None),
+        turnover=None if is_sealed else (applicant.turnover or applicant.md_ceo_name if applicant else None),
+        work_experience=None if is_sealed else (applicant.work_experience or applicant.chairperson_name if applicant else None),
         registration_type=applicant.registration_type if applicant else None,
+        vendor_type=applicant.vendor_type or applicant.registration_type if applicant else None,
         prime_line_business=applicant.prime_line_business if applicant else None,
         tender_title=tender.title if tender else None,
         tender_ref_no=tender.tender_ref_no if tender else None,
@@ -113,6 +135,8 @@ def build_application_out(app_obj: Application, db: Session) -> ApplicationOut:
                 quantity=float(p.quantity) if p.quantity is not None else None,
                 rate_per_unit=float(p.rate_per_unit) if p.rate_per_unit is not None else None,
                 amount=float(p.amount) if p.amount is not None else None,
+                valid_upto=p.valid_upto or app_obj.valid_upto,
+                min_supply_time=p.min_supply_time or app_obj.min_supply_time,
                 remarks=p.remarks
             ) for p in proposal_items
         ],
@@ -181,7 +205,7 @@ def submit_application(
     valid_job_ids = {j.job_id for j in tender_jobs}
 
     if tender_jobs and not payload.selected_jobs:
-        raise HTTPException(status_code=400, detail="Please select at least one job from this tender to submit your quotation.")
+        raise HTTPException(status_code=400, detail="Please select at least one item from this RFQ to submit your quotation.")
 
     if payload.selected_jobs:
         for sj in payload.selected_jobs:
@@ -217,6 +241,8 @@ def submit_application(
         signatory_name=payload.signatory_name,
         signatory_designation=payload.signatory_designation,
         quoted_amount=quoted_amount,
+        valid_upto=payload.valid_upto,
+        min_supply_time=payload.min_supply_time,
         status="SUBMITTED",
         remarks=payload.remarks
     )
@@ -237,6 +263,8 @@ def submit_application(
             application_id=app_obj.application_id,
             job_id=s_job.job_id,
             quoted_amount=job_amount,
+            valid_upto=s_job.valid_upto or payload.valid_upto,
+            min_supply_time=s_job.min_supply_time or payload.min_supply_time,
             remarks=s_job.remarks,
             status="SUBMITTED"
         )
@@ -254,7 +282,7 @@ def submit_application(
         )
         db.add(cap)
 
-    # Save Annexure III items
+    # Save Annexure III proposal items
     for item in payload.proposal_items:
         item_amt = item.amount
         if item_amt is None and item.quantity and item.rate_per_unit:
@@ -268,6 +296,8 @@ def submit_application(
             quantity=item.quantity,
             rate_per_unit=item.rate_per_unit,
             amount=item_amt,
+            valid_upto=item.valid_upto or payload.valid_upto,
+            min_supply_time=item.min_supply_time or payload.min_supply_time,
             remarks=item.remarks
         )
         db.add(prop)
@@ -295,7 +325,7 @@ def submit_application(
 
     db.commit()
     db.refresh(app_obj)
-    return build_application_out(app_obj, db)
+    return build_application_out(app_obj, db, user_role=current_user["role"], user_id=current_user["id"])
 
 
 @router.post("/{application_id}/documents")
@@ -344,17 +374,25 @@ def download_all_application_documents(
     if not app_obj:
         raise HTTPException(status_code=404, detail="Application not found")
 
+    tender = db.query(RFQTender).filter(RFQTender.tender_id == app_obj.tender_id).first()
+
     # Security: Applicant only downloads their own quotation docs
     if current_user["role"] == "APPLICANT" and app_obj.applicant_id != current_user["id"]:
         raise HTTPException(status_code=403, detail="Forbidden: You can only download documents for your own quotation")
 
-    # Security: CE/Officer only downloads documents for RFQs created by them (unless SUPER_ADMIN)
+    # Security: CE/Officer check
     if current_user["role"] in ["CE", "ADMIN"] and current_user["role"] != "SUPER_ADMIN":
-        tender = db.query(RFQTender).filter(RFQTender.tender_id == app_obj.tender_id).first()
         if tender and tender.created_by != current_user["id"]:
             raise HTTPException(
                 status_code=403,
                 detail=f"Access forbidden: Only the Officer who raised RFQ {tender.tender_ref_no or tender.tender_id} has authorization to download submitted quotation documents."
+            )
+        # Check revealing date
+        now = datetime.now()
+        if tender and tender.revealing_date and now < tender.revealing_date:
+            raise HTTPException(
+                status_code=403,
+                detail=f"🔒 Document downloads are sealed until Quotation Revealing Date ({tender.revealing_date.strftime('%d-%b-%Y %I:%M %p')})."
             )
 
     docs = db.query(ApplicationDocument).filter(ApplicationDocument.application_id == application_id).all()
@@ -363,7 +401,6 @@ def download_all_application_documents(
     zip_buffer = io.BytesIO()
     with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
         added_names = set()
-        # Add application documents (Annexure III, EMD, Signed RFQ, etc.)
         for doc in docs:
             filename_clean = os.path.basename(doc.file_path)
             real_path = os.path.join(settings.UPLOAD_DIR, filename_clean)
@@ -376,7 +413,6 @@ def download_all_application_documents(
                 added_names.add(arcname)
                 zip_file.write(real_path, arcname=arcname)
 
-        # Add applicant profile documents (Turnover, Registration, Experience)
         for adoc in applicant_docs:
             filename_clean = os.path.basename(adoc.file_path)
             real_path = os.path.join(settings.UPLOAD_DIR, filename_clean)
@@ -390,7 +426,6 @@ def download_all_application_documents(
                 zip_file.write(real_path, arcname=arcname)
 
         if not added_names:
-            # Add a readme text file if no files exist yet
             zip_file.writestr("README.txt", f"No documents were attached for Application {app_obj.application_no or application_id}.")
 
     zip_buffer.seek(0)
@@ -409,7 +444,7 @@ def get_my_applications(
 ):
     applicant_id = current_user["id"]
     apps = db.query(Application).filter(Application.applicant_id == applicant_id).order_by(Application.submitted_at.desc()).all()
-    return [build_application_out(a, db) for a in apps]
+    return [build_application_out(a, db, user_role=current_user["role"], user_id=current_user["id"]) for a in apps]
 
 @router.get("/officer/all", response_model=List[ApplicationOut])
 def get_officer_all_applications(
@@ -424,7 +459,7 @@ def get_officer_all_applications(
         if not tender_ids:
             return []
         apps = db.query(Application).filter(Application.tender_id.in_(tender_ids)).order_by(Application.submitted_at.desc()).all()
-    return [build_application_out(a, db) for a in apps]
+    return [build_application_out(a, db, user_role=current_user["role"], user_id=current_user["id"]) for a in apps]
 
 @router.get("/tender/{tender_id}", response_model=List[ApplicationOut])
 def get_tender_applications(
@@ -436,7 +471,7 @@ def get_tender_applications(
     if not tender:
         raise HTTPException(status_code=404, detail="Quotation/RFQ not found")
 
-    # Strict Officer Authorization: Only the Officer who raised the RFQ can view quotations
+    # Strict Officer Authorization
     if current_user["role"] != "SUPER_ADMIN" and tender.created_by != current_user["id"]:
         raise HTTPException(
             status_code=403,
@@ -444,7 +479,7 @@ def get_tender_applications(
         )
 
     apps = db.query(Application).filter(Application.tender_id == tender_id).order_by(Application.submitted_at.desc()).all()
-    return [build_application_out(a, db) for a in apps]
+    return [build_application_out(a, db, user_role=current_user["role"], user_id=current_user["id"]) for a in apps]
 
 @router.get("/{application_id}", response_model=ApplicationOut)
 def get_application_details(
@@ -454,62 +489,74 @@ def get_application_details(
 ):
     app_obj = db.query(Application).filter(Application.application_id == application_id).first()
     if not app_obj:
-        raise HTTPException(status_code=404, detail="Quotation not found")
+        raise HTTPException(status_code=404, detail="Quotation application not found")
 
-    # Access control: APPLICANT sees ONLY their own quotation
-    if current_user["role"] == "APPLICANT" and app_obj.applicant_id != current_user["id"]:
-        raise HTTPException(status_code=403, detail="Forbidden: You can only view your own quotation")
+    tender = db.query(RFQTender).filter(RFQTender.tender_id == app_obj.tender_id).first()
 
-    # Access control: CE/Officer sees ONLY quotations for RFQs raised by them (unless SUPER_ADMIN)
-    if current_user["role"] in ["CE", "ADMIN"] and current_user["role"] != "SUPER_ADMIN":
-        tender = db.query(RFQTender).filter(RFQTender.tender_id == app_obj.tender_id).first()
-        if tender and tender.created_by != current_user["id"]:
+    if current_user["role"] == "APPLICANT":
+        if app_obj.applicant_id != current_user["id"]:
+            raise HTTPException(status_code=403, detail="Forbidden: You can only view your own quotation")
+    elif current_user["role"] in ["CE", "ADMIN"]:
+        if current_user["role"] != "SUPER_ADMIN" and tender and tender.created_by != current_user["id"]:
             raise HTTPException(
                 status_code=403,
-                detail=f"Access forbidden: Only the Officer who created RFQ {tender.tender_ref_no or tender.tender_id} has authority to review this quotation."
+                detail=f"Access forbidden: You do not have authorization to view this quotation. Only the Officer who raised RFQ {tender.tender_ref_no or tender.tender_id} can review submissions."
+            )
+        # Check revealing date
+        now = datetime.now()
+        if tender and tender.revealing_date and now < tender.revealing_date:
+            raise HTTPException(
+                status_code=403,
+                detail=f"🔒 Quotation is Sealed: Vendor quotation details will be revealed on {tender.revealing_date.strftime('%d-%b-%Y %I:%M %p')}. Early access is restricted as per procurement governance policy."
             )
 
-    return build_application_out(app_obj, db)
+    return build_application_out(app_obj, db, user_role=current_user["role"], user_id=current_user["id"])
 
-@router.patch("/{application_id}/status")
+@router.patch("/{application_id}/status", response_model=ApplicationOut)
 def update_application_status(
     application_id: int,
     payload: ApplicationStatusUpdate,
     current_user: dict = Depends(require_ce),
     db: Session = Depends(get_db)
 ):
-    status_val = "ACCEPTED" if payload.status == "APPROVED" else payload.status
-    valid_statuses = ['DRAFT', 'SUBMITTED', 'UNDER_REVIEW', 'ACCEPTED', 'APPROVED', 'REJECTED', 'WITHDRAWN']
-    if payload.status not in valid_statuses:
-        raise HTTPException(status_code=400, detail=f"Invalid status. Must be one of: {valid_statuses}")
-
     app_obj = db.query(Application).filter(Application.application_id == application_id).first()
     if not app_obj:
-        raise HTTPException(status_code=404, detail="Quotation not found")
+        raise HTTPException(status_code=404, detail="Quotation application not found")
 
-    # Officer Authorization: Only the Officer who raised this RFQ can approve or reject quotations
     tender = db.query(RFQTender).filter(RFQTender.tender_id == app_obj.tender_id).first()
     if current_user["role"] != "SUPER_ADMIN" and tender and tender.created_by != current_user["id"]:
         raise HTTPException(
             status_code=403,
-            detail=f"Access forbidden: Only the Officer who raised RFQ {tender.tender_ref_no or tender.tender_id} can approve or reject quotations."
+            detail="Access forbidden: Only the Officer who raised this RFQ has authority to review and approve quotations."
         )
 
+    # Check revealing date
+    now = datetime.now()
+    if tender and tender.revealing_date and now < tender.revealing_date:
+        raise HTTPException(
+            status_code=403,
+            detail=f"🔒 Quotation is Sealed: You cannot change status before the Quotation Revealing Date ({tender.revealing_date.strftime('%d-%b-%Y %I:%M %p')})."
+        )
+
+    valid_statuses = ["SUBMITTED", "UNDER_REVIEW", "ACCEPTED", "REJECTED", "WITHDRAWN"]
+    if payload.status not in valid_statuses:
+        raise HTTPException(status_code=400, detail=f"Invalid status. Must be one of: {valid_statuses}")
+
     old_status = app_obj.status
-    app_obj.status = status_val
+    app_obj.status = payload.status
     if payload.remarks:
         app_obj.remarks = payload.remarks
     app_obj.updated_at = datetime.now()
 
-    # Log audit history
-    history = ApplicationStatusHistory(
-        application_id=application_id,
+    hist = ApplicationStatusHistory(
+        application_id=app_obj.application_id,
         old_status=old_status,
-        new_status=status_val,
+        new_status=payload.status,
         changed_by_ce=current_user["id"],
-        remarks=payload.remarks
+        remarks=payload.remarks or f"Status changed to {payload.status} by CE"
     )
-    db.add(history)
-    db.commit()
+    db.add(hist)
 
-    return {"message": "Quotation status updated successfully", "application_id": application_id, "status": status_val}
+    db.commit()
+    db.refresh(app_obj)
+    return build_application_out(app_obj, db, user_role=current_user["role"], user_id=current_user["id"])

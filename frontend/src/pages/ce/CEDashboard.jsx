@@ -475,35 +475,60 @@ export default function CEDashboard() {
                           <div className="font-mono text-[11px] font-bold text-[#414042]">{q.tender_ref_no}</div>
                           <div className="text-[#58595B] line-clamp-1">{q.tender_title}</div>
                         </td>
-                        <td className="py-3 px-3 font-mono font-black text-[#231F20] text-sm">
-                          ₹{q.quoted_amount ? q.quoted_amount.toLocaleString('en-IN') : '0.00'}
+                        <td className="py-3 px-3">
+                          {q.is_sealed ? (
+                            <span className="inline-flex items-center text-xs font-bold text-amber-900 bg-amber-100 px-2 py-1 rounded border border-amber-300">
+                              <ShieldAlert className="w-3.5 h-3.5 mr-1 text-amber-700" />
+                              Sealed Bid
+                            </span>
+                          ) : (
+                            <span className="font-mono font-black text-[#231F20] text-sm">
+                              ₹{q.quoted_amount ? q.quoted_amount.toLocaleString('en-IN') : '0.00'}
+                            </span>
+                          )}
+                          {q.valid_upto && !q.is_sealed && (
+                            <div className="text-[10px] text-[#58595B]">
+                              Valid: {new Date(q.valid_upto).toLocaleDateString()}
+                            </div>
+                          )}
                         </td>
                         <td className="py-3 px-3 text-[#58595B] text-[11px]">
-                          {new Date(q.submitted_at).toLocaleString()}
+                          <div>{new Date(q.submitted_at).toLocaleString()}</div>
+                          {q.is_sealed && q.revealing_date && (
+                            <span className="text-[10px] text-indigo-700 font-bold block">
+                              Reveals: {new Date(q.revealing_date).toLocaleString()}
+                            </span>
+                          )}
                         </td>
                         <td className="py-3 px-3">
                           <StatusBadge status={q.status} size="sm" />
                         </td>
                         <td className="py-3 px-3 text-center">
-                          <div className="flex items-center justify-center space-x-2">
-                            <Link
-                              to={`/ce/applications/${q.application_id}/review`}
-                              className="px-2.5 py-1.5 bg-[#7A1315] hover:bg-[#A31E22] text-white font-bold rounded-lg text-xs inline-flex items-center shadow-xs transition"
-                              title="Review Quotation Dossier"
-                            >
-                              <FileText className="w-3.5 h-3.5 mr-1" />
-                              Review
-                            </Link>
-                            <button
-                              type="button"
-                              onClick={() => handleDownloadAllZip(q.application_id)}
-                              className="px-2.5 py-1.5 bg-[#FAF8F5] hover:bg-[#FDE6D3] text-[#414042] font-bold rounded-lg text-xs inline-flex items-center border border-[#A7A9AC]/40 transition"
-                              title="Download all vendor documents as ZIP"
-                            >
-                              <Download className="w-3.5 h-3.5 mr-1 text-[#58595B]" />
-                              ZIP
-                            </button>
-                          </div>
+                          {q.is_sealed ? (
+                            <span className="px-2.5 py-1 bg-slate-100 text-slate-500 font-bold rounded text-xs border border-slate-200 cursor-not-allowed inline-flex items-center" title="Quotation will unlock on revealing date">
+                              🔒 Sealed Until Revealing
+                            </span>
+                          ) : (
+                            <div className="flex items-center justify-center space-x-2">
+                              <Link
+                                to={`/ce/applications/${q.application_id}/review`}
+                                className="px-2.5 py-1.5 bg-[#7A1315] hover:bg-[#A31E22] text-white font-bold rounded-lg text-xs inline-flex items-center shadow-xs transition"
+                                title="Review Quotation Dossier"
+                              >
+                                <FileText className="w-3.5 h-3.5 mr-1" />
+                                Review
+                              </Link>
+                              <button
+                                type="button"
+                                onClick={() => handleDownloadAllZip(q.application_id)}
+                                className="px-2.5 py-1.5 bg-[#FAF8F5] hover:bg-[#FDE6D3] text-[#414042] font-bold rounded-lg text-xs inline-flex items-center border border-[#A7A9AC]/40 transition"
+                                title="Download all vendor documents as ZIP"
+                              >
+                                <Download className="w-3.5 h-3.5 mr-1 text-[#58595B]" />
+                                ZIP
+                              </button>
+                            </div>
+                          )}
                         </td>
                       </tr>
                     ))
