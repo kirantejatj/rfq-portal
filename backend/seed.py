@@ -65,11 +65,31 @@ def reset_and_seed():
             role="CE",
             is_active=True
         )
-        db.add_all([ce1, ce2])
+        ce3 = CEUser(
+            name="Er. M. S. Lakshmi Prasanna",
+            mobile_no="9876543222",
+            email="lakshmi.prasanna@agic.ap.gov.in",
+            password_hash=get_password_hash("CE@1234"),
+            designation="Executive Engineer (Water & Environmental Systems)",
+            role="CE",
+            is_active=True
+        )
+        ce4 = CEUser(
+            name="Er. G. Ravindra Kumar",
+            mobile_no="9876543233",
+            email="ravindra.kumar@agic.ap.gov.in",
+            password_hash=get_password_hash("CE@1234"),
+            designation="Executive Engineer (Electrical & Automation)",
+            role="CE",
+            is_active=True
+        )
+        db.add_all([ce1, ce2, ce3, ce4])
         db.commit()
         db.refresh(ce1)
         db.refresh(ce2)
-        print(f"[OK] Created CE Officers: {ce1.name} (Mobile: 9876543210) & {ce2.name} (Mobile: 9876543211) [Password: CE@1234]")
+        db.refresh(ce3)
+        db.refresh(ce4)
+        print(f"[OK] Created CE Officers: 9876543210, 9876543211, 9876543222, 9876543233 [Password: CE@1234 / password123]")
 
         # 3. Seed Registered Vendors / Applicants
         vendors = [
@@ -139,6 +159,91 @@ def reset_and_seed():
                 turnover="₹ 24,500 Crores",
                 work_experience="32+ Years in National Highway Bridges, Tunnels & Lift Irrigation",
                 postal_address="S-2, Technocrat Industrial Estate, Balanagar, Hyderabad - 500037",
+                is_active=True
+            ),
+            Applicant(
+                firm_name="Apex Heavy Engineering Works",
+                registration_type="Manufacturer",
+                vendor_type="Manufacturer",
+                prime_line_business="Heavy Steel & Girders",
+                mobile_no="9111222333",
+                email="apex.heavy@example.com",
+                password_hash=get_password_hash("Vendor@1234"),
+                gstin="37AAACA1111A1Z1",
+                pan_no="AAACA1111A",
+                md_ceo_name="Er. Rajesh Sharma",
+                chairperson_name="K. L. Sharma",
+                turnover="₹ 450 Crores",
+                work_experience="18+ Years in Heavy Fabrications",
+                postal_address="Industrial Area, Phase 2, Vijayawada",
+                is_active=True
+            ),
+            Applicant(
+                firm_name="Godavari Flow & Hydro Controls",
+                registration_type="Authorised Dealer",
+                vendor_type="Authorised Dealer",
+                prime_line_business="Pumps & Valves",
+                mobile_no="9222333444",
+                email="godavari.flow@example.com",
+                password_hash=get_password_hash("Vendor@1234"),
+                gstin="37AAACG2222G1Z2",
+                pan_no="AAACG2222G",
+                md_ceo_name="V. Satyanarayana",
+                chairperson_name="V. K. Rao",
+                turnover="₹ 180 Crores",
+                work_experience="14+ Years in Flow Systems",
+                postal_address="Autonagar, Guntur",
+                is_active=True
+            ),
+            Applicant(
+                firm_name="Amaravati Premier Infra Contractors",
+                registration_type="Contractor",
+                vendor_type="Contractor",
+                prime_line_business="Civil & Precast Works",
+                mobile_no="9333444555",
+                email="amaravati.infra@example.com",
+                password_hash=get_password_hash("Vendor@1234"),
+                gstin="37AAACA3333A1Z3",
+                pan_no="AAACA3333A",
+                md_ceo_name="K. Chandra Mohan",
+                chairperson_name="K. Subba Rao",
+                turnover="₹ 320 Crores",
+                work_experience="16+ Years in Civil Works",
+                postal_address="MG Road, Vijayawada",
+                is_active=True
+            ),
+            Applicant(
+                firm_name="VoltMatrix Electrical & Power",
+                registration_type="Authorised Distributor",
+                vendor_type="Authorised Distributor",
+                prime_line_business="Substations & Cables",
+                mobile_no="9444555666",
+                email="voltmatrix@example.com",
+                password_hash=get_password_hash("Vendor@1234"),
+                gstin="37AAACV4444V1Z4",
+                pan_no="AAACV4444V",
+                md_ceo_name="P. Venkateswara Rao",
+                chairperson_name="P. V. Prasad",
+                turnover="₹ 210 Crores",
+                work_experience="12+ Years in Electrical Grids",
+                postal_address="Tadepalli, Amaravati",
+                is_active=True
+            ),
+            Applicant(
+                firm_name="Southern Precision Valves",
+                registration_type="Manufacturer",
+                vendor_type="Manufacturer",
+                prime_line_business="Precision Valves & Sluice Gates",
+                mobile_no="9555666777",
+                email="southern.valves@example.com",
+                password_hash=get_password_hash("Vendor@1234"),
+                gstin="37AAACS5555S1Z5",
+                pan_no="AAACS5555S",
+                md_ceo_name="M. Anand Kumar",
+                chairperson_name="M. R. Reddy",
+                turnover="₹ 160 Crores",
+                work_experience="15+ Years in Water Control Gates",
+                postal_address="Enikepadu, Vijayawada",
                 is_active=True
             )
         ]
