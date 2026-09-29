@@ -97,43 +97,31 @@ export default function CELogin() {
           <div className="grid grid-cols-1 gap-1.5 text-left text-xs">
             <button
               type="button"
-              onClick={() => setOfficerCreds('9876543210')}
+              onClick={() => setOfficerCreds('9876543210', 'CE@1234')}
               className="p-2 rounded-lg bg-[#FAF8F5] hover:bg-[#FDE6D3]/60 border border-[#FDE6D3] transition flex justify-between items-center text-[#231F20]"
             >
               <div>
-                <strong className="block text-[11px] text-[#7A1315]">Officer 1: Er. K. V. Ramanathan</strong>
-                <span className="text-[10px] text-[#58595B]">Infrastructure & Bridges (5 RFQs)</span>
+                <strong className="block text-[11px] text-[#7A1315]">Er. K. V. Ramanathan</strong>
+                <span className="text-[10px] text-[#58595B]">Chief Engineer (Procurement & Contracts)</span>
               </div>
               <span className="font-mono text-[10px] font-bold bg-white px-1.5 py-0.5 rounded border border-[#A7A9AC]/40">9876543210</span>
             </button>
 
             <button
               type="button"
-              onClick={() => setOfficerCreds('9876543222')}
+              onClick={() => setOfficerCreds('9876543211', 'CE@1234')}
               className="p-2 rounded-lg bg-[#FAF8F5] hover:bg-[#FDE6D3]/60 border border-[#FDE6D3] transition flex justify-between items-center text-[#231F20]"
             >
               <div>
-                <strong className="block text-[11px] text-[#7A1315]">Officer 2: Er. M. S. Lakshmi Prasanna</strong>
-                <span className="text-[10px] text-[#58595B]">Water & Environmental Systems (4 RFQs)</span>
+                <strong className="block text-[11px] text-[#7A1315]">Er. S. Radhakrishna Murthy</strong>
+                <span className="text-[10px] text-[#58595B]">Superintending Engineer (Infrastructure)</span>
               </div>
-              <span className="font-mono text-[10px] font-bold bg-white px-1.5 py-0.5 rounded border border-[#A7A9AC]/40">9876543222</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setOfficerCreds('9876543233')}
-              className="p-2 rounded-lg bg-[#FAF8F5] hover:bg-[#FDE6D3]/60 border border-[#FDE6D3] transition flex justify-between items-center text-[#231F20]"
-            >
-              <div>
-                <strong className="block text-[11px] text-[#7A1315]">Officer 3: Er. G. Ravindra Kumar</strong>
-                <span className="text-[10px] text-[#58595B]">Electrical & Automation (5 RFQs)</span>
-              </div>
-              <span className="font-mono text-[10px] font-bold bg-white px-1.5 py-0.5 rounded border border-[#A7A9AC]/40">9876543233</span>
+              <span className="font-mono text-[10px] font-bold bg-white px-1.5 py-0.5 rounded border border-[#A7A9AC]/40">9876543211</span>
             </button>
           </div>
 
           <div className="text-center pt-2 text-[11px] text-[#58595B]">
-            Password for all accounts: <code className="bg-[#FDE6D3] px-1 py-0.5 rounded text-[#7A1315] font-bold">password123</code> or <code className="bg-[#FDE6D3] px-1 py-0.5 rounded text-[#7A1315] font-bold">ce123</code>
+            Default Password: <code className="bg-[#FDE6D3] px-1 py-0.5 rounded text-[#7A1315] font-bold">CE@1234</code> or <code className="bg-[#FDE6D3] px-1 py-0.5 rounded text-[#7A1315] font-bold">password123</code>
           </div>
 
           <div className="text-center pt-1 text-[11px] text-[#58595B]">

@@ -231,67 +231,55 @@ export default function ApplicantLogin() {
           <div className="grid grid-cols-1 gap-1.5 text-left text-xs">
             <button
               type="button"
-              onClick={() => { setMobile('9111222333'); setPassword('password123'); setLoginMethod('PASSWORD'); setError(''); }}
+              onClick={() => { setMobile('9876540001'); setPassword('Vendor@1234'); setLoginMethod('PASSWORD'); setError(''); }}
               className="p-2 rounded-lg bg-[#FAF8F5] hover:bg-[#FDE6D3]/60 border border-[#FDE6D3] transition flex justify-between items-center text-[#231F20]"
             >
               <div>
-                <strong className="block text-[11px] text-[#7A1315]">Vendor 1: Apex Heavy Engineering</strong>
-                <span className="text-[10px] text-[#58595B]">Manufacturer (Heavy Steel & Girders)</span>
+                <strong className="block text-[11px] text-[#7A1315]">Larsen & Toubro Heavy Engineering</strong>
+                <span className="text-[10px] text-[#58595B]">Manufacturer (Structural Steel & Bearings)</span>
               </div>
-              <span className="font-mono text-[10px] font-bold bg-white px-1.5 py-0.5 rounded border border-[#A7A9AC]/40">9111222333</span>
+              <span className="font-mono text-[10px] font-bold bg-white px-1.5 py-0.5 rounded border border-[#A7A9AC]/40">9876540001</span>
             </button>
 
             <button
               type="button"
-              onClick={() => { setMobile('9222333444'); setPassword('password123'); setLoginMethod('PASSWORD'); setError(''); }}
+              onClick={() => { setMobile('9876540002'); setPassword('Vendor@1234'); setLoginMethod('PASSWORD'); setError(''); }}
               className="p-2 rounded-lg bg-[#FAF8F5] hover:bg-[#FDE6D3]/60 border border-[#FDE6D3] transition flex justify-between items-center text-[#231F20]"
             >
               <div>
-                <strong className="block text-[11px] text-[#7A1315]">Vendor 2: Godavari Flow & Hydro Controls</strong>
-                <span className="text-[10px] text-[#58595B]">Authorised Dealer (Pumps & Valves)</span>
+                <strong className="block text-[11px] text-[#7A1315]">Tata Advanced Materials & Infra</strong>
+                <span className="text-[10px] text-[#58595B]">Authorised Dealer (Stay Cables & Alloys)</span>
               </div>
-              <span className="font-mono text-[10px] font-bold bg-white px-1.5 py-0.5 rounded border border-[#A7A9AC]/40">9222333444</span>
+              <span className="font-mono text-[10px] font-bold bg-white px-1.5 py-0.5 rounded border border-[#A7A9AC]/40">9876540002</span>
             </button>
 
             <button
               type="button"
-              onClick={() => { setMobile('9333444555'); setPassword('password123'); setLoginMethod('PASSWORD'); setError(''); }}
+              onClick={() => { setMobile('9876540003'); setPassword('Vendor@1234'); setLoginMethod('PASSWORD'); setError(''); }}
               className="p-2 rounded-lg bg-[#FAF8F5] hover:bg-[#FDE6D3]/60 border border-[#FDE6D3] transition flex justify-between items-center text-[#231F20]"
             >
               <div>
-                <strong className="block text-[11px] text-[#7A1315]">Vendor 3: Amaravati Premier Infra Contractors</strong>
-                <span className="text-[10px] text-[#58595B]">Contractor (Civil & Precast Works)</span>
+                <strong className="block text-[11px] text-[#7A1315]">Navayuga Engineering Company</strong>
+                <span className="text-[10px] text-[#58595B]">Contractor (Heavy Precast & Marine Works)</span>
               </div>
-              <span className="font-mono text-[10px] font-bold bg-white px-1.5 py-0.5 rounded border border-[#A7A9AC]/40">9333444555</span>
+              <span className="font-mono text-[10px] font-bold bg-white px-1.5 py-0.5 rounded border border-[#A7A9AC]/40">9876540003</span>
             </button>
 
             <button
               type="button"
-              onClick={() => { setMobile('9444555666'); setPassword('password123'); setLoginMethod('PASSWORD'); setError(''); }}
+              onClick={() => { setMobile('9876540004'); setPassword('Vendor@1234'); setLoginMethod('PASSWORD'); setError(''); }}
               className="p-2 rounded-lg bg-[#FAF8F5] hover:bg-[#FDE6D3]/60 border border-[#FDE6D3] transition flex justify-between items-center text-[#231F20]"
             >
               <div>
-                <strong className="block text-[11px] text-[#7A1315]">Vendor 4: VoltMatrix Electrical & Power</strong>
-                <span className="text-[10px] text-[#58595B]">Authorised Distributor (Substations & Cables)</span>
+                <strong className="block text-[11px] text-[#7A1315]">Megha Engineering (MEIL)</strong>
+                <span className="text-[10px] text-[#58595B]">Contractor (EPC Infrastructure & Power)</span>
               </div>
-              <span className="font-mono text-[10px] font-bold bg-white px-1.5 py-0.5 rounded border border-[#A7A9AC]/40">9444555666</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => { setMobile('9555666777'); setPassword('password123'); setLoginMethod('PASSWORD'); setError(''); }}
-              className="p-2 rounded-lg bg-[#FAF8F5] hover:bg-[#FDE6D3]/60 border border-[#FDE6D3] transition flex justify-between items-center text-[#231F20]"
-            >
-              <div>
-                <strong className="block text-[11px] text-[#7A1315]">Vendor 5: Southern Precision Valves</strong>
-                <span className="text-[10px] text-[#58595B]">Manufacturer (Precision Valves & Sluice Gates)</span>
-              </div>
-              <span className="font-mono text-[10px] font-bold bg-white px-1.5 py-0.5 rounded border border-[#A7A9AC]/40">9555666777</span>
+              <span className="font-mono text-[10px] font-bold bg-white px-1.5 py-0.5 rounded border border-[#A7A9AC]/40">9876540004</span>
             </button>
           </div>
 
           <div className="text-center pt-1 text-[11px] text-[#58595B]">
-            Password for all accounts: <code className="bg-[#FDE6D3] px-1 py-0.5 rounded text-[#7A1315] font-bold">password123</code> or <code className="bg-[#FDE6D3] px-1 py-0.5 rounded text-[#7A1315] font-bold">app123</code>
+            Default Password: <code className="bg-[#FDE6D3] px-1 py-0.5 rounded text-[#7A1315] font-bold">Vendor@1234</code> or <code className="bg-[#FDE6D3] px-1 py-0.5 rounded text-[#7A1315] font-bold">password123</code>
           </div>
 
           <div className="text-center text-[#58595B] pt-2 border-t border-[#FDE6D3]">
